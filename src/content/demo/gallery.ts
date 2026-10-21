@@ -1,0 +1,70 @@
+import type { GalleryRecord } from "../types";
+
+export const galleryRecords: GalleryRecord[] = [
+  {
+    id: "g-line-up",
+    title: { mn: "Духны шугам", en: "Hairline edge-up" },
+    imageId: "work-line-up",
+    barberId: "enkhjin",
+    serviceId: "skin-fade",
+    layout: "portrait",
+  },
+  {
+    id: "g-side-part",
+    title: { mn: "Сонгодог хажуу самнаа", en: "Classic side part" },
+    imageId: "work-side-part",
+    barberId: "temuulen",
+    serviceId: "studio-cut",
+    layout: "landscape",
+  },
+  {
+    id: "g-beard",
+    title: { mn: "Сахал хэлбэржүүлэлт", en: "Full beard, sculpted" },
+    imageId: "work-beard-sculpt",
+    barberId: "bilguun",
+    serviceId: "beard-sculpt",
+    layout: "portrait",
+  },
+  {
+    id: "g-texture",
+    title: { mn: "Оройн текстур", en: "Textured top" },
+    imageId: "work-texture-shears",
+    barberId: "enkhjin",
+    serviceId: "studio-cut",
+    layout: "portrait",
+  },
+  {
+    id: "g-tools",
+    title: { mn: "Ажлын багаж", en: "Tools of the trade" },
+    imageId: "studio-tools",
+    layout: "landscape",
+  },
+  {
+    id: "g-razor",
+    title: { mn: "Шулуун хусуураар тэгшлэх", en: "Straight-razor detailing" },
+    imageId: "work-straight-razor",
+    barberId: "bilguun",
+    serviceId: "hot-towel-shave",
+    layout: "portrait",
+  },
+  {
+    id: "g-scissor",
+    title: { mn: "Хайч, самны ажил", en: "Scissor over comb" },
+    imageId: "work-scissor-over-comb",
+    barberId: "temuulen",
+    serviceId: "scissor-cut",
+    layout: "portrait",
+  },
+  {
+    id: "g-floor",
+    title: { mn: "Студийн өдөр", en: "A day on the floor" },
+    imageId: "studio-floor",
+    layout: "portrait",
+  },
+  {
+    id: "g-chair",
+    title: { mn: "Таны сандал", en: "Your chair" },
+    imageId: "studio-chair",
+    layout: "portrait",
+  },
+];

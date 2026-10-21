@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens — the single source of truth for colour, type, spacing and
+ * motion. Re-skinning the site for a new studio starts here.
+ */
+@theme {
+  /* Palette: paper, ink, sand, taupe, muted brass */
+  --color-paper: #f3efe7;
+  --color-paper-deep: #e8e1d4;
+  --color-sand: #d6cab6;
+  --color-taupe: #8a7e6f;
+  --color-taupe-deep: #5c5348;
+  --color-ink: #161513;
+  --color-ink-soft: #24221f;
+  --color-ink-muted: #3a3732;
+  --color-brass: #9b7f4f;
+  --color-brass-soft: #c2a877;
+  --color-line: rgb(22 21 19 / 0.12);
+  --color-line-strong: rgb(22 21 19 / 0.24);
+  --color-line-inverse: rgb(243 239 231 / 0.16);
+  --color-danger: #9a3b2c;
+
+  /* Type scale */
+  --text-eyebrow: 0.6875rem;
+  --text-eyebrow--line-height: 1.2;
+  --text-eyebrow--letter-spacing: 0.18em;
+  --text-display-xl: clamp(2.75rem, 8.2vw, 8rem);
+  --text-display-xl--line-height: 0.96;
+  --text-display-xl--letter-spacing: -0.035em;
+  --text-display-lg: clamp(2.25rem, 5.4vw, 5rem);
+  --text-display-lg--line-height: 1;
+  --text-display-lg--letter-spacing: -0.03em;
+  --text-display-md: clamp(1.875rem, 3.6vw, 3.25rem);
+  --text-display-md--line-height: 1.06;
+  --text-display-md--letter-spacing: -0.025em;
+  --text-statement: clamp(1.625rem, 3.4vw, 3rem);
+  --text-statement--line-height: 1.18;
+  --text-statement--letter-spacing: -0.015em;
+
+  /* Layout */
+  --container-page: 90rem;
+  --container-prose: 38rem;
+  --spacing-section: clamp(5rem, 11vw, 10rem);
+  --spacing-header: 4.5rem;
+
+  /* Motion */
+  --ease-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-cinematic: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-slow-zoom: slow-zoom 24s var(--ease-soft) forwards;
+
+  @keyframes slow-zoom {
+    from {
+      transform: scale(1.08);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+}
+
+@keyframes scroll-cue {
+  0% {
+    transform: translateY(-100%);
+  }
+  60%,
+  100% {
+    transform: translateY(200%);
+  }
+}
+
+@theme inline {
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-cormorant), ui-serif, Georgia, serif;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: var(--spacing-header);
+  }
+
+  body {
+    background-color: var(--color-paper);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: var(--color-ink);
+    color: var(--color-paper);
+  }
+
+  :focus-visible {
+    outline: 1.5px solid var(--color-brass);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+}
+
+@utility eyebrow {
+  font-size: var(--text-eyebrow);
+  line-height: var(--text-eyebrow--line-height);
+  letter-spacing: var(--text-eyebrow--letter-spacing);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/*
+ * Scroll reveal. Content is only hidden when scripting is available, so the
+ * page stays fully readable without JavaScript and with reduced motion.
+ */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  [data-reveal] {
+    opacity: 0;
+    transform: translate3d(0, 1.25rem, 0);
+    transition:
+      opacity 900ms var(--ease-cinematic),
+      transform 1100ms var(--ease-cinematic);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  [data-reveal="shown"] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-safe-zoom {
+    animation: none !important;
+  }
+}
