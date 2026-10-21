@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { CircleCheck } from "lucide-react";
 import { localizedPath, type Locale } from "@/i18n/config";
-import type { BookingDraft } from "@/lib/booking/types";
+import type { BookingConfirmation, BookingDraft } from "@/lib/booking/types";
 import type { BookingStep } from "@/lib/booking/storage";
 import { formatLongDate } from "@/lib/booking/dates";
-import { formatDuration, formatPrice } from "@/lib/format";
+import { format, formatDuration, formatPrice } from "@/lib/format";
+import { site } from "@/content/site";
 import { Button, buttonStyles } from "@/components/ui/button";
 import type { BookingBarber, BookingDict, BookingService } from "./types";
 
@@ -22,18 +23,20 @@ export function resolveSelection(
   dict: BookingDict,
   services: BookingService[],
   barbers: BookingBarber[],
-  assignedBarberId?: string,
+  confirmation?: BookingConfirmation | null,
 ): ResolvedSelection {
   const service = services.find((s) => s.id === draft.serviceId);
-  const barberId = assignedBarberId ?? draft.barberId;
+  // Once booked, the server's answer (assigned barber, stored time) wins over the draft.
+  const barberId = confirmation?.barberId ?? draft.barberId;
   const barber = barbers.find((b) => b.id === barberId);
+  const date = confirmation?.date ?? draft.date;
   return {
     service,
     barberLabel: barber?.name ?? (draft.barberId ? dict.booking.barber.any : undefined),
-    dateLabel: draft.date
-      ? formatLongDate(draft.date, { weekdays: dict.weekdays, monthsLong: dict.calendar.monthsLong, dateLong: dict.calendar.dateLong })
+    dateLabel: date
+      ? formatLongDate(date, { weekdays: dict.weekdays, monthsLong: dict.calendar.monthsLong, dateLong: dict.calendar.dateLong })
       : undefined,
-    time: draft.time,
+    time: confirmation?.time ?? draft.time,
   };
 }
 
@@ -105,28 +108,38 @@ export function ReviewStep({
 export function Confirmation({
   locale,
   dict,
-  reference,
+  confirmation,
+  email,
   selection,
   onNewBooking,
 }: {
   locale: Locale;
   dict: BookingDict;
-  reference: string;
+  confirmation: BookingConfirmation;
+  /** The address the customer entered, for the "email sent" line. */
+  email: string;
   selection: ResolvedSelection;
   onNewBooking: () => void;
 }) {
   const t = dict.booking.confirmation;
   const r = dict.booking.review;
+  const confirmed = confirmation.status === "CONFIRMED";
+  const emailLine =
+    confirmation.email === "sent"
+      ? format(t.emailSent, { email })
+      : confirmation.email === "not_sent"
+        ? t.emailNotSent
+        : t.emailNotRequested;
   return (
     <div className="mx-auto max-w-2xl py-6 text-center sm:py-12">
       <CircleCheck aria-hidden className="mx-auto size-10 text-brass" strokeWidth={1.25} />
-      <p className="eyebrow mt-8 text-taupe-deep">{t.eyebrow}</p>
-      <h2 className="mt-4 text-display-md font-medium text-balance">{t.title}</h2>
-      <p className="mx-auto mt-5 max-w-lg leading-relaxed text-taupe-deep">{t.lead}</p>
+      <p className="eyebrow mt-8 text-taupe-deep">{confirmed ? t.eyebrowConfirmed : t.eyebrowPending}</p>
+      <h2 className="mt-4 text-display-md font-medium text-balance">{confirmed ? t.titleConfirmed : t.titlePending}</h2>
+      <p className="mx-auto mt-5 max-w-lg leading-relaxed text-taupe-deep">{confirmed ? t.leadConfirmed : t.leadPending}</p>
 
       <dl className="mt-12 border-t border-line-strong text-left">
         {[
-          [t.reference, reference],
+          [t.reference, confirmation.reference],
           [r.service, selection.service?.name],
           [r.barber, selection.barberLabel],
           [r.date, selection.dateLabel],
@@ -138,6 +151,11 @@ export function Confirmation({
           </div>
         ))}
       </dl>
+
+      <div className="mx-auto mt-8 max-w-lg space-y-2 text-sm leading-relaxed text-taupe-deep">
+        <p role="status">{emailLine}</p>
+        <p>{format(t.change, { phone: site.contact.phoneDisplay })}</p>
+      </div>
 
       <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
         <Button onClick={onNewBooking}>{t.newBooking}</Button>

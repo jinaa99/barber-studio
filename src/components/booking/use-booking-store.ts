@@ -12,7 +12,7 @@ import { clearBooking, loadBooking, saveBooking, type StoredBooking } from "@/li
  * alive by Activity) share the same state.
  */
 
-const initialState: StoredBooking = { step: "service", draft: emptyDraft, confirmation: null };
+const initialState: StoredBooking = { step: "service", draft: emptyDraft, attemptKey: null, confirmation: null };
 
 let cache: StoredBooking | null = null;
 const listeners = new Set<() => void>();

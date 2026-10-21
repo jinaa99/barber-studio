@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { site } from "@/content/site";
 import type { ServiceCategory } from "@/content/types";
-import { getBarbers, getServices, serviceCategoryLabels, serviceCategoryOrder } from "@/lib/data";
-import type { BookingCatalog } from "@/lib/booking/types";
+import { getBarbers, getBookingConfig, getServices, serviceCategoryLabels, serviceCategoryOrder } from "@/lib/data";
 import { pageMetadata } from "@/lib/metadata";
 import { routes } from "@/lib/navigation";
 import { Container } from "@/components/ui/container";
@@ -19,21 +18,18 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function BookingPage() {
   const locale = await getLocale();
-  const [dict, services, barbers] = await Promise.all([getDictionary(locale), getServices(locale), getBarbers(locale)]);
+  const [dict, services, barbers, config] = await Promise.all([
+    getDictionary(locale),
+    getServices(locale),
+    getBarbers(locale),
+    getBookingConfig(),
+  ]);
   const t = dict.booking;
 
   const ordered = serviceCategoryOrder.flatMap((c) => services.filter((s) => s.category === c));
   const categoryLabels = Object.fromEntries(
     serviceCategoryOrder.map((c) => [c, serviceCategoryLabels[c][locale]]),
   ) as Record<ServiceCategory, string>;
-
-  // Only what the browser needs: no images, bios or unused copy cross the boundary.
-  const catalog: BookingCatalog = {
-    services: services.map(({ id, durationMinutes }) => ({ id, durationMinutes })),
-    barbers: barbers.map(({ id, serviceIds, workingDays }) => ({ id, serviceIds, workingDays })),
-    hours: site.hours,
-    slotIntervalMinutes: site.booking.slotIntervalMinutes,
-  };
 
   return (
     <>
@@ -52,17 +48,18 @@ export default async function BookingPage() {
             durationMinutes,
             price,
           }))}
-          barbers={barbers.map(({ id, name, role, specialties, serviceIds, workingDays }) => ({
+          // Only what the browser needs: no images, bios or unused copy cross the boundary.
+          barbers={barbers.map(({ id, name, role, specialties, serviceIds, workingHours }) => ({
             id,
             name,
             role,
             specialties,
             serviceIds,
-            workingDays,
+            workingHours,
           }))}
           categoryLabels={categoryLabels}
-          catalog={catalog}
-          daysAhead={site.booking.daysAhead}
+          config={config}
+          isDemo={site.isDemo}
         />
       </Container>
     </>

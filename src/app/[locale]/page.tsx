@@ -97,7 +97,7 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      <Testimonials dict={dict} testimonials={testimonials} index="04" />
+      {testimonials.length > 0 && <Testimonials dict={dict} testimonials={testimonials} index="04" />}
       <VisitSummary locale={locale} dict={dict} media={getMedia("studio-chair", locale)} index="05" />
       <BookingCta locale={locale} dict={dict} />
     </>

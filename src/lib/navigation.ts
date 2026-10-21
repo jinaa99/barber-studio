@@ -10,6 +10,8 @@ export const routes = {
   gallery: "/gallery",
   booking: "/booking",
   visit: "/visit",
+  admin: "/admin",
+  adminLogin: "/admin/login",
 } as const;
 
 export function getNavItems(locale: Locale, dict: Dictionary): NavItem[] {

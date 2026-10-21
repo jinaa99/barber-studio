@@ -1,4 +1,5 @@
-import type { Weekday } from "@/content/types";
+import type { Locale } from "@/i18n/config";
+import type { CustomerField } from "./validation";
 
 export const ANY_BARBER = "any" as const;
 
@@ -15,7 +16,7 @@ export interface CustomerDetails {
 export interface BookingDraft {
   serviceId: string | null;
   barberId: BarberChoice | null;
-  /** Local calendar date, `YYYY-MM-DD`. */
+  /** Studio-zone calendar date, `YYYY-MM-DD`. */
   date: string | null;
   /** 24h `HH:MM`. */
   time: string | null;
@@ -41,33 +42,54 @@ export interface BookingRequest {
   date: string;
   time: string;
   customer: CustomerDetails;
+  /** Generated once per attempt so a retried submit can't create a second booking. */
+  idempotencyKey: string;
+  /** Language for the customer's notifications. */
+  locale: Locale;
 }
 
+/** What the customer sees after a booking has been saved. */
+export interface BookingConfirmation {
+  reference: string;
+  status: "PENDING" | "CONFIRMED";
+  barberId: string;
+  date: string;
+  time: string;
+  /**
+   * `sent`: the email provider accepted the confirmation. `not_sent`: no
+   * provider is configured, or it failed. `not_requested`: no email given.
+   */
+  email: "sent" | "not_sent" | "not_requested";
+}
+
+export type BookingError =
+  /** The time is no longer free (or never was). */
+  | "slot_taken"
+  /** The request failed validation; `fields` lists customer fields at fault. */
+  | "invalid"
+  /** This phone number already holds the maximum number of upcoming bookings. */
+  | "limit_reached"
+  | "rate_limited"
+  | "unknown";
+
 export type BookingResult =
-  | {
-      ok: true;
-      reference: string;
-      assignedBarberId: string;
-      /** True while bookings are simulated and nothing is persisted. */
-      isDemo: boolean;
-    }
-  | { ok: false; error: "slot_taken" | "invalid" | "unknown" };
+  | { ok: true; booking: BookingConfirmation }
+  | { ok: false; error: BookingError; fields?: CustomerField[] };
 
 /**
- * The booking UI depends only on this interface. Phase 03 replaces the demo
- * implementation with one backed by a real database and server actions.
+ * The booking UI depends only on this interface. The live implementation
+ * (`http-provider.ts`) calls the server, which owns availability and booking.
  */
 export interface BookingProvider {
   getAvailability(query: AvailabilityQuery): Promise<TimeSlot[]>;
   createBooking(request: BookingRequest): Promise<BookingResult>;
 }
 
-/** The minimal catalogue data a provider needs to reason about availability. */
-export interface BookingCatalog {
-  services: { id: string; durationMinutes: number }[];
-  barbers: { id: string; serviceIds: string[]; workingDays: Weekday[] }[];
-  hours: { day: Weekday; open: string | null; close: string | null }[];
-  slotIntervalMinutes: number;
+/** Booking rules the browser uses for hints. The server re-checks everything. */
+export interface BookingConfig {
+  timeZone: string;
+  bookingHorizonDays: number;
+  minLeadMinutes: number;
 }
 
 export const emptyCustomer: CustomerDetails = { name: "", phone: "", email: "", notes: "" };

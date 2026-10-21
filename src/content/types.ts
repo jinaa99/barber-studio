@@ -134,6 +134,8 @@ export interface Barber {
   image: Media;
   serviceIds: string[];
   workingDays: Weekday[];
+  /** Working blocks; weekday 0 = Sunday, minutes after midnight in the studio zone. */
+  workingHours: { weekday: number; startMinute: number; endMinute: number }[];
 }
 
 export interface GalleryItem {

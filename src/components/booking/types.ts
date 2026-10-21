@@ -6,4 +6,4 @@ export type BookingDict = Pick<Dictionary, "booking" | "common" | "calendar" | "
 
 export type BookingService = Pick<Service, "id" | "category" | "name" | "summary" | "durationMinutes" | "price">;
 
-export type BookingBarber = Pick<Barber, "id" | "name" | "role" | "specialties" | "serviceIds" | "workingDays">;
+export type BookingBarber = Pick<Barber, "id" | "name" | "role" | "specialties" | "serviceIds" | "workingHours">;

@@ -43,6 +43,7 @@ export const site = {
     { label: "Instagram", handle: "@studio08.demo", href: null },
     { label: "Facebook", handle: "STUDIO / 08", href: null },
   ] satisfies SocialLink[],
+  /** Starting values for the BusinessSettings row created by the seed. Live rules are in the database. */
   booking: {
     slotIntervalMinutes: 30,
     daysAhead: 14,

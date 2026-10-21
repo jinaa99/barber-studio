@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Locale } from "@/i18n/config";
 import type { ServiceCategory } from "@/content/types";
 import { ANY_BARBER, type BookingProvider, type CustomerDetails, type TimeSlot } from "@/lib/booking/types";
 import { parseISODate, weekdayOf } from "@/lib/booking/dates";
+import { invalidCustomerFields, LIMITS, type CustomerField } from "@/lib/booking/validation";
 import { formatDuration, formatPrice } from "@/lib/format";
 import { cn } from "@/lib/cn";
-import { DemoNotice } from "@/components/ui/demo-notice";
 import { OptionCard } from "./option-card";
 import type { BookingBarber, BookingDict, BookingService } from "./types";
 
@@ -127,11 +127,12 @@ export function TimeStep({
   dict,
   provider,
   dates,
-  closedDays,
+  isDateOpen,
   serviceId,
   barberId,
   date,
   time,
+  refreshKey,
   onDateChange,
   onTimeChange,
 }: {
@@ -139,13 +140,16 @@ export function TimeStep({
   dict: BookingDict;
   provider: BookingProvider;
   dates: string[];
-  closedDays: Set<string>;
+  /** Hint from working hours; days nobody works are disabled. */
+  isDateOpen: (date: string) => boolean;
   serviceId: string;
   barberId: string;
   date: string | null;
   time: string | null;
+  /** Changing it fetches availability again. */
+  refreshKey: number;
   onDateChange: (date: string) => void;
-  onTimeChange: (time: string) => void;
+  onTimeChange: (time: string | null) => void;
 }) {
   const t = dict.booking.time;
   const selectedIndex = date ? dates.indexOf(date) : -1;
@@ -154,23 +158,35 @@ export function TimeStep({
   const visible = dates.slice(page * DATES_PER_PAGE, (page + 1) * DATES_PER_PAGE);
 
   // Results are keyed by query so "loading" is derived instead of set in the effect.
-  const queryKey = date ? `${serviceId}|${barberId}|${date}` : null;
-  const [result, setResult] = useState<{ key: string; slots: TimeSlot[] } | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const queryKey = date ? `${serviceId}|${barberId}|${date}|${refreshKey}|${attempt}` : null;
+  const [result, setResult] = useState<{ key: string; slots: TimeSlot[] | null } | null>(null);
   const loading = queryKey !== null && result?.key !== queryKey;
-  const slots = !loading && result ? result.slots : [];
+  const failed = !loading && result?.slots === null;
+  const slots = !loading && result?.slots ? result.slots : [];
 
   useEffect(() => {
     if (!date || !queryKey) return;
     let cancelled = false;
-    provider.getAvailability({ date, serviceId, barberId }).then((next) => {
-      if (!cancelled) setResult({ key: queryKey, slots: next });
-    });
+    provider.getAvailability({ date, serviceId, barberId }).then(
+      (next) => {
+        if (cancelled) return;
+        setResult({ key: queryKey, slots: next });
+        // A previously chosen time that has since been taken is dropped.
+        if (time && !next.some((s) => s.time === time && s.available)) onTimeChange(null);
+      },
+      () => {
+        if (!cancelled) setResult({ key: queryKey, slots: null });
+      },
+    );
     return () => {
       cancelled = true;
     };
+    // `time` and `onTimeChange` are read once per fetch, not tracked.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [provider, date, serviceId, barberId, queryKey]);
 
-  const isClosed = date ? closedDays.has(weekdayOf(date)) : false;
+  const isClosed = date ? !isDateOpen(date) : false;
   const anyAvailable = slots.some((s) => s.available);
 
   return (
@@ -203,7 +219,7 @@ export function TimeStep({
           {visible.map((iso) => {
             const d = parseISODate(iso);
             const weekday = weekdayOf(iso);
-            const closed = closedDays.has(weekday);
+            const closed = !isDateOpen(iso);
             const checked = date === iso;
             const isToday = iso === dates[0];
             return (
@@ -243,6 +259,19 @@ export function TimeStep({
         <legend className="eyebrow mb-4 text-taupe-deep">{t.slotsLabel}</legend>
         {!date ? null : isClosed ? (
           <p className="text-sm text-taupe-deep">{t.closed}</p>
+        ) : failed ? (
+          <div className="flex flex-wrap items-center gap-4">
+            <p role="alert" className="text-sm text-danger">
+              {t.loadError}
+            </p>
+            <button
+              type="button"
+              onClick={() => setAttempt((a) => a + 1)}
+              className="text-sm font-medium underline underline-offset-4 hover:opacity-70"
+            >
+              {t.retry}
+            </button>
+          </div>
         ) : loading ? (
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5" aria-label={t.loadingSlots}>
             {Array.from({ length: 10 }, (_, i) => (
@@ -280,7 +309,7 @@ export function TimeStep({
             })}
           </div>
         )}
-        <DemoNotice className="mt-5">{t.exampleNotice}</DemoNotice>
+        <p className="mt-5 text-xs text-taupe-deep">{t.liveNotice}</p>
       </fieldset>
     </div>
   );
@@ -288,16 +317,12 @@ export function TimeStep({
 
 /* ---------------------------------- Details --------------------------------- */
 
-export type DetailErrors = Partial<Record<"name" | "phone" | "email", string>>;
+export type DetailErrors = Partial<Record<CustomerField, string>>;
 
+/** The same rules the server applies, for instant feedback. */
 export function validateCustomer(customer: CustomerDetails, dict: BookingDict): DetailErrors {
-  const e = dict.booking.details.errors;
-  const errors: DetailErrors = {};
-  if (customer.name.trim().length < 2) errors.name = e.name;
-  const digits = customer.phone.replace(/[\s()+-]/g, "");
-  if (!/^\d{8,15}$/.test(digits)) errors.phone = e.phone;
-  if (customer.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email.trim())) errors.email = e.email;
-  return errors;
+  const messages = dict.booking.details.errors;
+  return Object.fromEntries(invalidCustomerFields(customer).map((field) => [field, messages[field]]));
 }
 
 /** Field ids are scoped per flow instance: preserved (hidden) routes keep their DOM. */
@@ -328,6 +353,7 @@ export function DetailsStep({
           id={id("name")}
           name="name"
           autoComplete="name"
+          maxLength={LIMITS.name}
           value={value.name}
           onChange={set("name")}
           placeholder={t.namePlaceholder}
@@ -357,6 +383,7 @@ export function DetailsStep({
           name="email"
           type="email"
           autoComplete="email"
+          maxLength={LIMITS.email}
           value={value.email}
           onChange={set("email")}
           placeholder={t.emailPlaceholder}
@@ -365,15 +392,18 @@ export function DetailsStep({
           className={inputClass(!!errors.email)}
         />
       </Field>
-      <Field id={id("notes")} label={t.notes} className="sm:col-span-2">
+      <Field id={id("notes")} label={t.notes} error={errors.notes} className="sm:col-span-2">
         <textarea
           id={id("notes")}
           name="notes"
           rows={4}
+          maxLength={LIMITS.notes}
           value={value.notes}
           onChange={set("notes")}
           placeholder={t.notesPlaceholder}
-          className={cn(inputClass(false), "h-auto resize-y py-3")}
+          aria-invalid={!!errors.notes}
+          aria-describedby={errors.notes ? `${id("notes")}-error` : undefined}
+          className={cn(inputClass(!!errors.notes), "h-auto resize-y py-3")}
         />
       </Field>
     </div>
@@ -413,10 +443,4 @@ function Field({
       )}
     </div>
   );
-}
-
-/* ---------------------------------- Helpers --------------------------------- */
-
-export function useClosedDays(hours: { day: string; open: string | null }[]) {
-  return useMemo(() => new Set(hours.filter((h) => !h.open).map((h) => h.day)), [hours]);
 }

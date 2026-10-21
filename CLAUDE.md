@@ -14,6 +14,8 @@ The owner handles all Git operations.
 ## Stack
 
 - Next.js 16 App Router, React 19, TypeScript (strict), Tailwind CSS v4, `lucide-react`.
+- PostgreSQL via Prisma 7 (`prisma-client` generator → `src/generated/prisma`, git-ignored;
+  `@prisma/adapter-pg`). zod for server-side validation. Booking backend: [docs/BOOKING.md](docs/BOOKING.md).
 - This Next version differs from older training data. Check
   `node_modules/next/dist/docs/` before using an API. Specifically:
   - `src/proxy.ts` replaces `middleware.ts`.
@@ -36,9 +38,15 @@ The owner handles all Git operations.
 | Dev server | `npm run dev` |
 | Lint | `npm run lint` |
 | Type-check | `npm run typecheck` (runs `next typegen` first) |
-| Production build | `npm run build` then `npm start` |
+| Production build | `npm run build` then `npm start` (needs `DATABASE_URL`) |
+| Unit tests | `npm test` |
+| Database tests | `npm run test:integration` (needs `TEST_DATABASE_URL`, name containing "test") |
+| Local Postgres | `npm run db:local` (port 5433, data in `.data/`) |
+| Migrations | `npm run db:migrate` (dev) / `npm run db:deploy` |
+| Seed / staff account | `npm run db:seed` / `npm run admin:create` |
 
-Run lint, typecheck and build before saying a change is done.
+Run lint, typecheck, tests and build before saying a change is done.
+Never reset or drop a database; schema changes are new, additive migrations.
 
 ## Architecture
 
@@ -46,23 +54,39 @@ Run lint, typecheck and build before saying a change is done.
 src/
   proxy.ts                 unprefixed URL → /mn|/en (cookie, else Mongolian)
   app/[locale]/            every public route; layout.tsx is the root layout
+  app/[locale]/admin/      staff login + dashboard; actions.ts = Server Actions
+  app/api/booking/         availability (GET) and booking (POST) route handlers
   i18n/                    locales config, dictionaries (mn is the source type), loader
   content/                 site.ts (brand + business details), media.ts (images + credits),
-                           types.ts (records & view models), demo/* (demo records)
+                           types.ts (records & view models), demo/* (seed source data)
   lib/data.ts              async data-access layer: the ONLY way UI reads content
-  lib/booking/             booking domain: types, provider interface, demo provider,
-                           rules, dates, sessionStorage persistence
+  lib/booking/             pure, shared booking domain: availability engine, time zone,
+                           status rules, validation, HTTP provider, sessionStorage
+  lib/server/              server-only: db client, booking service, auth/sessions,
+                           accounts, notifications, audit, rate limit, settings
+prisma/                    schema, migrations (hand-written constraints at the end), seed
+scripts/                   local db, admin bootstrap, demo removal, email retry, test runner
+tests/integration/         database tests
   components/ui|layout|sections|booking|media|visit
 ```
 
 - **Server components by default.** Client components are the header, language
   switcher, `Reveal`, the hero sequence and the booking flow.
-- **Content** goes through `lib/data.ts`. Records store `LocalizedText`
-  (`{ mn, en }`); getters return single-language view models. Phase 03 swaps
-  these function bodies for database queries.
+- **Content** goes through `lib/data.ts`. Database rows store `LocalizedText`
+  (`{ mn, en }`) as JSON; getters return single-language view models. Reads are
+  `use cache` + `cacheTag` (`catalogTag`, `settingsTag`); call `updateTag` after writes.
 - **Booking UI** depends only on the `BookingProvider` interface
-  (`lib/booking/types.ts`). The demo provider generates deterministic example
-  availability in the browser and saves nothing.
+  (`lib/booking/types.ts`), implemented by `http-provider.ts`. Displayed slots are
+  advisory: `lib/server/booking.ts` recomputes availability inside a transaction
+  that locks the barbers' rows, and the `appointments_no_overlap` exclusion
+  constraint is the final guard. Keep all three.
+- **Server modules** in `lib/server/` take the Prisma client as an argument where
+  tests need them, and import `server-only`. Scripts and tests run with
+  `tsx --conditions=react-server`.
+- **Auth:** every admin page calls `requireUser()` inside a `<Suspense>` boundary,
+  and every Server Action calls `authorize(role)` itself. Never rely on hidden UI.
+- **Times:** appointments are UTC instants; working hours are minutes in the
+  studio zone (`BusinessSettings.timeZone`, Asia/Ulaanbaatar). Convert with `lib/booking/time.ts`.
 - **Booking state** lives in `components/booking/use-booking-store.ts`
   (`useSyncExternalStore` over sessionStorage), so a language switch or reload keeps progress.
 
@@ -83,9 +107,10 @@ src/
 - **Images:** go through `<Photo>` with a real `sizes` value and a fixed ratio.
   Alt text is localized in `content/media.ts`. Only use assets with a verified
   licence and record the credit. Never hotlink random URLs.
-- **Honesty:** placeholder business details, testimonials and the booking flow
-  are visibly marked as demo (`site.isDemo`, `<DemoNotice>`). Never present
-  sample reviews as real or claim that a booking was saved.
+- **Honesty:** placeholder business details and sample reviews are visibly
+  marked as demo (`site.isDemo`, `<DemoNotice>`, `isSample`). Seeded
+  appointments are `isDemo`. Never present samples as real, and never tell a
+  customer an email was sent unless the notification is `SENT`.
 - **Motion:** subtle and purposeful. Use `Reveal` for fade-ups. Everything must
   respect `prefers-reduced-motion`, and content stays visible without JS.
 - Layouts must work at 390px with a 16px gutter and no horizontal scroll.
@@ -96,6 +121,7 @@ src/
 - Phase 01 (done): foundation, all public pages, i18n, frontend booking demo.
 - Phase 02 (done): scroll-controlled cinematic hero (`components/sections/hero-sequence.tsx`,
   `heroClipRecords` in `content/media.ts`, GSAP ScrollTrigger). Media sources and licences: [docs/MEDIA.md](docs/MEDIA.md).
-- Phase 03: real booking backend behind `BookingProvider`, and DB-backed `lib/data.ts`.
+- Phase 03 (done): PostgreSQL/Prisma, DB-backed `lib/data.ts`, real booking behind
+  `BookingProvider`, staff auth and dashboard, notifications, seed, tests. See docs/BOOKING.md.
 
 Don't start a later phase unless asked.

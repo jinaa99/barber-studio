@@ -1,4 +1,4 @@
-import { emptyDraft, type BookingDraft } from "./types";
+import { emptyDraft, type BookingConfirmation, type BookingDraft } from "./types";
 
 /*
  * The booking draft lives in sessionStorage so switching language (which
@@ -7,14 +7,16 @@ import { emptyDraft, type BookingDraft } from "./types";
  * blocked site data), so every access is guarded and failure is silent.
  */
 
-const KEY = "studio08.booking.v1";
+const KEY = "studio08.booking.v2";
 
 export type BookingStep = "service" | "barber" | "time" | "details" | "review";
 
 export interface StoredBooking {
   step: BookingStep;
   draft: BookingDraft;
-  confirmation: { reference: string; assignedBarberId: string } | null;
+  /** Idempotency key of the current submit attempt; reused if it's retried. */
+  attemptKey: string | null;
+  confirmation: BookingConfirmation | null;
 }
 
 export function loadBooking(): StoredBooking | null {
@@ -26,6 +28,7 @@ export function loadBooking(): StoredBooking | null {
     return {
       step: parsed.step ?? "service",
       draft: { ...emptyDraft, ...parsed.draft, customer: { ...emptyDraft.customer, ...parsed.draft.customer } },
+      attemptKey: parsed.attemptKey ?? null,
       confirmation: parsed.confirmation ?? null,
     };
   } catch {

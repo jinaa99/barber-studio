@@ -1,0 +1,362 @@
+// STUDIO / 08 — booking and content schema.
+//
+// Single studio today. Everything location-specific (settings, barbers, hours,
+// appointments) is scoped so a future `Branch` model can be introduced by adding
+// a `branchId` to BusinessSettings, Barber and Appointment without reshaping data.
+//
+// Localized text is stored as JSON `{ "mn": "…", "en": "…" }` (LocalizedText).
+// Times of day are minutes after midnight in the studio time zone; instants
+// (appointments, time off) are timestamptz.
+//
+// Constraints that Prisma can't express (the no-overlap exclusion constraint,
+// CHECKs) live in the migration SQL. See docs/BOOKING.md.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  importFileExtension = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------- Accounts
+
+enum UserRole {
+  ADMIN // full access: services, barbers, settings, appointments
+  STAFF // day-to-day: view and update appointments
+}
+
+/// Staff accounts. Customers book as guests and are stored as `Customer`.
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  role         UserRole  @default(STAFF)
+  passwordHash String
+  active       Boolean   @default(true)
+  failedLogins Int       @default(0)
+  lockedUntil  DateTime? @db.Timestamptz(3)
+  lastLoginAt  DateTime? @db.Timestamptz(3)
+  createdAt    DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime  @updatedAt @db.Timestamptz(3)
+
+  sessions  Session[]
+  auditLogs AuditLog[]
+  barber    Barber?
+
+  @@map("users")
+}
+
+/// Opaque server-side sessions. Only a SHA-256 hash of the cookie token is stored.
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  userAgent String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+/// A guest who booked. Identified by normalized phone number; holds only
+/// what the booking form collects.
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  /// Digits only, with country code when given (e.g. 97688001234).
+  phone     String   @unique
+  email     String?
+  /// Created by the demo seed, never by a real booking.
+  isDemo    Boolean  @default(false)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  appointments Appointment[]
+  reviews      Review[]
+
+  @@map("customers")
+}
+
+// ----------------------------------------------------------------- Catalog
+
+enum ServiceCategory {
+  haircut
+  beard
+  ritual
+}
+
+model Service {
+  /// Stable slug, used in URLs (`/booking?service=studio-cut`).
+  id              String          @id
+  category        ServiceCategory
+  name            Json
+  summary         Json
+  /// LocalizedText[]
+  includes        Json            @default("[]")
+  durationMinutes Int
+  /// Whole tögrög (MNT).
+  priceMnt        Int
+  featured        Boolean         @default(false)
+  /// Inactive services are hidden from the site and can't be booked.
+  active          Boolean         @default(true)
+  sortOrder       Int             @default(0)
+  createdAt       DateTime        @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime        @updatedAt @db.Timestamptz(3)
+
+  barbers      BarberService[]
+  appointments Appointment[]
+
+  @@map("services")
+}
+
+model Barber {
+  /// Stable slug, used in URLs (`/booking?barber=temuulen`).
+  id              String   @id
+  name            Json
+  role            Json
+  bio             Json
+  /// LocalizedText[]
+  specialties     Json     @default("[]")
+  yearsExperience Int      @default(0)
+  /// Key into `content/media.ts` (images ship with the app).
+  imageId         String
+  active          Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  /// Optional login for the barber themself.
+  userId          String?  @unique
+  createdAt       DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime @updatedAt @db.Timestamptz(3)
+
+  user         User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  services     BarberService[]
+  workingHours WorkingHour[]
+  timeOff      TimeOff[]
+  appointments Appointment[]
+
+  @@map("barbers")
+}
+
+model BarberService {
+  barberId  String
+  serviceId String
+
+  barber  Barber  @relation(fields: [barberId], references: [id], onDelete: Cascade)
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@id([barberId, serviceId])
+  @@index([serviceId])
+  @@map("barber_services")
+}
+
+/// One working block. Several blocks on the same weekday model breaks
+/// (e.g. 10:00–14:00 and 15:00–20:00). No block on a weekday = day off.
+model WorkingHour {
+  id          String @id @default(cuid())
+  barberId    String
+  /// 0 = Sunday … 6 = Saturday (JavaScript `getDay()` order).
+  weekday     Int
+  /// Minutes after midnight, studio time zone.
+  startMinute Int
+  endMinute   Int
+
+  barber Barber @relation(fields: [barberId], references: [id], onDelete: Cascade)
+
+  @@index([barberId, weekday])
+  @@map("working_hours")
+}
+
+/// Holidays, sick days and other closures. `barberId = null` closes the whole studio.
+model TimeOff {
+  id        String   @id @default(cuid())
+  barberId  String?
+  startsAt  DateTime @db.Timestamptz(3)
+  endsAt    DateTime @db.Timestamptz(3)
+  reason    String?
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  barber Barber? @relation(fields: [barberId], references: [id], onDelete: Cascade)
+
+  @@index([barberId, startsAt])
+  @@map("time_off")
+}
+
+/// Booking rules for the studio. A single row with id "default".
+model BusinessSettings {
+  id                        String   @id @default("default")
+  /// IANA zone used for working hours and slot times.
+  timeZone                  String   @default("Asia/Ulaanbaatar")
+  slotIntervalMinutes       Int      @default(30)
+  /// How many days ahead (including today) can be booked.
+  bookingHorizonDays        Int      @default(14)
+  /// Minimum notice before an appointment can start.
+  minLeadMinutes            Int      @default(60)
+  /// Gap kept free after each appointment for the same barber.
+  bufferMinutes             Int      @default(0)
+  /// Upcoming active appointments one phone number may hold.
+  maxActiveBookingsPerPhone Int      @default(3)
+  /// New online bookings start CONFIRMED instead of PENDING.
+  autoConfirm               Boolean  @default(true)
+  updatedAt                 DateTime @updatedAt @db.Timestamptz(3)
+
+  @@map("business_settings")
+}
+
+// ------------------------------------------------------------ Appointments
+
+/// PENDING → CONFIRMED | CANCELLED
+/// CONFIRMED → COMPLETED | CANCELLED | NO_SHOW
+/// COMPLETED, CANCELLED and NO_SHOW are final.
+/// PENDING and CONFIRMED hold the barber's time (see the exclusion constraint).
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum AppointmentSource {
+  ONLINE
+  ADMIN
+  /// Sample data from `prisma/seed.ts`; excluded from real reporting.
+  DEMO_SEED
+}
+
+model Appointment {
+  id              String            @id @default(cuid())
+  /// Human-friendly booking reference shown to the customer (e.g. S08-7KQ2MD).
+  reference       String            @unique
+  serviceId       String
+  barberId        String
+  customerId      String
+  startsAt        DateTime          @db.Timestamptz(3)
+  endsAt          DateTime          @db.Timestamptz(3)
+  status          AppointmentStatus @default(PENDING)
+  source          AppointmentSource @default(ONLINE)
+  /// Sample appointment for demos and analytics previews. Never a real booking.
+  isDemo          Boolean           @default(false)
+  /// Price and duration at the time of booking.
+  priceMnt        Int
+  durationMinutes Int
+  /// Contact details as submitted with this booking (the customer record keeps the first ones).
+  customerName    String
+  customerEmail   String?
+  notes           String?
+  /// Language the customer booked in; used for their notifications.
+  locale          String            @default("mn")
+  /// Client-generated key so a retried submit returns the same booking.
+  idempotencyKey  String?           @unique
+  cancelReason    String?
+  statusChangedAt DateTime?         @db.Timestamptz(3)
+  createdAt       DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime          @updatedAt @db.Timestamptz(3)
+
+  service       Service        @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+  barber        Barber         @relation(fields: [barberId], references: [id], onDelete: Restrict)
+  customer      Customer       @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  notifications Notification[]
+  review        Review?
+
+  @@index([barberId, startsAt])
+  @@index([startsAt])
+  @@index([customerId])
+  @@map("appointments")
+}
+
+// ----------------------------------------------------------- Notifications
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+}
+
+enum NotificationType {
+  BOOKING_CONFIRMATION
+  BOOKING_CANCELLED
+}
+
+/// SENT: the provider accepted the message.
+/// SKIPPED: not attempted (no provider configured, or no recipient).
+/// FAILED: the provider rejected it or was unreachable; may be retried.
+enum NotificationStatus {
+  PENDING
+  SENT
+  SKIPPED
+  FAILED
+}
+
+model Notification {
+  id                String              @id @default(cuid())
+  appointmentId     String
+  channel           NotificationChannel
+  type              NotificationType
+  recipient         String
+  status            NotificationStatus  @default(PENDING)
+  provider          String?
+  providerMessageId String?
+  error             String?
+  attempts          Int                 @default(0)
+  sentAt            DateTime?           @db.Timestamptz(3)
+  createdAt         DateTime            @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime            @updatedAt @db.Timestamptz(3)
+
+  appointment Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([appointmentId])
+  @@map("notifications")
+}
+
+// ----------------------------------------------------------------- Reviews
+
+enum ReviewStatus {
+  PENDING
+  PUBLISHED
+  HIDDEN
+}
+
+/// Guest reviews. Only PUBLISHED reviews appear on the site; real ones need
+/// the guest's consent (`consentAt`). Samples are always labelled as such.
+model Review {
+  id            String       @id @default(cuid())
+  appointmentId String?      @unique
+  customerId    String?
+  rating        Int?
+  quote         Json
+  attribution   Json
+  status        ReviewStatus @default(PENDING)
+  isSample      Boolean      @default(false)
+  consentAt     DateTime?    @db.Timestamptz(3)
+  sortOrder     Int          @default(0)
+  createdAt     DateTime     @default(now()) @db.Timestamptz(3)
+
+  appointment Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  customer    Customer?    @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@map("reviews")
+}
+
+// --------------------------------------------------------------- Audit log
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  /// Null for system actions (scripts, failed anonymous logins).
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

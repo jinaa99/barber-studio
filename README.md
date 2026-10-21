@@ -8,23 +8,31 @@ demo, built so a real shop's brand can replace it.
 
 ## Getting started
 
+Requires Node 20.19+ and PostgreSQL 14+. Booking backend details: [docs/BOOKING.md](docs/BOOKING.md).
+
 ```bash
 npm install
-cp .env.example .env.local   # optional: set NEXT_PUBLIC_SITE_URL
-npm run dev                  # http://localhost:3000 → redirects to /mn
+cp .env.example .env.local   # set DATABASE_URL (and TEST_DATABASE_URL)
+npm run db:local             # optional: local PostgreSQL if you don't have one
+npm run db:deploy            # apply migrations
+npm run db:seed              # demo services, barbers, hours and sample appointments
+npm run admin:create         # first staff account
+npm run dev                  # http://localhost:3000 → redirects to /mn; staff: /mn/admin
 ```
 
 | Script | Purpose |
 | --- | --- |
 | `npm run dev` | Development server |
 | `npm run lint` | ESLint |
-| `npm run typecheck` | Generate route types and run `tsc --noEmit` |
-| `npm run build` / `npm start` | Production build and server |
+| `npm run typecheck` | Generate Prisma client and route types, then `tsc --noEmit` |
+| `npm test` | Unit tests |
+| `npm run test:integration` | Database tests (needs `TEST_DATABASE_URL`) |
+| `npm run build` / `npm start` | Production build (needs the database) and server |
 
 ## Customising for a studio
 
 1. **Brand and business details:** `src/content/site.ts` (name, wordmark, address, phone, hours, socials). Set `isDemo: false` when the details are real.
-2. **Services, barbers, gallery, testimonials:** `src/content/demo/*` (later replaced by database queries in `src/lib/data.ts`).
+2. **Services, barbers, schedules, reviews, booking rules:** stored in PostgreSQL. `src/content/demo/*` is the seed's source data; the gallery still ships with the app.
 3. **Copy:** `src/i18n/dictionaries/mn.ts` and `en.ts`.
 4. **Photography:** add files to `src/assets/media/` and register them, with localized alt text and credit, in `src/content/media.ts`.
 5. **Look and feel:** the design tokens in `src/app/globals.css`.

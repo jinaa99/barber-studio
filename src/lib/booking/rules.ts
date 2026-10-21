@@ -1,22 +1,30 @@
-import type { BookingCatalog } from "./types";
-import { timeToMinutes, toISODate, weekdayOf } from "./dates";
+import type { BookingConfig } from "./types";
+import { addCalendarDays, isoWeekday, zonedParts } from "./time";
 
-/** Lead time before the first bookable slot on the current day. */
-export const SAME_DAY_BUFFER_MINUTES = 60;
+/*
+ * Browser-side hints for the date picker. They only disable obviously
+ * unbookable days; the server decides what is actually available.
+ */
+
+/** Today's date in the studio zone, then the following days of the booking horizon. */
+export function bookableDates(config: BookingConfig, now = new Date()): string[] {
+  const today = zonedParts(now, config.timeZone).date;
+  return Array.from({ length: config.bookingHorizonDays }, (_, i) => addCalendarDays(today, i));
+}
 
 /**
- * Whether a service of `durationMinutes` can still start on `date`: the studio
- * is open that day and, for today, there is time left after the lead buffer.
+ * Whether anyone could take the service on `date`: one of `barberWeekdays`
+ * (0 = Sunday) is that day, and for today there's still time after the notice period.
  */
 export function isDateBookable(
-  hours: BookingCatalog["hours"],
+  config: BookingConfig,
   date: string,
-  durationMinutes: number,
+  workingWeekdays: Set<number>,
+  latestStartMinute: number | null,
   now = new Date(),
 ): boolean {
-  const day = hours.find((h) => h.day === weekdayOf(date));
-  if (!day?.open || !day.close) return false;
-  if (toISODate(now) !== date) return true;
-  const earliest = now.getHours() * 60 + now.getMinutes() + SAME_DAY_BUFFER_MINUTES;
-  return earliest <= timeToMinutes(day.close) - durationMinutes;
+  if (!workingWeekdays.has(isoWeekday(date))) return false;
+  const current = zonedParts(now, config.timeZone);
+  if (current.date !== date || latestStartMinute === null) return true;
+  return current.minutes + config.minLeadMinutes <= latestStartMinute;
 }
