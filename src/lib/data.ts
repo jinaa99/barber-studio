@@ -1,5 +1,5 @@
 import type { Locale } from "@/i18n/config";
-import { mediaRecords } from "@/content/media";
+import { heroClipRecords, mediaRecords } from "@/content/media";
 import { serviceRecords } from "@/content/demo/services";
 import { barberRecords } from "@/content/demo/barbers";
 import { galleryRecords } from "@/content/demo/gallery";
@@ -7,6 +7,7 @@ import { testimonialRecords } from "@/content/demo/testimonials";
 import type {
   Barber,
   GalleryItem,
+  HeroClip,
   Media,
   Service,
   ServiceCategory,
@@ -37,6 +38,19 @@ export function getMedia(id: string, locale: Locale): Media {
 
 export async function getAllMedia(locale: Locale): Promise<Media[]> {
   return mediaRecords.map((m) => getMedia(m.id, locale));
+}
+
+/** The home hero clips, in scroll order. */
+export async function getHeroClips(locale: Locale): Promise<HeroClip[]> {
+  return heroClipRecords.map((c) => ({
+    id: c.id,
+    sources: c.sources,
+    playback: c.playback,
+    poster: c.poster,
+    alt: c.alt[locale],
+    focus: c.focus,
+    credit: c.credit,
+  }));
 }
 
 export async function getServices(locale: Locale): Promise<Service[]> {

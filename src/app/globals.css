@@ -70,6 +70,13 @@
   }
 }
 
+/*
+ * The scroll-driven hero only runs when scripting is available and motion is
+ * welcome. Without either, `cinematic:` styles never apply and the hero is a
+ * single still screen.
+ */
+@custom-variant cinematic (@media (scripting: enabled) and (prefers-reduced-motion: no-preference));
+
 @theme inline {
   --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-cormorant), ui-serif, Georgia, serif;
@@ -115,6 +122,12 @@
   letter-spacing: var(--text-eyebrow--letter-spacing);
   text-transform: uppercase;
   font-weight: 600;
+}
+
+/* Static film grain for footage overlays (one small tile, no animation). */
+@utility film-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
 }
 
 @utility tabular {

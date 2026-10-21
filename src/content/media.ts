@@ -1,4 +1,4 @@
-import type { MediaRecord } from "./types";
+import type { HeroClipRecord, MediaRecord } from "./types";
 
 import studioHero from "@/assets/media/studio-hero.jpg";
 import studioInterior from "@/assets/media/studio-interior.jpg";
@@ -12,6 +12,10 @@ import workTextureShears from "@/assets/media/work-texture-shears.jpg";
 import workScissorOverComb from "@/assets/media/work-scissor-over-comb.jpg";
 import workDetailComb from "@/assets/media/work-detail-comb.jpg";
 import workLineUp from "@/assets/media/work-line-up.jpg";
+import heroEntry from "@/assets/media/hero-entry.jpg";
+import heroCraft from "@/assets/media/hero-craft.jpg";
+import heroDetail from "@/assets/media/hero-detail.jpg";
+import heroResult from "@/assets/media/hero-result.jpg";
 
 /**
  * Demo photography. Every image was downloaded from its Unsplash page and is
@@ -188,9 +192,87 @@ export const mediaRecords = [
 
 export type MediaId = (typeof mediaRecords)[number]["id"];
 
+const mixkit = {
+  provider: "Mixkit",
+  license: "Mixkit Stock Video Free License",
+  licenseUrl: "https://mixkit.co/license/#videoFree",
+} as const;
+
 /**
- * Optional muted hero loop (e.g. `{ src: "/media/hero.mp4", type: "video/mp4" }`
- * placed in /public/media). `null` uses the still image. No licensed footage
- * has been sourced yet; Phase 02 replaces this with the scroll-driven sequence.
+ * Home hero sequence. All four clips come from one Mixkit shoot (same room,
+ * barber and client), downloaded at 720p from each clip's page. They were
+ * trimmed, colour graded to the site palette, stripped of audio and
+ * re-encoded; see docs/MEDIA.md. They are stock footage, not this studio.
+ * Swap `sources` and `poster` to use the studio's own footage; an empty
+ * `sources` array keeps the sequence working on posters alone.
  */
-export const heroVideo: { src: string; type: string } | null = null;
+export const heroClipRecords = [
+  {
+    id: "arrival",
+    sources: [{ src: "/media/hero/hero-entry.mp4", type: "video/mp4" }],
+    playback: "scrub",
+    poster: heroEntry,
+    alt: {
+      mn: "Тоосгон ханатай барбер студид эгнэн зогсох бор арьсан сандлуудын хажуугаар камер аажуухан урагшилж буй нь",
+      en: "The camera drifts slowly past a row of brown leather barber chairs in a brick-walled studio",
+    },
+    focus: { landscape: "40% 50%", portrait: "30% 50%" },
+    credit: {
+      ...mixkit,
+      title: "Male Barber Chairs",
+      sourceUrl: "https://mixkit.co/free-stock-video/male-barber-chairs-43236/",
+      edits: "First 8 s, cropped to remove the shop's wall sign, colour graded, audio removed.",
+    },
+  },
+  {
+    id: "craft",
+    sources: [{ src: "/media/hero/hero-craft.mp4", type: "video/mp4" }],
+    playback: "loop",
+    poster: heroCraft,
+    alt: {
+      mn: "Хар бээлийтэй барбер сахалтай үйлчлүүлэгчийн хажуугийн үсийг машинаар засаж буй нь",
+      en: "A barber in black gloves works the side of a bearded client's head with clippers",
+    },
+    focus: { landscape: "60% 40%", portrait: "52% 40%" },
+    credit: {
+      ...mixkit,
+      title: "Barber cutting the hair of a bearded man",
+      sourceUrl: "https://mixkit.co/free-stock-video/barber-cutting-the-hair-of-a-bearded-man-43222/",
+      edits: "First 8 s, colour graded, audio removed.",
+    },
+  },
+  {
+    id: "detail",
+    sources: [{ src: "/media/hero/hero-detail.mp4", type: "video/mp4" }],
+    playback: "loop",
+    poster: heroDetail,
+    alt: {
+      mn: "Ойрын зураг: барбер сам барьж, хайчаар чихний дээгүүр үсийг засаж буй нь",
+      en: "Close-up of a barber cutting above the ear with scissors over a comb",
+    },
+    focus: { landscape: "35% 40%", portrait: "40% 40%" },
+    credit: {
+      ...mixkit,
+      title: "Barber cutting hair with scissors and comb",
+      sourceUrl: "https://mixkit.co/free-stock-video/barber-cutting-hair-with-scissors-and-comb-43232/",
+      edits: "First 5 s, colour graded, audio removed.",
+    },
+  },
+  {
+    id: "result",
+    sources: [{ src: "/media/hero/hero-result.mp4", type: "video/mp4" }],
+    playback: "scrub",
+    poster: heroResult,
+    alt: {
+      mn: "Засалт дууссаны дараа сахалтай үйлчлүүлэгч дээш харж суугаа нь",
+      en: "The bearded client sits with his finished cut as the barber steps away",
+    },
+    focus: { landscape: "60% 35%", portrait: "46% 35%" },
+    credit: {
+      ...mixkit,
+      title: "Barber combing his client's hair",
+      sourceUrl: "https://mixkit.co/free-stock-video/barber-combing-his-clients-hair-43238/",
+      edits: "Final 2.2 s (after the barber's branded apron leaves the frame), colour graded, audio removed.",
+    },
+  },
+] satisfies HeroClipRecord[];

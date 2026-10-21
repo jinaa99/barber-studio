@@ -23,6 +23,34 @@ export interface MediaRecord {
   credit?: MediaCredit;
 }
 
+export interface VideoCredit {
+  /** Clip title as listed on the source page (Mixkit doesn't name its videographers). */
+  title: string;
+  sourceUrl: string;
+  provider: "Mixkit";
+  license: "Mixkit Stock Video Free License";
+  licenseUrl: string;
+  /** What was changed from the original download. */
+  edits: string;
+}
+
+/** One stage of the home hero sequence, in scroll order. */
+export type HeroClipId = "arrival" | "craft" | "detail" | "result";
+
+export interface HeroClipRecord {
+  id: HeroClipId;
+  /** Muted, audio-free sources in /public. Empty renders the poster only. */
+  sources: { src: string; type: "video/mp4" | "video/webm" }[];
+  /** `scrub` follows the scroll position frame by frame; `loop` plays while its scene is on screen. */
+  playback: "scrub" | "loop";
+  /** Frame 0 of the clip, shown before the video loads and if it fails. */
+  poster: StaticImageData | null;
+  alt: LocalizedText;
+  /** `object-position` for landscape and portrait screens. */
+  focus: { landscape: string; portrait: string };
+  credit?: VideoCredit;
+}
+
 export type ServiceCategory = "haircut" | "beard" | "ritual";
 
 export interface ServiceRecord {
@@ -73,6 +101,16 @@ export interface Media {
   src: StaticImageData | null;
   alt: string;
   credit?: MediaCredit;
+}
+
+export interface HeroClip {
+  id: HeroClipId;
+  sources: HeroClipRecord["sources"];
+  playback: HeroClipRecord["playback"];
+  poster: StaticImageData | null;
+  alt: string;
+  focus: HeroClipRecord["focus"];
+  credit?: VideoCredit;
 }
 
 export interface Service {

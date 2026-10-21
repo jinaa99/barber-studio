@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
-import { getAllMedia, getGallery } from "@/lib/data";
+import { getAllMedia, getGallery, getHeroClips } from "@/lib/data";
 import { pageMetadata } from "@/lib/metadata";
 import { routes } from "@/lib/navigation";
 import { Container } from "@/components/ui/container";
@@ -17,9 +17,23 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function GalleryPage() {
   const locale = await getLocale();
-  const [dict, items, media] = await Promise.all([getDictionary(locale), getGallery(locale), getAllMedia(locale)]);
+  const [dict, items, media, clips] = await Promise.all([
+    getDictionary(locale),
+    getGallery(locale),
+    getAllMedia(locale),
+    getHeroClips(locale),
+  ]);
   const t = dict.galleryPage;
-  const credited = media.filter((m) => m.credit);
+  const credits = [
+    ...media.flatMap((m) =>
+      m.credit ? [{ id: m.id, label: t.photoBy, name: m.credit.author, provider: "Unsplash", url: m.credit.sourceUrl }] : [],
+    ),
+    ...clips.flatMap((c) =>
+      c.credit
+        ? [{ id: c.id, label: t.footage, name: c.credit.title, provider: c.credit.provider, url: c.credit.sourceUrl }]
+        : [],
+    ),
+  ];
 
   return (
     <>
@@ -52,11 +66,11 @@ export default async function GalleryPage() {
               <p className="mt-4 max-w-sm text-sm leading-relaxed text-taupe-deep">{t.creditsLead}</p>
             </div>
             <ul className="grid gap-x-8 gap-y-3 text-sm sm:grid-cols-2 lg:col-span-8">
-              {credited.map((m) => (
-                <li key={m.id} className="flex items-baseline justify-between gap-4 border-b border-line pb-3">
-                  <span className="text-taupe-deep">{t.photoBy}</span>
-                  <a href={m.credit!.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-right hover:opacity-70">
-                    {m.credit!.author} <span className="text-taupe">/ Unsplash</span>
+              {credits.map((c) => (
+                <li key={c.id} className="flex items-baseline justify-between gap-4 border-b border-line pb-3">
+                  <span className="shrink-0 text-taupe-deep">{c.label}</span>
+                  <a href={c.url} target="_blank" rel="noopener noreferrer" className="text-right hover:opacity-70">
+                    {c.name} <span className="text-taupe">/ {c.provider}</span>
                   </a>
                 </li>
               ))}

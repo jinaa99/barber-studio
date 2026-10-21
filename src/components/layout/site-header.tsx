@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useId, useLayoutEffect, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { localizedPath, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries/mn";
 import { site } from "@/content/site";
 import { cn } from "@/lib/cn";
+import { heroToneEvent } from "@/lib/events";
 import { buttonStyles } from "@/components/ui/button";
 import { LanguageSwitcher } from "./language-switcher";
 import { Wordmark } from "./wordmark";
@@ -18,8 +19,9 @@ export interface NavItem {
 }
 
 /**
- * Fixed header. On the home page it starts transparent over the hero and
- * settles onto paper once the visitor scrolls; elsewhere it is always solid.
+ * Fixed header. On the home page it stays transparent while the dark hero is
+ * behind it and settles onto paper once the hero has scrolled past (or has
+ * turned to paper itself); elsewhere it is always solid.
  */
 export function SiteHeader({
   locale,
@@ -32,24 +34,34 @@ export function SiteHeader({
 }) {
   const pathname = usePathname();
   const isHome = pathname === localizedPath(locale);
-  const [scrolled, setScrolled] = useState(false);
+  const [overHero, setOverHero] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   // Unique per instance: Next keeps the other locale's tree mounted (hidden) after a switch.
   const menuId = useId();
 
   useEffect(() => {
     let frame = 0;
+    // Hidden (preserved) routes keep their hero in the DOM with a zero-size box, so they never match.
     const update = () => {
       cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => setScrolled(window.scrollY > 24));
+      frame = requestAnimationFrame(() => {
+        const edge = headerRef.current?.offsetHeight ?? 0;
+        const heroes = document.querySelectorAll<HTMLElement>("[data-home-hero]");
+        setOverHero(
+          Array.from(heroes).some((el) => el.dataset.tone !== "light" && el.getBoundingClientRect().bottom > edge),
+        );
+      });
     };
     update();
     window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener(heroToneEvent, update);
     return () => {
       cancelAnimationFrame(frame);
       window.removeEventListener("scroll", update);
+      window.removeEventListener(heroToneEvent, update);
     };
-  }, []);
+  }, [pathname]);
 
   // Lock page scroll and allow Escape while the mobile menu is open.
   useEffect(() => {
@@ -67,12 +79,13 @@ export function SiteHeader({
   // A preserved (hidden) route must not come back with its menu open.
   useLayoutEffect(() => () => setMenuOpen(false), []);
 
-  const overlay = isHome && !scrolled && !menuOpen;
+  const overlay = isHome && overHero && !menuOpen;
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
   const close = () => setMenuOpen(false);
 
   return (
     <header
+      ref={headerRef}
       className={cn(
         "fixed inset-x-0 top-0 z-50 transition-[background-color,color,border-color] duration-500 ease-soft",
         overlay

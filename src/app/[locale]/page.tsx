@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { localizedPath } from "@/i18n/config";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { site } from "@/content/site";
-import { getBarbers, getFeaturedServices, getGallery, getMedia, getTestimonials } from "@/lib/data";
+import { getBarbers, getFeaturedServices, getGallery, getHeroClips, getMedia, getTestimonials } from "@/lib/data";
 import { pageMetadata } from "@/lib/metadata";
 import { routes } from "@/lib/navigation";
 import { ArrowLink } from "@/components/ui/button";
@@ -31,8 +31,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function HomePage() {
   const locale = await getLocale();
-  const [dict, services, barbers, work, testimonials] = await Promise.all([
+  const [dict, heroClips, services, barbers, work, testimonials] = await Promise.all([
     getDictionary(locale),
+    getHeroClips(locale),
     getFeaturedServices(locale),
     getBarbers(locale),
     getGallery(locale, featuredWork),
@@ -42,7 +43,9 @@ export default async function HomePage() {
 
   return (
     <>
-      <HomeHero locale={locale} dict={dict} media={getMedia("studio-hero", locale)} />
+      <HomeHero locale={locale} dict={dict} clips={heroClips} afterId={`after-hero-${locale}`} />
+      {/* Skip-intro target; focusable so keyboard users land after the sequence. */}
+      <span id={`after-hero-${locale}`} tabIndex={-1} className="block outline-none" />
       <Statement text={t.statement} />
       <StudioIntro dict={dict} media={getMedia("studio-interior", locale)} />
 

@@ -45,6 +45,14 @@ export const en: Dictionary = {
       primaryCta: "Book a chair",
       secondaryCta: "View services",
       scroll: "Scroll",
+      skipIntro: "Skip intro",
+      footageNote: "Demo footage: Mixkit stock video, not this studio's work.",
+      scenes: [
+        { label: "Arrival", line: "A quiet room, kept that way on purpose." },
+        { label: "The chair", line: "Clipper work by hand and by eye, never rushed." },
+        { label: "Detail", line: "Scissors over comb, one section at a time." },
+        { label: "Finish", line: "A shape that suits you and grows out well." },
+      ],
     },
     statement:
       "We cut for the person in the chair, not the queue at the door. One chair, one barber, complete attention.",
@@ -128,10 +136,11 @@ export const en: Dictionary = {
     eyebrow: "Our work",
     title: "Recent work",
     lead: "Cuts, beard work and everyday moments from the studio.",
-    creditsTitle: "Photo credits",
+    creditsTitle: "Photo and video credits",
     creditsLead:
-      "Photography on this demo site is used under the Unsplash License and does not show this studio's actual work.",
+      "Photography on this demo site is used under the Unsplash License and the home page footage under the Mixkit Stock Video Free License. Neither shows this studio's actual work.",
     photoBy: "Photo by",
+    footage: "Footage",
   },
   visitPage: {
     eyebrow: "Visit",
@@ -240,7 +249,7 @@ export const en: Dictionary = {
     follow: "Follow",
     demoNotice:
       "Demo website. Brand, address, contact details and reviews are placeholders.",
-    credits: "Photo credits",
+    credits: "Photo & video credits",
     rights: "All rights reserved.",
     backToTop: "Back to top",
   },

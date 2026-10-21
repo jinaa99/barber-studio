@@ -54,6 +54,8 @@ Phase 03 implements the real backend.
 - Testimonials are sample placeholders, visibly labelled. Real reviews require consent and verification.
 - Photography is Unsplash-licensed stock with credits listed on the gallery
   page. It doesn't show this studio's work or the named (fictional) barbers.
+- Hero footage is Mixkit stock (Stock Video Free License), labelled as demo
+  footage in the hero and credited on the gallery page. See docs/MEDIA.md.
 
 ## Engineering
 
@@ -64,5 +66,8 @@ Phase 03 implements the real backend.
 
 ## Roadmap
 
-- **Phase 02:** scroll-controlled cinematic hero with licensed video.
+- **Phase 02 (done):** scroll-controlled cinematic hero with licensed video. The page scrolls
+  natively past a sticky stage, and GSAP ScrollTrigger maps the scroll onto a timeline:
+  doorway → arrival (scrubbed) → the chair → detail → finish (scrubbed) → paper hand-over.
+  With reduced motion or without JS, the hero is a single still screen.
 - **Phase 03:** real booking backend (persistence, availability, notifications) and database-backed content.

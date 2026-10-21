@@ -56,7 +56,7 @@ src/
 ```
 
 - **Server components by default.** Client components are the header, language
-  switcher, `Reveal`, and the booking flow.
+  switcher, `Reveal`, the hero sequence and the booking flow.
 - **Content** goes through `lib/data.ts`. Records store `LocalizedText`
   (`{ mn, en }`); getters return single-language view models. Phase 03 swaps
   these function bodies for database queries.
@@ -94,7 +94,8 @@ src/
 ## Phases
 
 - Phase 01 (done): foundation, all public pages, i18n, frontend booking demo.
-- Phase 02: scroll-controlled cinematic hero (`components/sections/home-hero.tsx`, `heroVideo` in `content/media.ts`).
+- Phase 02 (done): scroll-controlled cinematic hero (`components/sections/hero-sequence.tsx`,
+  `heroClipRecords` in `content/media.ts`, GSAP ScrollTrigger). Media sources and licences: [docs/MEDIA.md](docs/MEDIA.md).
 - Phase 03: real booking backend behind `BookingProvider`, and DB-backed `lib/data.ts`.
 
 Don't start a later phase unless asked.
