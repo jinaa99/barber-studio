@@ -12,6 +12,15 @@ export const routes = {
   visit: "/visit",
   admin: "/admin",
   adminLogin: "/admin/login",
+  adminAppointments: "/admin/appointments",
+  adminNewAppointment: "/admin/appointments/new",
+  adminBarbers: "/admin/barbers",
+  adminServices: "/admin/services",
+  adminCustomers: "/admin/customers",
+  adminAnalytics: "/admin/analytics",
+  adminContent: "/admin/content",
+  adminSettings: "/admin/settings",
+  adminActivity: "/admin/activity",
 } as const;
 
 export function getNavItems(locale: Locale, dict: Dictionary): NavItem[] {

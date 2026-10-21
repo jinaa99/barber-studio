@@ -2,6 +2,10 @@ import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import type { Locale, LocalizedText } from "@/i18n/config";
 import { heroClipRecords, mediaRecords } from "@/content/media";
+import type { Dictionary } from "@/i18n/dictionaries/mn";
+import { getDictionary } from "@/i18n/get-dictionary";
+import { applyTextOverrides, curate, type StudioProfile } from "@/lib/admin/content";
+import { readSiteContent } from "@/lib/server/content";
 import { galleryRecords } from "@/content/demo/gallery";
 import { db } from "@/lib/server/db";
 import { getBookingRules } from "@/lib/server/settings";
@@ -12,7 +16,7 @@ import type {
   HeroClip,
   Media,
   Service,
-  ServiceCategory,
+  ServiceCategoryView,
   Testimonial,
   Weekday,
 } from "@/content/types";
@@ -24,12 +28,15 @@ import type {
  *
  * Database reads are cached (`use cache`) so public pages still prerender,
  * and tagged so staff changes show up at once: call `updateTag(catalogTag)`
- * after changing services, barbers, hours or reviews, and
- * `updateTag(settingsTag)` after changing business settings.
+ * after changing services, categories, barbers, hours or reviews,
+ * `updateTag(settingsTag)` after changing business settings, and
+ * `updateTag(contentTag)` after changing website content (studio profile,
+ * copy overrides, gallery curation).
  */
 
 export const catalogTag = "catalog";
 export const settingsTag = "settings";
+export const contentTag = "content";
 
 const weekdayNames: Weekday[] = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
@@ -46,7 +53,7 @@ async function loadServices() {
     orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
     select: {
       id: true,
-      category: true,
+      categoryId: true,
       name: true,
       summary: true,
       includes: true,
@@ -55,6 +62,20 @@ async function loadServices() {
       featured: true,
     },
   });
+}
+
+async function loadCategories() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(catalogTag);
+  return db.category.findMany({ orderBy: [{ sortOrder: "asc" }, { id: "asc" }], select: { id: true, name: true } });
+}
+
+async function loadSiteContent() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(contentTag);
+  return readSiteContent(db);
 }
 
 async function loadBarbers() {
@@ -101,13 +122,21 @@ async function loadBookingConfig(): Promise<BookingConfig> {
   return { timeZone, bookingHorizonDays, minLeadMinutes };
 }
 
-export const serviceCategoryOrder: ServiceCategory[] = ["haircut", "beard", "ritual"];
+/** Service categories in display order. */
+export async function getServiceCategories(locale: Locale): Promise<ServiceCategoryView[]> {
+  return (await loadCategories()).map((c) => ({ id: c.id, name: text(c.name, locale) }));
+}
 
-export const serviceCategoryLabels: Record<ServiceCategory, Record<Locale, string>> = {
-  haircut: { mn: "Үс засалт", en: "Haircuts" },
-  beard: { mn: "Сахал ба хусалт", en: "Beard & shave" },
-  ritual: { mn: "Багц үйлчилгээ", en: "Combined services" },
-};
+/** Studio name, contact details, opening hours and socials (database, else `content/site.ts`). */
+export async function getStudioProfile(): Promise<StudioProfile> {
+  return (await loadSiteContent()).profile;
+}
+
+/** The dictionary with the studio's website-copy overrides applied. Use it for pages that show editable copy. */
+export async function getSiteDictionary(locale: Locale): Promise<Dictionary> {
+  const [dict, content] = await Promise.all([getDictionary(locale), loadSiteContent()]);
+  return applyTextOverrides(dict, content.texts, locale);
+}
 
 export function getMedia(id: string, locale: Locale): Media {
   const record = mediaRecords.find((m) => m.id === id);
@@ -137,7 +166,7 @@ export async function getHeroClips(locale: Locale): Promise<HeroClip[]> {
 export async function getServices(locale: Locale): Promise<Service[]> {
   return (await loadServices()).map((s) => ({
     id: s.id,
-    category: s.category,
+    category: s.categoryId,
     name: text(s.name, locale),
     summary: text(s.summary, locale),
     includes: texts(s.includes, locale),
@@ -171,12 +200,15 @@ export async function getBookingConfig(): Promise<BookingConfig> {
   return loadBookingConfig();
 }
 
-/** All gallery items, or only `ids` in the order given. */
+/**
+ * Gallery items in the studio's curated order, without hidden ones. With
+ * `ids`, only those items in the order given (hidden ones still left out).
+ */
 export async function getGallery(locale: Locale, ids?: string[]): Promise<GalleryItem[]> {
+  const [barbers, content] = await Promise.all([loadBarbers(), loadSiteContent()]);
   const records = ids
-    ? ids.flatMap((id) => galleryRecords.filter((g) => g.id === id))
-    : galleryRecords;
-  const barbers = await loadBarbers();
+    ? curate(ids.flatMap((id) => galleryRecords.filter((g) => g.id === id)), { order: ids, hidden: content.gallery.hidden })
+    : curate(galleryRecords, content.gallery);
   return records.map((g) => {
     const barber = barbers.find((b) => b.id === g.barberId);
     return {

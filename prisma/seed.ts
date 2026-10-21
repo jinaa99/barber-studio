@@ -17,6 +17,7 @@
 import { config } from "dotenv";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient, type AppointmentStatus } from "../src/generated/prisma/client";
+import { categoryRecords } from "../src/content/demo/categories";
 import { serviceRecords } from "../src/content/demo/services";
 import { barberRecords } from "../src/content/demo/barbers";
 import { testimonialRecords } from "../src/content/demo/testimonials";
@@ -65,12 +66,16 @@ async function seedSettings() {
 }
 
 async function seedCatalog() {
+  for (const [i, c] of categoryRecords.entries()) {
+    await prisma.category.upsert({ where: { id: c.id }, create: { id: c.id, name: c.name, sortOrder: i }, update: {} });
+  }
+
   for (const [i, s] of serviceRecords.entries()) {
     await prisma.service.upsert({
       where: { id: s.id },
       create: {
         id: s.id,
-        category: s.category,
+        categoryId: s.category,
         name: s.name,
         summary: s.summary,
         includes: s.includes,

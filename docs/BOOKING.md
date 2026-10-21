@@ -37,16 +37,17 @@ fix the drift with a new migration.
 
 `prisma/schema.prisma` is the source of truth. In brief:
 
-- **User**: staff account (`ADMIN` or `STAFF`), scrypt password hash, lockout counters. **Session**: hashed session tokens.
+- **User**: staff account (`ADMIN`, `STAFF` or `BARBER`; see [ADMIN.md](ADMIN.md)), scrypt password hash, lockout counters. **Session**: hashed session tokens.
 - **Customer**: a guest who booked, keyed by normalized phone. There are no customer accounts; booking needs only a name and phone (email and notes optional).
-- **Service**, **Barber**, **BarberService**: the catalogue. Localized text is JSON `{ mn, en }`. `active = false` hides a service or barber and stops new bookings.
+- **Category**, **Service**, **Barber**, **BarberService**: the catalogue. Localized text is JSON `{ mn, en }`. `active = false` hides a service or barber and stops new bookings.
 - **WorkingHour**: one row per working block (weekday 0 = Sunday, minutes after midnight in the studio zone). Several blocks on a day model breaks; no block means a day off.
 - **TimeOff**: absences for one barber, or for the whole studio when `barberId` is null.
 - **BusinessSettings**: single `default` row: time zone (`Asia/Ulaanbaatar`), slot interval, booking horizon, minimum notice, buffer between appointments, max upcoming bookings per phone, and auto-confirm.
 - **Appointment**: UTC `startsAt`/`endsAt`, price and duration snapshot, the contact details submitted with it, `reference` (e.g. `S08-7KQ2MD`), `idempotencyKey`, `source` and `isDemo`.
 - **Notification**: one row per message with its real delivery outcome.
 - **Review**: published reviews feed the home page testimonials; samples are flagged `isSample` and labelled on the site.
-- **AuditLog**: logins (including failures), logouts, status changes, service activation, account creation.
+- **SiteContent**: editable studio profile, website copy overrides and gallery curation (one row; see [ADMIN.md](ADMIN.md)).
+- **AuditLog**: logins (including failures), logouts and every administrative change (list in [ADMIN.md](ADMIN.md)).
 
 **Multi-branch later:** add a `Branch` model and a `branchId` to BusinessSettings, Barber,
 TimeOff and Appointment. Availability already takes the time zone and rules as inputs,
@@ -97,18 +98,20 @@ and write an audit entry: `src/lib/server/appointments.ts`.
 
 ## Staff access
 
-- `/[locale]/admin/login` and `/[locale]/admin` (noindex). The dashboard lists a day's
-  appointments, can hide sample data, and offers only the status changes that are valid.
-  ADMINs can also activate and deactivate services.
+- `/[locale]/admin/login` and `/[locale]/admin/*` (noindex). The dashboard modules, roles
+  and permissions, staff-created bookings and metric definitions are documented in
+  [ADMIN.md](ADMIN.md). It only ever offers the status changes that are valid.
 - Sessions: a 256-bit random token in an httpOnly, SameSite=Lax cookie (`__Host-` and
   `Secure` in production), lasting 12 hours. Only its SHA-256 hash is stored.
 - Passwords: scrypt (N=2^15), at least 12 characters. After 5 failed attempts the
   account locks for 15 minutes. The login form also has a per-IP rate limit. Error
   messages never reveal whether an email exists.
-- Every Server Action re-reads the session from the database and checks the role
-  (`authorize("ADMIN")`). The UI hiding a button is never the check.
-- Accounts are only created with `npm run admin:create`, which reads credentials from
-  `ADMIN_*` environment variables or an interactive prompt. None are hardcoded.
+- Every Server Action re-reads the session from the database and checks a permission
+  (`permitted("catalog.manage", formData)`, built on `can()` from `lib/admin/permissions.ts`).
+  The UI hiding a button is never the check.
+- The first account is created with `npm run admin:create`, which reads credentials from
+  `ADMIN_*` environment variables or an interactive prompt. None are hardcoded. Admins can
+  then add accounts in the dashboard.
 
 ## Notifications
 

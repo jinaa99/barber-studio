@@ -1,7 +1,7 @@
 import { localizedPath, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries/mn";
 import type { Media } from "@/content/types";
-import { site } from "@/content/site";
+import type { StudioProfile } from "@/lib/admin/content";
 import { routes } from "@/lib/navigation";
 import { ArrowLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
@@ -15,11 +15,13 @@ export function VisitSummary({
   dict,
   media,
   index,
+  studio,
 }: {
   locale: Locale;
   dict: Dictionary;
   media: Media;
   index?: string;
+  studio: StudioProfile;
 }) {
   const t = dict.home.visit;
   const v = dict.visitPage;
@@ -43,26 +45,26 @@ export function VisitSummary({
               <div>
                 <h3 className="eyebrow text-taupe-deep">{v.address}</h3>
                 <address className="mt-4 text-[0.9375rem] not-italic leading-relaxed">
-                  {site.contact.address[locale]}
+                  {studio.contact.address[locale]}
                   <br />
-                  {site.contact.city[locale]}
+                  {studio.contact.city[locale]}
                 </address>
                 <h3 className="eyebrow mt-8 text-taupe-deep">{v.contact}</h3>
                 <p className="mt-4 text-[0.9375rem] leading-relaxed">
-                  <a href={site.contact.phoneHref} className="tabular hover:opacity-70">
-                    {site.contact.phoneDisplay}
+                  <a href={studio.contact.phoneHref} className="tabular hover:opacity-70">
+                    {studio.contact.phoneDisplay}
                   </a>
                   <br />
-                  <a href={`mailto:${site.contact.email}`} className="hover:opacity-70">
-                    {site.contact.email}
+                  <a href={`mailto:${studio.contact.email}`} className="hover:opacity-70">
+                    {studio.contact.email}
                   </a>
                 </p>
                 <h3 className="eyebrow mt-8 text-taupe-deep">{v.social}</h3>
-                <SocialLinks className="mt-4 max-w-60" />
+                <SocialLinks socials={studio.socials} className="mt-4 max-w-60" />
               </div>
               <div>
                 <h3 className="eyebrow text-taupe-deep">{v.hours}</h3>
-                <OpeningHoursList dict={dict} className="mt-2" />
+                <OpeningHoursList dict={dict} hours={studio.hours} className="mt-2" />
               </div>
             </div>
 

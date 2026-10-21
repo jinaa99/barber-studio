@@ -1,13 +1,21 @@
 import { ArrowUpRight } from "lucide-react";
-import { site } from "@/content/site";
+import type { SocialLink } from "@/content/site";
 import { cn } from "@/lib/cn";
 
 /** Social accounts. Entries without an `href` (demo placeholders) render as plain text. */
-export function SocialLinks({ tone = "default", className }: { tone?: "default" | "inverse"; className?: string }) {
+export function SocialLinks({
+  socials,
+  tone = "default",
+  className,
+}: {
+  socials: SocialLink[];
+  tone?: "default" | "inverse";
+  className?: string;
+}) {
   const muted = tone === "inverse" ? "text-paper/50" : "text-taupe-deep";
   return (
     <ul className={cn("space-y-3 text-sm", className)}>
-      {site.socials.map((social) => (
+      {socials.map((social) => (
         <li key={social.label} className="flex items-baseline justify-between gap-4">
           {social.href ? (
             <a

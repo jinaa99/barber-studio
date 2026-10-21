@@ -2,38 +2,22 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { updateTag } from "next/cache";
-import { AppointmentStatus } from "@/generated/prisma/enums";
 import { hasLocale, localizedPath, type Locale } from "@/i18n/config";
 import { routes } from "@/lib/navigation";
-import { catalogTag } from "@/lib/data";
 import { db } from "@/lib/server/db";
 import { authenticate } from "@/lib/server/accounts";
 import { audit } from "@/lib/server/audit";
-import { authorize, endSession, startSession } from "@/lib/server/auth";
-import { changeAppointmentStatus } from "@/lib/server/appointments";
+import { endSession, startSession } from "@/lib/server/auth";
 import { clientAddress, rateLimit } from "@/lib/server/rate-limit";
 
 /*
- * Every action authorizes itself against the session in the database.
- * The admin UI hides what a role can't do, but that is only a convenience.
+ * Sign-in and sign-out. Dashboard actions live in ./actions/, and each one
+ * authorizes itself against the session in the database.
  */
-
-export type AdminNotice = "forbidden" | "invalidTransition" | "generic";
 
 function localeFrom(formData: FormData): Locale {
   const value = String(formData.get("locale") ?? "");
   return hasLocale(value) ? value : "mn";
-}
-
-/** Only ever return to the admin dashboard of the same locale (no open redirects). */
-function backTo(formData: FormData, locale: Locale, notice?: AdminNotice): never {
-  const base = localizedPath(locale, routes.admin);
-  const requested = String(formData.get("returnTo") ?? "");
-  const url = new URL(requested.startsWith(`${base}?`) || requested === base ? requested : base, "http://local");
-  if (notice) url.searchParams.set("notice", notice);
-  else url.searchParams.delete("notice");
-  redirect(`${url.pathname}${url.search}`);
 }
 
 export interface LoginState {
@@ -69,45 +53,4 @@ export async function logoutAction(formData: FormData) {
   const userId = await endSession();
   if (userId) await audit(db, { actorId: userId, action: "auth.logout", entityType: "User", entityId: userId });
   redirect(localizedPath(locale, routes.adminLogin));
-}
-
-export async function changeStatusAction(formData: FormData) {
-  const locale = localeFrom(formData);
-  const user = await authorize("STAFF");
-  if (!user) redirect(localizedPath(locale, routes.adminLogin));
-
-  const appointmentId = String(formData.get("appointmentId") ?? "");
-  const to = String(formData.get("status") ?? "");
-  if (!appointmentId || !(to in AppointmentStatus)) backTo(formData, locale, "generic");
-
-  const result = await changeAppointmentStatus(db, {
-    appointmentId,
-    to: to as AppointmentStatus,
-    actorId: user.id,
-  });
-  backTo(formData, locale, result.ok ? undefined : "invalidTransition");
-}
-
-export async function setServiceActiveAction(formData: FormData) {
-  const locale = localeFrom(formData);
-  const user = await authorize("ADMIN");
-  if (!user) {
-    // Signed in without the role, or not signed in at all.
-    if (!(await authorize("STAFF"))) redirect(localizedPath(locale, routes.adminLogin));
-    backTo(formData, locale, "forbidden");
-  }
-
-  const serviceId = String(formData.get("serviceId") ?? "");
-  const active = formData.get("active") === "true";
-  const updated = await db.service.updateMany({ where: { id: serviceId }, data: { active } });
-  if (updated.count === 0) backTo(formData, locale, "generic");
-
-  await audit(db, {
-    actorId: user.id,
-    action: active ? "service.activated" : "service.deactivated",
-    entityType: "Service",
-    entityId: serviceId,
-  });
-  updateTag(catalogTag);
-  backTo(formData, locale);
 }

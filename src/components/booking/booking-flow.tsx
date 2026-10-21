@@ -35,9 +35,10 @@ interface BookingFlowProps {
   config: BookingConfig;
   /** Show the placeholder-business notice. */
   isDemo: boolean;
+  studioPhone: string;
 }
 
-export function BookingFlow({ locale, dict, services, barbers, categoryLabels, config, isDemo }: BookingFlowProps) {
+export function BookingFlow({ locale, dict, services, barbers, categoryLabels, config, isDemo, studioPhone }: BookingFlowProps) {
   const state = useBookingStore();
   const hydrated = state !== null;
   const router = useRouter();
@@ -223,6 +224,7 @@ export function BookingFlow({ locale, dict, services, barbers, categoryLabels, c
         confirmation={confirmation}
         email={draft.customer.email.trim()}
         selection={selection}
+        studioPhone={studioPhone}
         onNewBooking={() => {
           setErrors({});
           resetBooking();

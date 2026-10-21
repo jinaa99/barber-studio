@@ -7,7 +7,6 @@ import type { BookingConfirmation, BookingDraft } from "@/lib/booking/types";
 import type { BookingStep } from "@/lib/booking/storage";
 import { formatLongDate } from "@/lib/booking/dates";
 import { format, formatDuration, formatPrice } from "@/lib/format";
-import { site } from "@/content/site";
 import { Button, buttonStyles } from "@/components/ui/button";
 import type { BookingBarber, BookingDict, BookingService } from "./types";
 
@@ -111,6 +110,7 @@ export function Confirmation({
   confirmation,
   email,
   selection,
+  studioPhone,
   onNewBooking,
 }: {
   locale: Locale;
@@ -119,6 +119,8 @@ export function Confirmation({
   /** The address the customer entered, for the "email sent" line. */
   email: string;
   selection: ResolvedSelection;
+  /** The studio's phone number, for changes. */
+  studioPhone: string;
   onNewBooking: () => void;
 }) {
   const t = dict.booking.confirmation;
@@ -154,7 +156,7 @@ export function Confirmation({
 
       <div className="mx-auto mt-8 max-w-lg space-y-2 text-sm leading-relaxed text-taupe-deep">
         <p role="status">{emailLine}</p>
-        <p>{format(t.change, { phone: site.contact.phoneDisplay })}</p>
+        <p>{format(t.change, { phone: studioPhone })}</p>
       </div>
 
       <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">

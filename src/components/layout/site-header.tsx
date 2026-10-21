@@ -6,7 +6,6 @@ import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { localizedPath, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries/mn";
-import { site } from "@/content/site";
 import { cn } from "@/lib/cn";
 import { heroToneEvent } from "@/lib/events";
 import { buttonStyles } from "@/components/ui/button";
@@ -27,10 +26,12 @@ export function SiteHeader({
   locale,
   labels,
   items,
+  studio,
 }: {
   locale: Locale;
   labels: Dictionary["nav"];
   items: NavItem[];
+  studio: { name: string; wordmark: { primary: string; secondary: string }; phoneDisplay: string; phoneHref: string };
 }) {
   const pathname = usePathname();
   const isHome = pathname === localizedPath(locale);
@@ -100,8 +101,8 @@ export function SiteHeader({
         {labels.skipToContent}
       </a>
       <div className="mx-auto flex h-header w-full max-w-page items-center justify-between gap-6 px-4 sm:px-6 lg:px-10">
-        <Link href={localizedPath(locale)} onClick={close} aria-label={site.brand.name} className="-my-2 py-2">
-          <Wordmark />
+        <Link href={localizedPath(locale)} onClick={close} aria-label={studio.name} className="-my-2 py-2">
+          <Wordmark wordmark={studio.wordmark} />
         </Link>
 
         <nav aria-label={labels.primary} className="hidden lg:block">
@@ -174,9 +175,11 @@ export function SiteHeader({
             >
               {labels.book}
             </Link>
-            <p className="mt-6 text-sm text-taupe-deep">
-              <a href={site.contact.phoneHref} className="tabular">{site.contact.phoneDisplay}</a>
-            </p>
+            {studio.phoneHref && (
+              <p className="mt-6 text-sm text-taupe-deep">
+                <a href={studio.phoneHref} className="tabular">{studio.phoneDisplay}</a>
+              </p>
+            )}
           </div>
         </nav>
       </div>

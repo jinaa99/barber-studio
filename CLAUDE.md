@@ -53,8 +53,10 @@ Never reset or drop a database; schema changes are new, additive migrations.
 ```
 src/
   proxy.ts                 unprefixed URL → /mn|/en (cookie, else Mongolian)
-  app/[locale]/            every public route; layout.tsx is the root layout
-  app/[locale]/admin/      staff login + dashboard; actions.ts = Server Actions
+  app/[locale]/            layout.tsx is the root layout (document only)
+  app/[locale]/(site)/     every public route, with the site header and footer
+  app/[locale]/admin/      login; (dashboard)/ = the staff dashboard shell and modules;
+                           actions.ts = sign-in/out, actions/*.ts = dashboard Server Actions
   app/api/booking/         availability (GET) and booking (POST) route handlers
   i18n/                    locales config, dictionaries (mn is the source type), loader
   content/                 site.ts (brand + business details), media.ts (images + credits),
@@ -62,19 +64,23 @@ src/
   lib/data.ts              async data-access layer: the ONLY way UI reads content
   lib/booking/             pure, shared booking domain: availability engine, time zone,
                            status rules, validation, HTTP provider, sessionStorage
+  lib/admin/               pure dashboard logic: permissions, metric definitions, form
+                           schemas, website-content fallbacks, formatting
   lib/server/              server-only: db client, booking service, auth/sessions,
-                           accounts, notifications, audit, rate limit, settings
+                           accounts, notifications, audit, rate limit, settings,
+                           appointments, catalog, staff, customers, metrics, content
 prisma/                    schema, migrations (hand-written constraints at the end), seed
 scripts/                   local db, admin bootstrap, demo removal, email retry, test runner
 tests/integration/         database tests
-  components/ui|layout|sections|booking|media|visit
+  components/ui|layout|sections|booking|media|visit|admin
 ```
 
 - **Server components by default.** Client components are the header, language
-  switcher, `Reveal`, the hero sequence and the booking flow.
+  switcher, `Reveal`, the hero sequence, the booking flow and the dashboard's forms,
+  dialogs (native `<dialog>`), navigation and schedule editor.
 - **Content** goes through `lib/data.ts`. Database rows store `LocalizedText`
   (`{ mn, en }`) as JSON; getters return single-language view models. Reads are
-  `use cache` + `cacheTag` (`catalogTag`, `settingsTag`); call `updateTag` after writes.
+  `use cache` + `cacheTag` (`catalogTag`, `settingsTag`, `contentTag`); call `updateTag` after writes.
 - **Booking UI** depends only on the `BookingProvider` interface
   (`lib/booking/types.ts`), implemented by `http-provider.ts`. Displayed slots are
   advisory: `lib/server/booking.ts` recomputes availability inside a transaction
@@ -83,8 +89,13 @@ tests/integration/         database tests
 - **Server modules** in `lib/server/` take the Prisma client as an argument where
   tests need them, and import `server-only`. Scripts and tests run with
   `tsx --conditions=react-server`.
-- **Auth:** every admin page calls `requireUser()` inside a `<Suspense>` boundary,
-  and every Server Action calls `authorize(role)` itself. Never rely on hidden UI.
+- **Auth:** every admin page calls `adminContext()` (→ `requireUser()`) inside a
+  `<Suspense>` boundary and checks `ctx.can(permission)`; every Server Action calls
+  `permitted(permission, formData)` itself. Appointment queries take the user's scope
+  (`appointmentScope`) so BARBER logins only reach their own. Never rely on hidden UI.
+  Roles and the metric definitions: [docs/ADMIN.md](docs/ADMIN.md).
+- **Site content:** studio name, contact, hours and socials come from `getStudioProfile()`;
+  pages with editable copy use `getSiteDictionary(locale)`. `content/site.ts` is only the default.
 - **Times:** appointments are UTC instants; working hours are minutes in the
   studio zone (`BusinessSettings.timeZone`, Asia/Ulaanbaatar). Convert with `lib/booking/time.ts`.
 - **Booking state** lives in `components/booking/use-booking-store.ts`
@@ -123,5 +134,7 @@ tests/integration/         database tests
   `heroClipRecords` in `content/media.ts`, GSAP ScrollTrigger). Media sources and licences: [docs/MEDIA.md](docs/MEDIA.md).
 - Phase 03 (done): PostgreSQL/Prisma, DB-backed `lib/data.ts`, real booking behind
   `BookingProvider`, staff auth and dashboard, notifications, seed, tests. See docs/BOOKING.md.
+- Phase 04 (done): full staff dashboard with roles (ADMIN/STAFF/BARBER), calendar and staff
+  booking, catalogue, customers, analytics, website content, activity log. See docs/ADMIN.md.
 
 Don't start a later phase unless asked.

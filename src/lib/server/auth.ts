@@ -3,11 +3,11 @@ import { createHash, randomBytes } from "node:crypto";
 import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import type { UserRole } from "@/generated/prisma/enums";
 import { localizedPath, type Locale } from "@/i18n/config";
 import { routes } from "@/lib/navigation";
 import { db } from "./db";
-import { hasRole, type StaffUser } from "./accounts";
+import { can, type Permission } from "@/lib/admin/permissions";
+import type { StaffUser } from "./accounts";
 
 /*
  * Staff sessions. The browser holds a random 256-bit token in an httpOnly
@@ -57,11 +57,13 @@ export const getCurrentUser = cache(async (): Promise<StaffUser | null> => {
   if (!token) return null;
   const session = await db.session.findUnique({
     where: { tokenHash: hashToken(token) },
-    include: { user: { select: { id: true, name: true, email: true, role: true, active: true } } },
+    include: {
+      user: { select: { id: true, name: true, email: true, role: true, active: true, barber: { select: { id: true } } } },
+    },
   });
   if (!session || session.expiresAt <= new Date() || !session.user.active) return null;
-  const { id, name, email, role } = session.user;
-  return { id, name, email, role };
+  const { id, name, email, role, barber } = session.user;
+  return { id, name, email, role, barberId: barber?.id ?? null };
 });
 
 /** For pages: the signed-in user, or a redirect to the login screen. */
@@ -71,8 +73,9 @@ export async function requireUser(locale: Locale): Promise<StaffUser> {
   return user;
 }
 
-/** For Server Actions: the signed-in user if they hold `role`, otherwise null. */
-export async function authorize(role: UserRole): Promise<StaffUser | null> {
+/** For Server Actions: the signed-in user if they hold `permission` (or are signed in at all), otherwise null. */
+export async function authorize(permission?: Permission): Promise<StaffUser | null> {
   const user = await getCurrentUser();
-  return user && hasRole(user, role) ? user : null;
+  if (!user) return null;
+  return !permission || can(user, permission) ? user : null;
 }

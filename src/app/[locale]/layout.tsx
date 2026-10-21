@@ -2,10 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import { locales } from "@/i18n/config";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
-import { site } from "@/content/site";
-import { getNavItems } from "@/lib/navigation";
-import { SiteHeader } from "@/components/layout/site-header";
-import { SiteFooter } from "@/components/layout/site-footer";
+import { getStudioProfile } from "@/lib/data";
 import "../globals.css";
 
 // Both families ship Cyrillic Extended, which covers Mongolian Ө ө Ү ү.
@@ -28,12 +25,12 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const dict = await getDictionary();
+  const [dict, studio] = await Promise.all([getDictionary(), getStudioProfile()]);
   return {
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
-    title: { default: `${site.brand.name} — ${dict.meta.home}`, template: `%s — ${site.brand.name}` },
+    title: { default: `${studio.name} — ${dict.meta.home}`, template: `%s — ${studio.name}` },
     description: dict.meta.siteDescription,
-    applicationName: site.brand.name,
+    applicationName: studio.name,
   };
 }
 
@@ -43,20 +40,13 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
+/** The document shell. The public site and the staff dashboard each add their own chrome. */
 export default async function LocaleLayout({ children }: LayoutProps<"/[locale]">) {
   const locale = await getLocale();
-  const dict = await getDictionary(locale);
-  const navItems = getNavItems(locale, dict);
 
   return (
     <html lang={locale} id="top" className={`${manrope.variable} ${cormorant.variable}`}>
-      <body className="flex min-h-dvh flex-col">
-        <SiteHeader locale={locale} labels={dict.nav} items={navItems} />
-        <main id={`main-${locale}`} className="flex-1">
-          {children}
-        </main>
-        <SiteFooter locale={locale} dict={dict} items={navItems} />
-      </body>
+      <body className="flex min-h-dvh flex-col">{children}</body>
     </html>
   );
 }

@@ -33,7 +33,7 @@ real barber shops. Brand, business details, content and imagery must be easy to 
 | `/[locale]/barbers` | Barber profiles: role, bio, specialties, services offered, book-with link |
 | `/[locale]/gallery` | Our Work gallery and photo credits |
 | `/[locale]/booking` | Booking flow (live, database-backed) |
-| `/[locale]/admin` | Staff dashboard (sign-in required, not indexed) |
+| `/[locale]/admin/*` | Staff dashboard (sign-in required, not indexed): see [ADMIN.md](ADMIN.md) |
 | `/[locale]/visit` | Address, directions, opening hours, contact, socials, map link |
 
 ## Booking flow
@@ -81,3 +81,9 @@ Details: [BOOKING.md](BOOKING.md).
 - **Phase 03 (done):** PostgreSQL + Prisma, database-backed content, server-side availability,
   conflict-safe booking (row locks + exclusion constraint), staff sign-in with roles,
   status lifecycle, audit log, email notifications with recorded delivery status, seed and tests.
+- **Phase 04 (done):** the full staff dashboard: overview, calendar (day/week/list) with
+  staff booking and rescheduling under the same conflict protections, barbers, schedules
+  and time off, services and categories, customers, analytics with defined metrics,
+  website content and booking rules, staff accounts with ADMIN/STAFF/BARBER permissions,
+  activity log. See [ADMIN.md](ADMIN.md).
+- **Phase 05 (next):** media library: uploads for barber photos, gallery and hero media.

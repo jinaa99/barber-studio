@@ -46,8 +46,17 @@ async function findCandidates(db: Db | Tx, serviceId: string, barberChoice: stri
   return { service, barberIds: barbers.map((b) => b.id) };
 }
 
-/** Working blocks, time off and active appointments of `barberIds` on `date`. */
-async function loadBarberDays(db: Db | Tx, date: string, barberIds: string[], rules: BookingRules): Promise<BarberDay[]> {
+/**
+ * Working blocks, time off and active appointments of `barberIds` on `date`.
+ * `excludeAppointmentId` leaves one appointment out (it is being rescheduled).
+ */
+export async function loadBarberDays(
+  db: Db | Tx,
+  date: string,
+  barberIds: string[],
+  rules: BookingRules,
+  excludeAppointmentId?: string,
+): Promise<BarberDay[]> {
   const dayStart = zonedTimeToUtc(date, 0, rules.timeZone);
   const dayEnd = zonedTimeToUtc(addCalendarDays(date, 1), 0, rules.timeZone);
   const margin = rules.bufferMinutes * 60_000;
@@ -68,6 +77,7 @@ async function loadBarberDays(db: Db | Tx, date: string, barberIds: string[], ru
       where: {
         barberId: { in: barberIds },
         status: { in: [...ACTIVE_STATUSES] },
+        ...(excludeAppointmentId ? { id: { not: excludeAppointmentId } } : {}),
         startsAt: { lt: new Date(dayEnd.getTime() + margin) },
         endsAt: { gt: new Date(dayStart.getTime() - margin) },
       },
@@ -142,7 +152,7 @@ class BookingRejected extends Error {
 }
 
 /** Postgres exclusion-constraint violation (SQLSTATE 23P01) on appointments. */
-function isOverlapViolation(error: unknown): boolean {
+export function isOverlapViolation(error: unknown): boolean {
   const text = error instanceof Error ? `${error.message} ${JSON.stringify(error)}` : String(error);
   return text.includes("23P01") || text.includes("appointments_no_overlap");
 }

@@ -1,5 +1,5 @@
 import type { Dictionary } from "@/i18n/dictionaries/mn";
-import { site, type OpeningHours } from "@/content/site";
+import type { OpeningHours } from "@/content/site";
 import { cn } from "@/lib/cn";
 
 interface HoursGroup {
@@ -25,11 +25,13 @@ function groupHours(hours: OpeningHours[]): HoursGroup[] {
 
 export function OpeningHoursList({
   dict,
+  hours,
   tone = "default",
   compact = false,
   className,
 }: {
   dict: Dictionary;
+  hours: OpeningHours[];
   tone?: "default" | "inverse";
   /** Group days into ranges with short names, for tight spaces. */
   compact?: boolean;
@@ -37,8 +39,8 @@ export function OpeningHoursList({
 }) {
   const names = compact ? dict.calendar.weekdaysShort : dict.weekdays;
   const rows = compact
-    ? groupHours(site.hours)
-    : site.hours.map((h) => ({ from: h.day, to: h.day, open: h.open, close: h.close }));
+    ? groupHours(hours)
+    : hours.map((h) => ({ from: h.day, to: h.day, open: h.open, close: h.close }));
 
   return (
     <dl className={cn("text-sm", compact ? "space-y-1.5" : "divide-y", tone === "inverse" ? "divide-line-inverse" : "divide-line", className)}>

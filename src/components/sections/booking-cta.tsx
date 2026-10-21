@@ -1,13 +1,12 @@
 import { localizedPath, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries/mn";
-import { site } from "@/content/site";
 import { routes } from "@/lib/navigation";
 import { ButtonLink, buttonStyles } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { Reveal } from "@/components/ui/reveal";
 
 /** Closing call to action shared by every public page. */
-export function BookingCta({ locale, dict }: { locale: Locale; dict: Dictionary }) {
+export function BookingCta({ locale, dict, phoneHref }: { locale: Locale; dict: Dictionary; phoneHref: string }) {
   const t = dict.home.finalCta;
   return (
     <section className="border-b border-line-inverse bg-ink text-paper">
@@ -22,9 +21,11 @@ export function BookingCta({ locale, dict }: { locale: Locale; dict: Dictionary 
             <ButtonLink href={localizedPath(locale, routes.booking)} variant="inverse" size="lg" arrow>
               {t.cta}
             </ButtonLink>
-            <a href={site.contact.phoneHref} className={buttonStyles({ variant: "inverse-outline", size: "lg" })}>
-              {t.secondary}
-            </a>
+            {phoneHref && (
+              <a href={phoneHref} className={buttonStyles({ variant: "inverse-outline", size: "lg" })}>
+                {t.secondary}
+              </a>
+            )}
           </div>
         </Reveal>
       </Container>

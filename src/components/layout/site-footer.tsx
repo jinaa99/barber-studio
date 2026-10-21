@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowUp } from "lucide-react";
 import { localizedPath, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries/mn";
-import { site } from "@/content/site";
+import type { StudioProfile } from "@/lib/admin/content";
 import { Container } from "@/components/ui/container";
 import { DemoNotice } from "@/components/ui/demo-notice";
 import { OpeningHoursList } from "@/components/visit/opening-hours";
@@ -14,10 +14,12 @@ export function SiteFooter({
   locale,
   dict,
   items,
+  studio,
 }: {
   locale: Locale;
   dict: Dictionary;
   items: NavItem[];
+  studio: StudioProfile;
 }) {
   const t = dict.footer;
   return (
@@ -25,8 +27,8 @@ export function SiteFooter({
       <Container className="pb-10 pt-20 sm:pt-24">
         <div className="grid gap-14 md:grid-cols-12 md:gap-8">
           <div className="md:col-span-4">
-            <Link href={localizedPath(locale)} aria-label={site.brand.name}>
-              <Wordmark className="text-lg" />
+            <Link href={localizedPath(locale)} aria-label={studio.name}>
+              <Wordmark className="text-lg" wordmark={studio.wordmark} />
             </Link>
             <p className="mt-5 max-w-xs text-sm leading-relaxed text-paper/60">{t.tagline}</p>
           </div>
@@ -47,28 +49,30 @@ export function SiteFooter({
           <div className="md:col-span-3">
             <h2 className="eyebrow text-paper/45">{t.visit}</h2>
             <address className="mt-5 text-sm not-italic leading-relaxed text-paper/80">
-              {site.contact.address[locale]}
+              {studio.contact.address[locale]}
               <br />
-              {site.contact.city[locale]}
+              {studio.contact.city[locale]}
               <br />
-              <a href={site.contact.phoneHref} className="tabular mt-3 inline-block hover:text-paper">
-                {site.contact.phoneDisplay}
-              </a>
+              {studio.contact.phoneHref && (
+                <a href={studio.contact.phoneHref} className="tabular mt-3 inline-block hover:text-paper">
+                  {studio.contact.phoneDisplay}
+                </a>
+              )}
             </address>
-            <OpeningHoursList dict={dict} tone="inverse" compact className="mt-6" />
+            <OpeningHoursList dict={dict} hours={studio.hours} tone="inverse" compact className="mt-6" />
           </div>
 
           <div className="md:col-span-3">
             <h2 className="eyebrow text-paper/45">{t.follow}</h2>
-            <SocialLinks tone="inverse" className="mt-5" />
+            <SocialLinks socials={studio.socials} tone="inverse" className="mt-5" />
           </div>
         </div>
 
         <div className="mt-20 flex flex-col gap-6 border-t border-line-inverse pt-8 md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
-            {site.isDemo && <DemoNotice tone="inverse">{t.demoNotice}</DemoNotice>}
+            {studio.isDemo && <DemoNotice tone="inverse">{t.demoNotice}</DemoNotice>}
             <p className="text-xs text-paper/45">
-              © {site.brand.name}. {t.rights}{" "}
+              © {studio.name}. {t.rights}{" "}
               <Link href={`${localizedPath(locale, "/gallery")}#credits`} className="underline underline-offset-4 hover:text-paper">
                 {t.credits}
               </Link>

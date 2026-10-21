@@ -51,7 +51,13 @@ export interface HeroClipRecord {
   credit?: VideoCredit;
 }
 
-export type ServiceCategory = "haircut" | "beard" | "ritual";
+/** Category id (a slug from the `service_categories` table, e.g. "haircut"). */
+export type ServiceCategory = string;
+
+export interface ServiceCategoryView {
+  id: ServiceCategory;
+  name: string;
+}
 
 export interface ServiceRecord {
   id: string;

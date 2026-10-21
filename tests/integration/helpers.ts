@@ -25,7 +25,8 @@ export type TestDb = ReturnType<typeof createTestClient>;
 export async function resetDatabase(db: TestDb) {
   await db.$executeRawUnsafe(`
     TRUNCATE "audit_logs", "notifications", "reviews", "appointments", "customers", "time_off",
-      "working_hours", "barber_services", "barbers", "services", "sessions", "users", "business_settings"
+      "working_hours", "barber_services", "barbers", "services", "service_categories", "sessions", "users",
+      "business_settings", "site_content"
     RESTART IDENTITY CASCADE`);
 }
 
@@ -38,9 +39,10 @@ export async function seedFixtures(db: TestDb, settings: Partial<{ maxActiveBook
     data: { id: "default", timeZone: TZ, slotIntervalMinutes: 30, bookingHorizonDays: 14, minLeadMinutes: 60, ...settings },
   });
   const localized = (en: string) => ({ mn: en, en });
+  await db.category.create({ data: { id: "haircut", name: localized("Haircuts") } });
   const service = (id: string, durationMinutes: number, active = true) => ({
     id,
-    category: "haircut" as const,
+    categoryId: "haircut",
     name: localized(id),
     summary: localized(id),
     durationMinutes,

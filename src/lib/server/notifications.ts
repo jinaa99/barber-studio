@@ -5,11 +5,11 @@ import type { Db } from "./db";
 import { hasLocale, type LocalizedText } from "@/i18n/config";
 import { mn } from "@/i18n/dictionaries/mn";
 import { en } from "@/i18n/dictionaries/en";
-import { site } from "@/content/site";
 import { formatLongDate, minutesToTime } from "@/lib/booking/dates";
 import { zonedParts } from "@/lib/booking/time";
 import { format } from "@/lib/format";
 import { getBookingRules } from "./settings";
+import { readSiteContent } from "./content";
 
 /*
  * Notifications are written to the database first (inside the booking
@@ -128,13 +128,13 @@ async function renderBookingEmail(db: Db, notification: NotificationWithAppointm
   const locale = hasLocale(appointment.locale) ? appointment.locale : "mn";
   const dict = { mn, en }[locale];
   const t = dict.email.booking;
-  const { timeZone } = await getBookingRules(db);
+  const [{ timeZone }, { profile: studio }] = await Promise.all([getBookingRules(db), readSiteContent(db)]);
   const local = zonedParts(appointment.startsAt, timeZone);
   const text = (value: unknown) => (value as LocalizedText)[locale];
 
   const confirmed = appointment.status === "CONFIRMED";
   const subject = format(confirmed ? t.subjectConfirmed : t.subjectPending, {
-    brand: site.brand.name,
+    brand: studio.name,
     reference: appointment.reference,
   });
   const rows: [string, string][] = [
@@ -143,13 +143,13 @@ async function renderBookingEmail(db: Db, notification: NotificationWithAppointm
     [t.barber, text(appointment.barber.name)],
     [t.date, formatLongDate(local.date, { weekdays: dict.weekdays, monthsLong: dict.calendar.monthsLong, dateLong: dict.calendar.dateLong })],
     [t.time, minutesToTime(local.minutes)],
-    [t.address, `${site.contact.address[locale]}, ${site.contact.city[locale]}`],
+    [t.address, `${studio.contact.address[locale]}, ${studio.contact.city[locale]}`],
   ];
   const paragraphs = [
     format(t.greeting, { name: appointment.customerName }),
-    format(confirmed ? t.confirmed : t.pending, { brand: site.brand.name }),
-    format(t.change, { phone: site.contact.phoneDisplay }),
-    ...(site.isDemo ? [t.demo] : []),
+    format(confirmed ? t.confirmed : t.pending, { brand: studio.name }),
+    format(t.change, { phone: studio.contact.phoneDisplay }),
+    ...(studio.isDemo ? [t.demo] : []),
   ];
 
   const textBody = [
@@ -160,7 +160,7 @@ async function renderBookingEmail(db: Db, notification: NotificationWithAppointm
     "",
     ...paragraphs.slice(2),
     "",
-    site.brand.name,
+    studio.name,
   ].join("\n");
 
   const html = `<!doctype html><html lang="${locale}"><body style="font-family:Helvetica,Arial,sans-serif;color:#1c1a17;line-height:1.5">
@@ -171,7 +171,7 @@ async function renderBookingEmail(db: Db, notification: NotificationWithAppointm
 ${paragraphs
   .slice(2)
   .map((p) => `<p>${escapeHtml(p)}</p>`)
-  .join("")}<p>${escapeHtml(site.brand.name)}</p></body></html>`;
+  .join("")}<p>${escapeHtml(studio.name)}</p></body></html>`;
 
   return { to: notification.recipient, subject, text: textBody, html, idempotencyKey: `notification-${notification.id}` };
 }

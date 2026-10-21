@@ -23,9 +23,11 @@ datasource db {
 
 // ---------------------------------------------------------------- Accounts
 
+/// What each role may do is defined in `src/lib/admin/permissions.ts`.
 enum UserRole {
-  ADMIN // full access: services, barbers, settings, appointments
-  STAFF // day-to-day: view and update appointments
+  ADMIN // owner/manager: everything, including revenue, catalogue, team and settings
+  STAFF // front desk: every appointment and customer, no financials or configuration
+  BARBER // a barber's own login: only their own appointments (needs a linked Barber)
 }
 
 /// Staff accounts. Customers book as guests and are stored as `Customer`.
@@ -85,16 +87,33 @@ model Customer {
 
 // ----------------------------------------------------------------- Catalog
 
+/// Superseded by the `Category` table (Phase 04). Kept so that migration stays additive.
 enum ServiceCategory {
   haircut
   beard
   ritual
 }
 
+/// Service groups shown on the services page and in the booking flow.
+model Category {
+  /// Stable slug.
+  id        String   @id
+  name      Json
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  services Service[]
+
+  @@map("service_categories")
+}
+
 model Service {
   /// Stable slug, used in URLs (`/booking?service=studio-cut`).
   id              String          @id
-  category        ServiceCategory
+  categoryId      String
+  /// Deprecated: replaced by `categoryId`. No longer written; drop in a later cleanup migration.
+  category        ServiceCategory?
   name            Json
   summary         Json
   /// LocalizedText[]
@@ -109,9 +128,11 @@ model Service {
   createdAt       DateTime        @default(now()) @db.Timestamptz(3)
   updatedAt       DateTime        @updatedAt @db.Timestamptz(3)
 
+  categoryRef  Category        @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   barbers      BarberService[]
   appointments Appointment[]
 
+  @@index([categoryId])
   @@map("services")
 }
 
@@ -207,6 +228,22 @@ model BusinessSettings {
   @@map("business_settings")
 }
 
+/// Editable website content (single row "default"). Each JSON column is validated
+/// by `src/lib/admin/content.ts`; anything missing or invalid falls back to
+/// `src/content/site.ts` and the dictionaries, so an empty row changes nothing.
+model SiteContent {
+  id        String   @id @default("default")
+  /// Studio name, wordmark, contact details, opening hours, socials, demo flag.
+  profile   Json     @default("{}")
+  /// Optional LocalizedText overrides for selected website copy.
+  texts     Json     @default("{}")
+  /// Gallery order and hidden items.
+  gallery   Json     @default("{}")
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  @@map("site_content")
+}
+
 // ------------------------------------------------------------ Appointments
 
 /// PENDING → CONFIRMED | CANCELLED
@@ -266,6 +303,7 @@ model Appointment {
   @@index([barberId, startsAt])
   @@index([startsAt])
   @@index([customerId])
+  @@index([updatedAt])
   @@map("appointments")
 }
 
