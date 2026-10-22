@@ -130,6 +130,9 @@ tests/integration/         database tests
   pages with editable copy use `getSiteDictionary(locale)`. `content/site.ts` is only the default.
 - **Times:** appointments are UTC instants; working hours are minutes in the
   studio zone (`BusinessSettings.timeZone`, Asia/Ulaanbaatar). Convert with `lib/booking/time.ts`.
+- **Home hero variant:** `lib/hero/variant.ts` switches the home page between the scroll-scrubbed
+  video test (`HomeVideoHero` → `components/hero-video/scroll-video-hero.tsx`; footage and limits in
+  docs/MEDIA.md) and the 3D walk-through below. Both stay in the tree.
 - **Home hero (3D):** `HomeHero` (server: copy, CTAs, per-locale posters) → `HeroStage`
   (client: picks `scene` or `still` once via `useSyncExternalStore`; still = reduced motion,
   no WebGL, constrained device or lost context) → `hero-scene.tsx`, loaded with

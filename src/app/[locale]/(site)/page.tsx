@@ -16,6 +16,8 @@ import { ArrowLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { HomeHero } from "@/components/sections/home-hero";
+import { HomeVideoHero } from "@/components/sections/home-video-hero";
+import { homeHeroVariant } from "@/lib/hero/variant";
 import { Statement } from "@/components/sections/statement";
 import { StudioIntro } from "@/components/sections/studio-intro";
 import { ServiceList } from "@/components/sections/service-list";
@@ -52,7 +54,11 @@ export default async function HomePage() {
 
   return (
     <>
-      <HomeHero locale={locale} dict={dict} studio={studio} afterId={`after-hero-${locale}`} />
+      {homeHeroVariant === "video" ? (
+        <HomeVideoHero locale={locale} dict={dict} afterId={`after-hero-${locale}`} />
+      ) : (
+        <HomeHero locale={locale} dict={dict} studio={studio} afterId={`after-hero-${locale}`} />
+      )}
       {/* Skip-intro target; focusable so keyboard users land after the sequence. */}
       <span id={`after-hero-${locale}`} tabIndex={-1} className="block outline-none" />
       <Statement text={t.statement} label={studio.name} />

@@ -54,6 +54,14 @@ export const en: Dictionary = {
       signLine: "Barber studio",
       windowLine: "Barber studio · By appointment",
     },
+    videoHero: {
+      title: "Your time. Your cut.",
+      scrollHint: "Scroll",
+      bookShort: "Book",
+      note: "Footage: AI-generated video, not the real studio.",
+      posterAlt: "The outside of a barber studio: a glass door, folded towels on a shelf and a man walking past.",
+      stillAlt: "Inside a barber studio, a barber trims a seated client's beard with clippers.",
+    },
     statement:
       "We cut for the person in the chair, not the queue at the door. One chair, one barber, complete attention.",
     intro: {
