@@ -11,6 +11,7 @@ import {
   type FormEvent,
   type ReactNode,
 } from "react";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 import type { Dictionary } from "@/i18n/dictionaries/mn";
 import { idleState, type FieldErrorCode, type FormState } from "@/lib/admin/forms";
 import { format } from "@/lib/format";
@@ -107,10 +108,15 @@ function FormStatus({ show }: { show: boolean }) {
       key={state.at}
       role={state.status === "error" ? "alert" : "status"}
       className={cn(
-        "mt-4 border-l-2 pl-3 text-sm leading-relaxed",
-        state.status === "error" ? "border-danger text-danger" : "border-ink text-ink",
+        "mt-4 flex animate-fade-in items-start gap-2 rounded-lg px-3 py-2.5 text-sm leading-relaxed motion-reduce:animate-none",
+        state.status === "error" ? "bg-danger-wash text-danger" : "bg-success-wash text-success",
       )}
     >
+      {state.status === "error" ? (
+        <AlertCircle aria-hidden className="mt-0.5 size-4 shrink-0" strokeWidth={1.75} />
+      ) : (
+        <CheckCircle2 aria-hidden className="mt-0.5 size-4 shrink-0" strokeWidth={1.75} />
+      )}
       {message}
     </p>
   );
@@ -137,7 +143,7 @@ export function SubmitButton({
     variant === "primary"
       ? primarySmallButton
       : variant === "danger"
-        ? "inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-danger px-4 text-sm font-semibold text-paper transition-opacity hover:opacity-90 disabled:opacity-40"
+        ? "inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-danger px-3.5 text-sm font-medium text-canvas transition-[opacity,transform] duration-150 hover:opacity-90 active:scale-[0.98] disabled:opacity-40"
         : smallButton;
   return (
     <button type="submit" name={name} value={value} disabled={pending} className={cn(style, className)}>
@@ -187,16 +193,17 @@ function FieldShell({
     <div className={cn("min-w-0", className)}>
       <label htmlFor={id} className="mb-1.5 block text-sm font-medium">
         {label}
-        {optional && <span className="ml-1.5 font-normal text-taupe-deep">({t.common.optional})</span>}
+        {optional && <span className="ml-1.5 font-normal text-muted">({t.common.optional})</span>}
       </label>
       {children}
       {hint && !error && (
-        <p id={`${id}-hint`} className="mt-1.5 text-xs leading-relaxed text-taupe-deep">
+        <p id={`${id}-hint`} className="mt-1.5 text-xs leading-relaxed text-muted">
           {hint}
         </p>
       )}
       {error && (
-        <p id={`${id}-error`} className="mt-1.5 text-xs font-medium text-danger">
+        <p id={`${id}-error`} className="mt-1.5 flex animate-fade-in items-center gap-1 text-xs font-medium text-danger motion-reduce:animate-none">
+          <AlertCircle aria-hidden className="size-3.5 shrink-0" strokeWidth={2} />
           {error}
         </p>
       )}
@@ -319,14 +326,14 @@ export function CheckboxField({
         value={value}
         defaultChecked={defaultChecked}
         aria-describedby={hint ? `${id}-hint` : undefined}
-        className="mt-0.5 size-4.5 shrink-0 accent-ink"
+        className="mt-0.5 size-4 shrink-0 accent-ink"
       />
       <div className="min-w-0">
         <label htmlFor={id} className="text-sm font-medium">
           {label}
         </label>
         {hint && (
-          <p id={`${id}-hint`} className="mt-0.5 text-xs leading-relaxed text-taupe-deep">
+          <p id={`${id}-hint`} className="mt-0.5 text-xs leading-relaxed text-muted">
             {hint}
           </p>
         )}
@@ -358,13 +365,13 @@ export function LocalizedFields({
   const t = useAdminStrings();
   return (
     <fieldset className="min-w-0">
-      <legend className="mb-2 text-sm font-semibold">{label}</legend>
+      <legend className="mb-2 text-sm font-medium">{label}</legend>
       <div className="grid gap-4 sm:grid-cols-2">
         {(["mn", "en"] as const).map((lang) =>
           multiline ? (
             <TextAreaField
               key={lang}
-              label={<span className="font-normal text-taupe-deep">{t.common[lang]}</span>}
+              label={<span className="font-normal text-muted">{t.common[lang]}</span>}
               name={`${name}.${lang}`}
               defaultValue={defaultValue?.[lang]}
               rows={rows ?? 4}
@@ -375,7 +382,7 @@ export function LocalizedFields({
           ) : (
             <TextField
               key={lang}
-              label={<span className="font-normal text-taupe-deep">{t.common[lang]}</span>}
+              label={<span className="font-normal text-muted">{t.common[lang]}</span>}
               name={`${name}.${lang}`}
               defaultValue={defaultValue?.[lang]}
               maxLength={maxLength}
@@ -385,7 +392,7 @@ export function LocalizedFields({
           ),
         )}
       </div>
-      {hint && <p className="mt-1.5 text-xs leading-relaxed text-taupe-deep">{hint}</p>}
+      {hint && <p className="mt-1.5 text-xs leading-relaxed text-muted">{hint}</p>}
     </fieldset>
   );
 }

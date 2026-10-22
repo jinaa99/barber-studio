@@ -15,7 +15,7 @@ import { getMetrics, hasDemoAppointments } from "@/lib/server/metrics";
 import { BarList, DataTable } from "@/components/admin/charts";
 import { DemoToggle, queryOf, RangeFilter } from "@/components/admin/filters";
 import { BookingTrend, RevenueTrend, UtilizationList } from "@/components/admin/metrics-view";
-import { EmptyState, Forbidden, Notice, PageHeader, PageSkeleton, Section, StatTile, TableFrame, td, th } from "@/components/admin/ui";
+import { EmptyState, Forbidden, Notice, PageHeader, PageSkeleton, Section, StatGroup, StatTile, TableFrame, td, th } from "@/components/admin/ui";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dict = await getDictionary();
@@ -60,29 +60,29 @@ async function Analytics({ locale, dict, searchParams }: { locale: Locale; dict:
         lead={a.lead}
         actions={<DemoToggle dict={dict} base={base} query={query} includeDemo={includeDemo} />}
       />
-      <div className="mt-6">
+      <div className="mt-6 rounded-2xl border border-line bg-surface px-5 py-4 sm:px-6">
         <RangeFilter dict={dict} base={base} query={query} preset={range.preset} from={range.from} to={range.to} />
-        <p className="mt-3 text-sm text-taupe-deep">
+        <p className="tabular mt-3 text-sm text-muted">
           {format(t.range.summary, { from: tableDate(range.from, locale, dict), to: tableDate(range.to, locale, dict) })}
         </p>
       </div>
       {includeDemo && <Notice tone="demo" className="mt-6">{t.common.demoBanner}</Notice>}
       {!includeDemo && empty && demoExists && <Notice className="mt-6">{t.common.demoHiddenEmpty}</Notice>}
 
-      <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile label={t.overview.revenue} value={formatPrice(totals.completedRevenue, locale)} hint={t.overview.revenueHint} />
+      <StatGroup className="mt-6 sm:grid-cols-2 lg:grid-cols-4">
+        <StatTile label={t.overview.revenue} value={formatPrice(totals.completedRevenue, locale)} hint={t.overview.revenueHint} size="lg" />
         <StatTile label={t.overview.scheduledValue} value={formatPrice(totals.scheduledValue, locale)} hint={t.overview.scheduledHint} tone="muted" />
         <StatTile label={a.averageTicket} value={totals.averageTicket === null ? "—" : formatPrice(totals.averageTicket, locale)} />
         <StatTile label={a.appointments} value={totals.appointments} />
-      </div>
+      </StatGroup>
 
       {empty ? (
-        <div className="mt-12">
+        <div className="mt-6">
           <EmptyState>{a.noData}</EmptyState>
         </div>
       ) : (
         <>
-          <div className="grid gap-x-12 lg:grid-cols-2">
+          <div className="grid gap-x-6 lg:grid-cols-2">
             <Section id={`revenue-${locale}`} title={a.revenueOverTime}>
               <RevenueTrend dict={dict} locale={locale} trend={metrics.trend} title={a.revenueOverTime} />
             </Section>
@@ -91,7 +91,7 @@ async function Analytics({ locale, dict, searchParams }: { locale: Locale; dict:
             </Section>
           </div>
 
-          <div className="grid gap-x-12 lg:grid-cols-2">
+          <div className="grid gap-x-6 lg:grid-cols-2">
             <Section id={`services-${locale}`} title={a.popularServices}>
               <BarList
                 label={a.popularServices}
@@ -121,21 +121,21 @@ async function Analytics({ locale, dict, searchParams }: { locale: Locale; dict:
                   display: `${totals.byStatus[s]} · ${percent(totals.byStatus[s] / totals.appointments)}`,
                 }))}
               />
-              <dl className="mt-6 grid grid-cols-2 gap-4 text-sm">
+              <dl className="mt-6 grid grid-cols-2 gap-4 border-t border-line pt-5 text-sm">
                 <div>
-                  <dt className="text-taupe-deep">{t.overview.cancellations}</dt>
-                  <dd className="mt-1 text-xl font-semibold">{percent(totals.cancellationRate)}</dd>
+                  <dt className="text-muted">{t.overview.cancellations}</dt>
+                  <dd className="numeric mt-1 text-2xl font-medium">{percent(totals.cancellationRate)}</dd>
                 </div>
                 <div>
-                  <dt className="text-taupe-deep">{t.overview.noShows}</dt>
-                  <dd className="mt-1 text-xl font-semibold">{percent(totals.noShowRate)}</dd>
+                  <dt className="text-muted">{t.overview.noShows}</dt>
+                  <dd className="numeric mt-1 text-2xl font-medium">{percent(totals.noShowRate)}</dd>
                 </div>
               </dl>
             </Section>
           </div>
 
-          <Section id={`barbers-${locale}`} title={a.barberPerformance}>
-            <TableFrame label={a.barberPerformance}>
+          <Section id={`barbers-${locale}`} title={a.barberPerformance} flush>
+            <TableFrame label={a.barberPerformance} flush>
               <thead>
                 <tr>
                   <th scope="col" className={th}>{t.common.barber}</th>
@@ -161,15 +161,17 @@ async function Analytics({ locale, dict, searchParams }: { locale: Locale; dict:
                 ))}
               </tbody>
             </TableFrame>
-            <div className="mt-8 max-w-2xl">
-              <h3 className="mb-4 text-sm font-semibold">{t.overview.utilizationByBarber}</h3>
-              <UtilizationList dict={dict} locale={locale} barbers={metrics.barbers} label={t.overview.utilizationByBarber} />
+            <div className="border-t border-line px-5 py-5 sm:px-6 sm:py-6">
+              <h3 className="mb-5 text-sm font-medium">{t.overview.utilizationByBarber}</h3>
+              <div className="max-w-3xl">
+                <UtilizationList dict={dict} locale={locale} barbers={metrics.barbers} label={t.overview.utilizationByBarber} />
+              </div>
             </div>
           </Section>
 
           <Section id={`returning-${locale}`} title={a.returning}>
             {metrics.returning.status === "ok" ? (
-              <div className="max-w-sm">
+              <div className="-m-5 max-w-sm sm:-m-6">
                 <StatTile
                   label={a.returning}
                   value={percent(metrics.returning.rate)}
@@ -187,7 +189,7 @@ async function Analytics({ locale, dict, searchParams }: { locale: Locale; dict:
       )}
 
       <Section id={`definitions-${locale}`} title={a.definitions}>
-        <ul className="max-w-3xl list-disc space-y-2 pl-5 text-sm leading-relaxed text-taupe-deep">
+        <ul className="max-w-3xl list-disc space-y-2 pl-5 text-sm leading-relaxed text-muted marker:text-faint">
           {a.definitionList.map((d) => (
             <li key={d}>{d}</li>
           ))}

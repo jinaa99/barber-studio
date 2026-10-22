@@ -94,7 +94,7 @@ async function Content({ locale, dict }: { locale: Locale; dict: Dictionary }) {
 
           <fieldset>
             <legend className="text-sm font-semibold">{t.openingHours}</legend>
-            <p className="mt-1 text-xs text-taupe-deep">{t.openingHoursHint}</p>
+            <p className="mt-1 text-xs text-muted">{t.openingHoursHint}</p>
             <div className="mt-3 divide-y divide-line border-y border-line">
               {weekdayOrder.map((day, i) => {
                 const hours = profile.hours.find((h) => h.day === day);
@@ -112,7 +112,7 @@ async function Content({ locale, dict }: { locale: Locale; dict: Dictionary }) {
 
           <fieldset>
             <legend className="text-sm font-semibold">{t.socials}</legend>
-            <p className="mt-1 text-xs text-taupe-deep">{t.socialsHint}</p>
+            <p className="mt-1 text-xs text-muted">{t.socialsHint}</p>
             <div className="mt-3 space-y-3">
               {socials.map((s, i) => (
                 <div key={i} className="grid gap-3 sm:grid-cols-[1fr_1fr_2fr]">
@@ -139,7 +139,7 @@ async function Content({ locale, dict }: { locale: Locale; dict: Dictionary }) {
                 rows={"list" in rest ? 5 : 3}
                 maxLength={max}
               />
-              <details className="mt-2 text-xs text-taupe-deep">
+              <details className="mt-2 text-xs text-muted">
                 <summary className="cursor-pointer hover:text-ink">{t.showDefault}</summary>
                 <div className="mt-2 grid gap-4 whitespace-pre-line sm:grid-cols-2">
                   <p lang="mn">{dictionaryText(mn, key)}</p>
@@ -160,13 +160,13 @@ async function Content({ locale, dict }: { locale: Locale; dict: Dictionary }) {
               const position = galleryPosition(g.id, index);
               return (
                 <li key={g.id} className="flex gap-3 border border-line p-3">
-                  <span className="relative block aspect-square w-16 shrink-0 overflow-hidden bg-paper-deep">
+                  <span className="relative block aspect-square w-16 shrink-0 overflow-hidden bg-stone">
                     {choice && <MediaThumb src={choice.src} alt="" sizes="64px" />}
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{g.title}</p>
                     {g.libraryId && (
-                      <p className="mt-0.5 text-xs text-taupe-deep">
+                      <p className="mt-0.5 text-xs text-muted">
                         {choice ? m.libraryBadge : m.galleryUnpublished} ·{" "}
                         <Link href={`${mediaHref}?asset=${g.libraryId}`} className={textLink}>
                           {m.manage}
@@ -174,11 +174,11 @@ async function Content({ locale, dict }: { locale: Locale; dict: Dictionary }) {
                       </p>
                     )}
                     <div className="mt-2 flex items-center gap-4">
-                      <label className="flex items-center gap-2 text-xs text-taupe-deep">
+                      <label className="flex items-center gap-2 text-xs text-muted">
                         {t.galleryOrder}
                         <input type="number" name={`position.${g.id}`} min={1} max={999} defaultValue={position} className={`${inputClass} h-8 w-16 px-2`} />
                       </label>
-                      <label className="flex items-center gap-2 text-xs text-taupe-deep">
+                      <label className="flex items-center gap-2 text-xs text-muted">
                         <input type="checkbox" name="hidden" value={g.id} defaultChecked={gallery.hidden.includes(g.id)} className="size-4 accent-ink" />
                         {t.galleryHidden}
                       </label>
@@ -188,7 +188,7 @@ async function Content({ locale, dict }: { locale: Locale; dict: Dictionary }) {
               );
             })}
           </ul>
-          <p className="mt-4 text-xs text-taupe-deep">
+          <p className="mt-4 text-xs text-muted">
             {m.galleryAddHint}{" "}
             <Link href={mediaHref} className={textLink}>
               {m.title}
@@ -220,7 +220,7 @@ async function Content({ locale, dict }: { locale: Locale; dict: Dictionary }) {
               return (
                 <details key={clip.id} className="group border border-line" open={custom}>
                   <summary className="flex cursor-pointer list-none items-center gap-4 p-3 [&::-webkit-details-marker]:hidden">
-                    <span className="relative block aspect-video w-28 shrink-0 overflow-hidden bg-paper-deep">
+                    <span className="relative block aspect-video w-28 shrink-0 overflow-hidden bg-stone">
                       {current ? (
                         <MediaThumb src={current.src} alt="" sizes="112px" />
                       ) : (
@@ -229,11 +229,11 @@ async function Content({ locale, dict }: { locale: Locale; dict: Dictionary }) {
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block font-medium">{m.heroScenes[clip.id]}</span>
-                      <span className="block text-xs text-taupe-deep">
+                      <span className="block text-xs text-muted">
                         {custom ? m.heroCustom : format(m.heroBundled, { title: clip.credit?.title ?? clip.id, provider: clip.credit?.provider ?? "" })}
                       </span>
                     </span>
-                    <span className="text-xs text-taupe-deep group-open:hidden">{dict.admin.common.edit}</span>
+                    <span className="text-xs text-muted group-open:hidden">{dict.admin.common.edit}</span>
                   </summary>
                   <ActionForm action={saveHeroSceneAction} className="space-y-6 border-t border-line p-4">
                     <input type="hidden" name="locale" value={locale} />
@@ -262,7 +262,7 @@ async function Content({ locale, dict }: { locale: Locale; dict: Dictionary }) {
                       <TextField label={m.focusX} name="focusX" type="number" min={0} max={100} defaultValue={focus.focusX} />
                       <TextField label={m.focusY} name="focusY" type="number" min={0} max={100} defaultValue={focus.focusY} />
                     </div>
-                    <p className="-mt-3 text-xs text-taupe-deep">{m.focusHint}</p>
+                    <p className="-mt-3 text-xs text-muted">{m.focusHint}</p>
                     <div className="flex flex-wrap gap-2">
                       <SubmitButton>{c.save}</SubmitButton>
                       {custom && (
@@ -300,7 +300,7 @@ async function Content({ locale, dict }: { locale: Locale; dict: Dictionary }) {
             })}
             <SubmitButton>{c.save}</SubmitButton>
           </ActionForm>
-          <p className="mt-6 text-sm text-taupe-deep">
+          <p className="mt-6 text-sm text-muted">
             <Link href={localizedPath(locale, routes.adminBarbers)} className={textLink}>
               {t.barbersLink}
             </Link>

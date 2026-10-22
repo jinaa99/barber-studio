@@ -21,7 +21,7 @@ export function DeleteMediaButton({
         <ActionForm action={deleteMediaAction}>
           <input type="hidden" name="locale" value={locale} />
           <input type="hidden" name="id" value={id} />
-          <p className="mb-4 text-sm text-taupe-deep">{labels.body}</p>
+          <p className="mb-4 text-sm text-muted">{labels.body}</p>
           <SubmitButton variant="danger">{labels.delete}</SubmitButton>
         </ActionForm>
       )}

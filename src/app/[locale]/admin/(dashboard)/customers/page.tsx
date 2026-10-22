@@ -12,7 +12,22 @@ import { db } from "@/lib/server/db";
 import { adminContext } from "@/lib/server/admin-context";
 import { customerFilters, listCustomers, type CustomerFilter } from "@/lib/server/customers";
 import { hrefWith, queryOf } from "@/components/admin/filters";
-import { EmptyState, Forbidden, inputClass, Notice, PageHeader, PageSkeleton, Pagination, smallButton, TableFrame, Tag, td, th } from "@/components/admin/ui";
+import {
+  compactInputClass,
+  EmptyState,
+  Forbidden,
+  Notice,
+  PageHeader,
+  PageSkeleton,
+  Pagination,
+  segment,
+  segmentGroup,
+  smallButton,
+  TableFrame,
+  Tag,
+  td,
+  th,
+} from "@/components/admin/ui";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dict = await getDictionary();
@@ -51,28 +66,28 @@ async function Customers({ locale, dict, searchParams }: { locale: Locale; dict:
         <form method="get" action={base} role="search" className="flex flex-wrap items-end gap-2">
           {keep.filter && <input type="hidden" name="filter" value={keep.filter} />}
           {keep.demo && <input type="hidden" name="demo" value={keep.demo} />}
-          <label className="text-xs text-taupe-deep">
+          <label className="text-xs text-muted">
             <span className="mb-1 block">{t.customers.searchLabel}</span>
-            <input type="search" name="q" defaultValue={query.q} placeholder={t.customers.searchPlaceholder} maxLength={80} className={cn(inputClass, "h-9 w-64")} />
+            <input type="search" name="q" defaultValue={query.q} placeholder={t.customers.searchPlaceholder} maxLength={80} className={cn(compactInputClass, "w-64")} />
           </label>
           <button type="submit" className={smallButton}>
             {t.common.search}
           </button>
         </form>
         <div className="flex flex-wrap items-center gap-4">
-          <nav aria-label={t.customers.filterLabel} className="flex flex-wrap gap-1">
+          <nav aria-label={t.customers.filterLabel} className={segmentGroup}>
             {customerFilters.map((f) => (
               <Link
                 key={f}
                 href={hrefWith(base, keep, { filter: f === "all" ? undefined : f })}
                 aria-current={filter === f ? "true" : undefined}
-                className={cn("rounded-full px-3 py-1.5 text-sm", filter === f ? "bg-ink text-paper" : "text-taupe-deep hover:bg-paper-deep hover:text-ink")}
+                className={segment(filter === f)}
               >
                 {t.customers.filters[f]}
               </Link>
             ))}
           </nav>
-          <Link href={hrefWith(base, keep, { demo: includeDemo ? undefined : "1" })} className="text-sm text-taupe-deep underline underline-offset-4 hover:text-ink">
+          <Link href={hrefWith(base, keep, { demo: includeDemo ? undefined : "1" })} className="text-sm text-muted underline underline-offset-4 hover:text-ink">
             {includeDemo ? t.common.hideDemo : t.common.includeDemo}
           </Link>
         </div>
@@ -84,7 +99,7 @@ async function Customers({ locale, dict, searchParams }: { locale: Locale; dict:
           <EmptyState>{query.q || filter !== "all" ? t.customers.empty : t.customers.emptyAll}</EmptyState>
         ) : (
           <>
-            <p className="mb-3 text-sm text-taupe-deep">{format(t.common.results, { count: result.total })}</p>
+            <p className="mb-3 text-sm text-muted">{format(t.common.results, { count: result.total })}</p>
             <TableFrame label={t.customers.title}>
               <thead>
                 <tr>
@@ -101,14 +116,14 @@ async function Customers({ locale, dict, searchParams }: { locale: Locale; dict:
               </thead>
               <tbody>
                 {result.rows.map((c) => (
-                  <tr key={c.id} className="hover:bg-paper-deep/40">
+                  <tr key={c.id} className="hover:bg-stone/40">
                     <td className={td}>
                       <Link href={`${base}/${c.id}`} className="font-medium underline-offset-4 hover:underline">
                         {c.name}
                       </Link>
                       {c.isDemo && <Tag className="ml-2">{t.common.sample}</Tag>}
                     </td>
-                    <td className={cn(td, "tabular text-taupe-deep")}>{maskPhone(c.phone)}</td>
+                    <td className={cn(td, "tabular text-muted")}>{maskPhone(c.phone)}</td>
                     <td className={cn(td, "tabular text-right")}>{c.completed}</td>
                     <td className={cn(td, "tabular whitespace-nowrap")}>{c.lastVisit ? tableDate(zoned(c.lastVisit, ctx.timeZone).date, locale, dict) : "—"}</td>
                     <td className={cn(td, "tabular whitespace-nowrap")}>{c.nextVisit ? tableDate(zoned(c.nextVisit, ctx.timeZone).date, locale, dict) : "—"}</td>

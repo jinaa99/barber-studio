@@ -5,7 +5,6 @@ import {
   getBarbers,
   getFeaturedServices,
   getGallery,
-  getHeroClips,
   getSiteDictionary,
   getSlotMedia,
   getStudioProfile,
@@ -20,7 +19,7 @@ import { HomeHero } from "@/components/sections/home-hero";
 import { Statement } from "@/components/sections/statement";
 import { StudioIntro } from "@/components/sections/studio-intro";
 import { ServiceList } from "@/components/sections/service-list";
-import { BarberGrid } from "@/components/sections/barber-grid";
+import { BarberFeature } from "@/components/sections/barber-grid";
 import { WorkGrid } from "@/components/sections/work-grid";
 import { Testimonials } from "@/components/sections/testimonials";
 import { VisitSummary } from "@/components/sections/visit-summary";
@@ -39,9 +38,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function HomePage() {
   const locale = await getLocale();
-  const [dict, heroClips, services, barbers, work, testimonials, studio, introMedia, visitMedia] = await Promise.all([
+  const [dict, services, barbers, work, testimonials, studio, introMedia, visitMedia] = await Promise.all([
     getSiteDictionary(locale),
-    getHeroClips(locale),
     getFeaturedServices(locale),
     getBarbers(locale),
     getGallery(locale, featuredWork),
@@ -54,28 +52,31 @@ export default async function HomePage() {
 
   return (
     <>
-      <HomeHero locale={locale} dict={dict} clips={heroClips} afterId={`after-hero-${locale}`} />
+      <HomeHero locale={locale} dict={dict} studio={studio} afterId={`after-hero-${locale}`} />
       {/* Skip-intro target; focusable so keyboard users land after the sequence. */}
       <span id={`after-hero-${locale}`} tabIndex={-1} className="block outline-none" />
-      <Statement text={t.statement} />
+      <Statement text={t.statement} label={studio.name} />
       <StudioIntro dict={dict} media={introMedia} />
 
-      <section className="bg-paper-deep py-section">
+      <section className="bg-surface py-section">
         <Container>
           <SectionHeading
             index="01"
+            layout="split"
             eyebrow={t.services.eyebrow}
             title={t.services.title}
             lead={t.services.lead}
             action={<ArrowLink href={localizedPath(locale, routes.services)}>{t.services.link}</ArrowLink>}
           />
-          <div className="mt-14">
-            <ServiceList locale={locale} dict={dict} services={services} />
+          <div className="mt-12 lg:mt-16 lg:grid lg:grid-cols-12 lg:gap-8">
+            <div className="lg:col-span-9 lg:col-start-4">
+              <ServiceList locale={locale} dict={dict} services={services} />
+            </div>
           </div>
         </Container>
       </section>
 
-      <section className="py-section">
+      <section className="bg-stone py-section">
         <Container>
           <SectionHeading
             index="02"
@@ -83,33 +84,34 @@ export default async function HomePage() {
             title={t.barbers.title}
             action={<ArrowLink href={localizedPath(locale, routes.barbers)}>{t.barbers.link}</ArrowLink>}
           />
-          <div className="mt-14">
-            <BarberGrid dict={dict} barbers={barbers} />
+          <div className="mt-14 lg:mt-20">
+            <BarberFeature locale={locale} dict={dict} barbers={barbers} />
           </div>
         </Container>
       </section>
 
-      <section className="bg-ink py-section text-paper">
+      <section className="bg-ink py-section text-canvas">
         <Container>
           <SectionHeading
             index="03"
             tone="inverse"
+            layout="split"
             eyebrow={t.work.eyebrow}
             title={t.work.title}
             action={
-              <ArrowLink href={localizedPath(locale, routes.gallery)} className="text-paper">
+              <ArrowLink href={localizedPath(locale, routes.gallery)} className="text-canvas">
                 {t.work.link}
               </ArrowLink>
             }
           />
-          <div className="mt-14">
+          <div className="mt-14 lg:mt-20">
             <WorkGrid items={work} />
           </div>
         </Container>
       </section>
 
       {testimonials.length > 0 && <Testimonials dict={dict} testimonials={testimonials} index="04" />}
-      <VisitSummary locale={locale} dict={dict} media={visitMedia} index="05" studio={studio} />
+      <VisitSummary locale={locale} dict={dict} media={visitMedia} index={testimonials.length > 0 ? "05" : "04"} studio={studio} />
       <BookingCta locale={locale} dict={dict} phoneHref={studio.contact.phoneHref} />
     </>
   );

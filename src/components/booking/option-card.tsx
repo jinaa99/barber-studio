@@ -6,7 +6,9 @@ import { cn } from "@/lib/cn";
 
 /**
  * A native radio input presented as a selectable row. Keeping the real input
- * gives arrow-key navigation and screen-reader semantics for free.
+ * gives arrow-key navigation and screen-reader semantics for free. The
+ * selected row lifts onto a white surface with an ink border and a filled
+ * indicator, so the state never relies on colour alone.
  */
 export function OptionCard({
   name,
@@ -28,10 +30,12 @@ export function OptionCard({
   return (
     <label
       className={cn(
-        "relative flex cursor-pointer items-start gap-4 border px-5 py-5 transition-[border-color,background-color] duration-300 ease-soft",
-        "has-focus-visible:outline has-focus-visible:outline-[1.5px] has-focus-visible:outline-offset-2 has-focus-visible:outline-brass",
-        checked ? "border-ink bg-paper" : "border-line bg-paper/40 hover:border-line-strong",
-        disabled && "cursor-not-allowed opacity-45 hover:border-line",
+        "relative flex cursor-pointer items-start gap-4 rounded-xl border px-5 py-4.5 transition-[border-color,background-color,box-shadow] duration-200 ease-standard",
+        "has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent",
+        checked
+          ? "border-ink bg-surface shadow-[0_1px_0_rgb(18_18_17/0.04),0_8px_24px_-16px_rgb(18_18_17/0.35)]"
+          : "border-line-strong bg-transparent hover:border-ink/40 hover:bg-surface/60",
+        disabled && "cursor-not-allowed opacity-50 hover:border-line-strong hover:bg-transparent",
         className,
       )}
     >
@@ -47,11 +51,11 @@ export function OptionCard({
       <span
         aria-hidden
         className={cn(
-          "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border transition-colors duration-300",
-          checked ? "border-ink bg-ink text-paper" : "border-line-strong",
+          "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border transition-[background-color,border-color] duration-200",
+          checked ? "border-ink bg-ink text-canvas" : "border-line-strong bg-surface",
         )}
       >
-        {checked && <Check className="size-3" strokeWidth={2.5} />}
+        <Check className={cn("size-3 transition-transform duration-200 ease-emphasis", checked ? "scale-100" : "scale-0")} strokeWidth={2.5} />
       </span>
       <span className="min-w-0 flex-1">{children}</span>
     </label>

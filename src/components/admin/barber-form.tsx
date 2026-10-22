@@ -76,7 +76,7 @@ export function BarberForm({
 
       <fieldset>
         <legend className="text-sm font-semibold">{t.servicesOffered}</legend>
-        <p className="mt-1 text-xs text-taupe-deep">{t.servicesHint}</p>
+        <p className="mt-1 text-xs text-muted">{t.servicesHint}</p>
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           {services.map((s) => (
             <CheckboxField
@@ -86,7 +86,7 @@ export function BarberForm({
               label={
                 <>
                   {(s.name as LocalizedText)[locale]}
-                  {!s.active && <span className="ml-1.5 font-normal text-taupe-deep">({c.inactive})</span>}
+                  {!s.active && <span className="ml-1.5 font-normal text-muted">({c.inactive})</span>}
                 </>
               }
               defaultChecked={values?.serviceIds.includes(s.id)}

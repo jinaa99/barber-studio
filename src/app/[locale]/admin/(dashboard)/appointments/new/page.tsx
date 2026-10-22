@@ -77,7 +77,7 @@ async function NewAppointment({ locale, dict, searchParams }: { locale: Locale; 
 
   return (
     <>
-      <Link href={calendar} className="mb-4 inline-flex items-center gap-2 text-sm text-taupe-deep hover:text-ink">
+      <Link href={calendar} className="mb-4 inline-flex items-center gap-2 text-sm text-muted hover:text-ink">
         <ArrowLeft aria-hidden className="size-4" strokeWidth={1.75} />
         {t.appointments.title}
       </Link>
@@ -143,16 +143,16 @@ async function NewAppointment({ locale, dict, searchParams }: { locale: Locale; 
 
           <fieldset>
             <legend className="text-lg font-semibold tracking-tight">
-              {t.booking.freeTimes} · <span className="font-normal text-taupe-deep">{longDate(date, dict)}</span>
+              {t.booking.freeTimes} · <span className="font-normal text-muted">{longDate(date, dict)}</span>
             </legend>
             {free.length === 0 ? (
-              <p className="mt-3 text-sm text-taupe-deep">{t.booking.noTimes}</p>
+              <p className="mt-3 text-sm text-muted">{t.booking.noTimes}</p>
             ) : (
               <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-6 lg:grid-cols-8">
                 {free.map((s, i) => (
                   <label key={s.time} className="relative">
                     <input type="radio" name="time" value={s.time} defaultChecked={i === 0} className="peer sr-only" />
-                    <span className="tabular flex h-10 cursor-pointer items-center justify-center border border-line-strong text-sm font-medium transition-colors peer-checked:border-ink peer-checked:bg-ink peer-checked:text-paper peer-focus-visible:outline peer-focus-visible:outline-brass hover:border-ink">
+                    <span className="tabular flex h-10 cursor-pointer items-center justify-center border border-line-strong text-sm font-medium transition-colors peer-checked:border-ink peer-checked:bg-ink peer-checked:text-canvas peer-focus-visible:outline peer-focus-visible:outline-accent hover:border-ink">
                       {s.time}
                     </span>
                   </label>
@@ -200,7 +200,7 @@ async function NewAppointment({ locale, dict, searchParams }: { locale: Locale; 
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <SubmitButton pendingLabel={t.booking.submitting}>{existing ? t.booking.submitReschedule : t.booking.submitCreate}</SubmitButton>
             {service && (
-              <span className="text-sm text-taupe-deep">
+              <span className="text-sm text-muted">
                 {name(service.name)} · {service.durationMinutes} {t.common.minutes} · {formatPrice(service.priceMnt, locale)}
               </span>
             )}

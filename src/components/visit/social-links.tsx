@@ -12,7 +12,7 @@ export function SocialLinks({
   tone?: "default" | "inverse";
   className?: string;
 }) {
-  const muted = tone === "inverse" ? "text-paper/50" : "text-taupe-deep";
+  const muted = tone === "inverse" ? "text-canvas/65" : "text-muted";
   return (
     <ul className={cn("space-y-3 text-sm", className)}>
       {socials.map((social) => (
@@ -22,10 +22,14 @@ export function SocialLinks({
               href={social.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="group inline-flex items-center gap-1.5 hover:opacity-70"
+              className="group inline-flex items-center gap-1.5"
             >
-              {social.label}
-              <ArrowUpRight aria-hidden className="size-3.5" strokeWidth={1.75} />
+              <span className="link-draw">{social.label}</span>
+              <ArrowUpRight
+                aria-hidden
+                className="size-3.5 transition-transform duration-300 ease-emphasis group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                strokeWidth={1.75}
+              />
             </a>
           ) : (
             <span>{social.label}</span>

@@ -168,6 +168,7 @@ export interface GalleryItem {
   id: string;
   title: string;
   image: Media;
+  barberId?: string;
   barberName?: string;
   layout: GalleryRecord["layout"];
 }

@@ -22,7 +22,7 @@ import {
 import { checkConnectionAction, choosePageAction, startConnectionAction } from "@/app/[locale]/admin/actions/social";
 import { ActionForm, SubmitButton } from "@/components/admin/form";
 import { DisconnectSocialButton } from "@/components/admin/social-disconnect";
-import { EmptyState, Forbidden, Notice, PageHeader, PageSkeleton, Section, StatTile, Tag, textLink } from "@/components/admin/ui";
+import { EmptyState, Forbidden, Notice, PageHeader, PageSkeleton, Section, StatGroup, StatTile, Tag, textLink } from "@/components/admin/ui";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dict = await getDictionary();
@@ -90,7 +90,7 @@ async function Social({ locale, dict, searchParams }: { locale: Locale; dict: Di
                         <input type="radio" name="pageId" value={page.id} defaultChecked={i === 0} className="mt-1 accent-ink" />
                         <span className="min-w-0">
                           <span className="block font-medium">{page.name}</span>
-                          <span className="block text-xs text-taupe-deep">
+                          <span className="block text-xs text-muted">
                             {[page.category, page.canAnalyze ? null : t.choose.noAnalyze].filter(Boolean).join(" · ")}
                           </span>
                         </span>
@@ -117,7 +117,7 @@ async function Social({ locale, dict, searchParams }: { locale: Locale; dict: Di
         </div>
       </Section>
 
-      <Section id={`social-insights-${locale}`} title={t.insights.title} lead={t.insights.lead} className="border-t border-line pt-10">
+      <Section id={`social-insights-${locale}`} title={t.insights.title} lead={t.insights.lead}>
         {accounts.some((a) => a.connection) ? (
           <div className="space-y-12">
             {accounts.map((a) =>
@@ -131,7 +131,7 @@ async function Social({ locale, dict, searchParams }: { locale: Locale; dict: Di
         )}
       </Section>
 
-      <Section id={`social-setup-${locale}`} title={t.setup.title} lead={t.setup.lead} className="border-t border-line pt-10">
+      <Section id={`social-setup-${locale}`} title={t.setup.title} lead={t.setup.lead}>
         <div className="grid gap-8 lg:grid-cols-2">
           {accounts.map((a) => (
             <SetupDetails key={a.provider} dict={dict} account={a} />
@@ -155,9 +155,9 @@ function AccountCard({ locale, dict, account, timeZone }: { locale: Locale; dict
         <h3 id={`social-${account.provider}-${locale}`} className="font-semibold tracking-tight">
           {p.title}
         </h3>
-        <Tag className={cn(status === "connected" && "border-ink bg-ink text-paper", status === "needsReconnect" && "border-danger text-danger")}>{t.statuses[status]}</Tag>
+        <Tag tone={status === "connected" ? "solid" : status === "needsReconnect" ? "danger" : "default"}>{t.statuses[status]}</Tag>
       </div>
-      <p className="mt-2 text-sm leading-relaxed text-taupe-deep">{p.eligibility}</p>
+      <p className="mt-2 text-sm leading-relaxed text-muted">{p.eligibility}</p>
 
       {!account.configured && (
         <Notice className="mt-4">
@@ -173,7 +173,7 @@ function AccountCard({ locale, dict, account, timeZone }: { locale: Locale; dict
 
       {c && (
         <dl className="mt-5 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-[max-content_1fr]">
-          <dt className="text-taupe-deep">{t.fields.account}</dt>
+          <dt className="text-muted">{t.fields.account}</dt>
           <dd className="min-w-0 break-words">
             {c.profileUrl ? (
               <a href={c.profileUrl} target="_blank" rel="noopener noreferrer" className={cn(textLink, "inline-flex items-center gap-1")}>
@@ -183,22 +183,22 @@ function AccountCard({ locale, dict, account, timeZone }: { locale: Locale; dict
             ) : (
               c.name
             )}
-            {c.username && c.name !== c.username && <span className="block text-xs text-taupe-deep">{c.name}</span>}
+            {c.username && c.name !== c.username && <span className="block text-xs text-muted">{c.name}</span>}
           </dd>
           {c.accountType && (
             <>
-              <dt className="text-taupe-deep">{t.fields.accountType}</dt>
+              <dt className="text-muted">{t.fields.accountType}</dt>
               <dd>{t.accountTypes[c.accountType as keyof typeof t.accountTypes] ?? c.accountType}</dd>
             </>
           )}
-          <dt className="text-taupe-deep">{t.fields.permissions}</dt>
+          <dt className="text-muted">{t.fields.permissions}</dt>
           <dd className="min-w-0">
             <ul className="flex flex-wrap gap-1.5">
               {[...account.requested.required, ...account.requested.optional].map((scope) => {
                 const granted = c.grantedScopes.includes(scope);
                 return (
                   <li key={scope}>
-                    <Tag className={cn("normal-case tracking-normal", granted ? "text-ink" : "border-dashed text-taupe-deep line-through")}>
+                    <Tag tone={granted ? "default" : "missing"}>
                       <span className="sr-only">{granted ? t.fields.granted : t.fields.notGranted}: </span>
                       {scope}
                     </Tag>
@@ -207,24 +207,24 @@ function AccountCard({ locale, dict, account, timeZone }: { locale: Locale; dict
               })}
             </ul>
             {c.status === "connected" && c.missingOptional.length > 0 && (
-              <p className="mt-2 text-xs leading-relaxed text-taupe-deep">{format(t.optionalMissing, { scopes: c.missingOptional.join(", ") })}</p>
+              <p className="mt-2 text-xs leading-relaxed text-muted">{format(t.optionalMissing, { scopes: c.missingOptional.join(", ") })}</p>
             )}
           </dd>
-          <dt className="text-taupe-deep">{t.fields.connected}</dt>
+          <dt className="text-muted">{t.fields.connected}</dt>
           <dd className="tabular">{c.connectedBy ? format(t.fields.connectedBy, { date: when(c.connectedAt)!, name: c.connectedBy }) : when(c.connectedAt)}</dd>
           {c.status === "connected" && (
             <>
-              <dt className="text-taupe-deep">{t.fields.tokenExpires}</dt>
+              <dt className="text-muted">{t.fields.tokenExpires}</dt>
               <dd className="tabular">{when(c.tokenExpiresAt) ?? t.fields.noExpiry}</dd>
               {c.dataAccessExpiresAt && (
                 <>
-                  <dt className="text-taupe-deep">{t.fields.dataAccess}</dt>
+                  <dt className="text-muted">{t.fields.dataAccess}</dt>
                   <dd className="tabular">{when(c.dataAccessExpiresAt)}</dd>
                 </>
               )}
             </>
           )}
-          <dt className="text-taupe-deep">{t.fields.lastChecked}</dt>
+          <dt className="text-muted">{t.fields.lastChecked}</dt>
           <dd className="tabular">{when(c.lastCheckedAt) ?? t.fields.never}</dd>
         </dl>
       )}
@@ -328,19 +328,19 @@ function InsightsPanel({
         <h3 id={id} className="font-semibold tracking-tight">
           {title}
         </h3>
-        <p className="text-xs text-taupe-deep tabular">{format(t.asOf, { time: dateTime(result.fetchedAt, timeZone, locale, dict) })}</p>
+        <p className="text-xs text-muted tabular">{format(t.asOf, { time: dateTime(result.fetchedAt, timeZone, locale, dict) })}</p>
       </div>
 
-      <h4 className="mt-5 eyebrow text-taupe-deep">{t.profile}</h4>
-      <div className="mt-3 grid grid-cols-2 gap-6 sm:grid-cols-4">
+      <h4 className="mt-5 eyebrow text-muted">{t.profile}</h4>
+      <StatGroup className="mt-3 grid-cols-2 sm:grid-cols-4">
         {profileTiles.map((tile) => (
           <StatTile key={tile.label} label={tile.label} value={value(tile.value)} tone={tile.value === null ? "muted" : "default"} />
         ))}
-      </div>
+      </StatGroup>
 
-      <h4 className="mt-8 eyebrow text-taupe-deep">{format(t.period, { days: 28 })}</h4>
+      <h4 className="mt-8 eyebrow text-muted">{format(t.period, { days: 28 })}</h4>
       {!result.insightsGranted && <Notice className="mt-3">{t.notGranted[provider]}</Notice>}
-      <div className="mt-3 grid grid-cols-2 gap-6 sm:grid-cols-4">
+      <StatGroup className="mt-3 grid-cols-2 sm:grid-cols-4">
         {result.metrics.map((m) => (
           <StatTile
             key={m.key}
@@ -350,22 +350,22 @@ function InsightsPanel({
             hint={m.state === "ok" ? undefined : t.states[m.state]}
           />
         ))}
-      </div>
-      <p className="mt-3 text-xs leading-relaxed text-taupe-deep">{t.metricsNote[provider]}</p>
+      </StatGroup>
+      <p className="mt-3 text-xs leading-relaxed text-muted">{t.metricsNote[provider]}</p>
 
-      <h4 className="mt-8 eyebrow text-taupe-deep">{t.posts}</h4>
+      <h4 className="mt-8 eyebrow text-muted">{t.posts}</h4>
       {result.posts === null ? (
-        <p className="mt-3 text-sm text-taupe-deep">{t.postsUnavailable}</p>
+        <p className="mt-3 text-sm text-muted">{t.postsUnavailable}</p>
       ) : result.posts.length === 0 ? (
-        <p className="mt-3 text-sm text-taupe-deep">{t.noPosts}</p>
+        <p className="mt-3 text-sm text-muted">{t.noPosts}</p>
       ) : (
         <ul className="mt-3 divide-y divide-line border-y border-line">
           {result.posts.map((post) => (
             <li key={post.id} className="flex flex-col gap-1 py-3 text-sm sm:flex-row sm:items-baseline sm:gap-4">
-              <span className="shrink-0 text-xs text-taupe-deep tabular sm:w-36">{post.createdAt ? dateTime(new Date(post.createdAt), timeZone, locale, dict) : "—"}</span>
+              <span className="shrink-0 text-xs text-muted tabular sm:w-36">{post.createdAt ? dateTime(new Date(post.createdAt), timeZone, locale, dict) : "—"}</span>
               <span className="min-w-0 flex-1 break-words">{post.text || t.untitledPost}</span>
               {(post.likes != null || post.comments != null) && (
-                <span className="shrink-0 text-xs text-taupe-deep tabular">
+                <span className="shrink-0 text-xs text-muted tabular">
                   {format(t.reactions, { likes: post.likes ?? 0, comments: post.comments ?? 0 })}
                 </span>
               )}
@@ -391,21 +391,21 @@ function SetupDetails({ dict, account }: { dict: Dictionary; account: SocialAcco
       <h3 className="font-semibold tracking-tight">{p.title}</h3>
       <dl className="mt-3 space-y-3">
         <div>
-          <dt className="text-taupe-deep">{t.callback}</dt>
+          <dt className="text-muted">{t.callback}</dt>
           <dd className="mt-0.5 break-all font-mono text-xs">{account.redirectUri ?? t.needsOrigin}</dd>
         </div>
         <div>
-          <dt className="text-taupe-deep">{t.deauthorize}</dt>
+          <dt className="text-muted">{t.deauthorize}</dt>
           <dd className="mt-0.5 break-all font-mono text-xs">{account.deauthorizeUri ?? t.needsOrigin}</dd>
         </div>
         <div>
-          <dt className="text-taupe-deep">{t.requested}</dt>
+          <dt className="text-muted">{t.requested}</dt>
           <dd className="mt-1">
             <ul className="space-y-1.5">
               {[...account.requested.required.map((s) => [s, true] as const), ...account.requested.optional.map((s) => [s, false] as const)].map(([scope, required]) => (
                 <li key={scope}>
                   <span className="font-mono text-xs">{scope}</span>{" "}
-                  <span className="text-xs text-taupe-deep">
+                  <span className="text-xs text-muted">
                     ({required ? t.required : t.optional}) {reasons[scope as keyof typeof reasons]}
                   </span>
                 </li>
@@ -414,7 +414,7 @@ function SetupDetails({ dict, account }: { dict: Dictionary; account: SocialAcco
           </dd>
         </div>
       </dl>
-      <p className="mt-4 text-xs leading-relaxed text-taupe-deep">{t.docs}</p>
+      <p className="mt-4 text-xs leading-relaxed text-muted">{t.docs}</p>
     </div>
   );
 }

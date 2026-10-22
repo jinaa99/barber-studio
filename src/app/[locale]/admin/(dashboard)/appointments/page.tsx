@@ -15,15 +15,17 @@ import { addCalendarDays, isISODate, isoWeekday, zonedTimeToUtc } from "@/lib/bo
 import { db } from "@/lib/server/db";
 import { adminContext, type AdminContext } from "@/lib/server/admin-context";
 import { listAppointmentsBetween, listAppointmentsPage, type AppointmentListRow } from "@/lib/server/appointments";
-import { hrefWith, queryOf, type Query } from "@/components/admin/filters";
+import { DemoSwitch, hrefWith, queryOf, type Query } from "@/components/admin/filters";
 import {
+  compactInputClass,
   EmptyState,
-  inputClass,
   Notice,
   PageHeader,
   PageSkeleton,
   Pagination,
   primarySmallButton,
+  segment,
+  segmentGroup,
   smallButton,
   StatusBadge,
   TableFrame,
@@ -106,13 +108,13 @@ async function Appointments({ locale, dict, searchParams }: { locale: Locale; di
       />
 
       <div className="mt-6 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-        <nav aria-label={t.appointments.viewLabel} className="flex w-fit rounded-full border border-line-strong p-0.5">
+        <nav aria-label={t.appointments.viewLabel} className={segmentGroup}>
           {(["day", "week", "list"] as const).map((v) => (
             <Link
               key={v}
               href={link({ view: v === "day" ? undefined : v })}
               aria-current={view === v ? "page" : undefined}
-              className={cn("rounded-full px-4 py-1.5 text-sm font-medium", view === v ? "bg-ink text-paper" : "text-taupe-deep hover:text-ink")}
+              className={segment(view === v)}
             >
               {t.appointments.views[v]}
             </Link>
@@ -123,31 +125,31 @@ async function Appointments({ locale, dict, searchParams }: { locale: Locale; di
           {view !== "day" && <input type="hidden" name="view" value={view} />}
           {query.demo && <input type="hidden" name="demo" value={query.demo} />}
           {view !== "list" && (
-            <label className="text-xs text-taupe-deep">
+            <label className="text-xs text-muted">
               <span className="mb-1 block">{t.appointments.goToDate}</span>
-              <input type="date" name="date" defaultValue={date} className={cn(inputClass, "h-9 w-[9.5rem]")} />
+              <input type="date" name="date" defaultValue={date} className={cn(compactInputClass, "w-[9.5rem]")} />
             </label>
           )}
           {view === "list" && (
             <>
-              <label className="text-xs text-taupe-deep">
+              <label className="text-xs text-muted">
                 <span className="mb-1 block">{t.appointments.searchLabel}</span>
-                <input type="search" name="q" defaultValue={query.q} placeholder={t.appointments.searchPlaceholder} maxLength={80} className={cn(inputClass, "h-9 w-56")} />
+                <input type="search" name="q" defaultValue={query.q} placeholder={t.appointments.searchPlaceholder} maxLength={80} className={cn(compactInputClass, "w-56")} />
               </label>
-              <label className="text-xs text-taupe-deep">
+              <label className="text-xs text-muted">
                 <span className="mb-1 block">{t.range.from}</span>
-                <input type="date" name="from" defaultValue={query.from} className={cn(inputClass, "h-9 w-[9.5rem]")} />
+                <input type="date" name="from" defaultValue={query.from} className={cn(compactInputClass, "w-[9.5rem]")} />
               </label>
-              <label className="text-xs text-taupe-deep">
+              <label className="text-xs text-muted">
                 <span className="mb-1 block">{t.range.to}</span>
-                <input type="date" name="to" defaultValue={query.to} className={cn(inputClass, "h-9 w-[9.5rem]")} />
+                <input type="date" name="to" defaultValue={query.to} className={cn(compactInputClass, "w-[9.5rem]")} />
               </label>
             </>
           )}
           {allBarbers && (
-            <label className="text-xs text-taupe-deep">
+            <label className="text-xs text-muted">
               <span className="mb-1 block">{t.common.barber}</span>
-              <select name="barber" defaultValue={barberId ?? ""} className={cn(inputClass, "h-9 w-40")}>
+              <select name="barber" defaultValue={barberId ?? ""} className={cn(compactInputClass, "w-40")}>
                 <option value="">{t.appointments.allBarbers}</option>
                 {barbers.map((b) => (
                   <option key={b.id} value={b.id}>
@@ -157,9 +159,9 @@ async function Appointments({ locale, dict, searchParams }: { locale: Locale; di
               </select>
             </label>
           )}
-          <label className="text-xs text-taupe-deep">
+          <label className="text-xs text-muted">
             <span className="mb-1 block">{t.common.status}</span>
-            <select name="status" defaultValue={status ?? ""} className={cn(inputClass, "h-9 w-40")}>
+            <select name="status" defaultValue={status ?? ""} className={cn(compactInputClass, "w-40")}>
               <option value="">{t.appointments.allStatuses}</option>
               {Object.values(Statuses).map((s) => (
                 <option key={s} value={s}>
@@ -180,7 +182,11 @@ async function Appointments({ locale, dict, searchParams }: { locale: Locale; di
         ) : (
           <span />
         )}
-        <Link href={link({ demo: includeDemo ? undefined : "1" })} className="text-sm text-taupe-deep underline underline-offset-4 hover:text-ink">
+        <Link
+          href={link({ demo: includeDemo ? undefined : "1" })}
+          className="inline-flex h-9 items-center gap-2.5 rounded-lg px-3 text-sm text-muted transition-colors hover:bg-stone hover:text-ink"
+        >
+          <DemoSwitch on={includeDemo} />
           {includeDemo ? t.common.hideDemo : t.common.includeDemo}
         </Link>
       </div>
@@ -222,7 +228,7 @@ function DateNav({
   const step = view === "day" ? 1 : 7;
   const target = (d: string) => link({ date: d === today ? undefined : d });
   const label = view === "day" ? longDate(date, dict) : format(t.weekOf, { date: shortDate(weekStart(date), locale, dict) });
-  const nav = "inline-flex size-9 items-center justify-center rounded-full border border-line transition-colors hover:border-ink";
+  const nav = "inline-flex size-9 items-center justify-center rounded-lg border border-line-strong bg-surface transition-colors hover:border-ink/40 hover:bg-canvas";
   return (
     <div className="flex flex-wrap items-center gap-2">
       <Link href={target(addCalendarDays(date, -step))} aria-label={view === "day" ? t.prevDay : t.prevWeek} className={nav}>
@@ -231,9 +237,9 @@ function DateNav({
       <Link href={target(addCalendarDays(date, step))} aria-label={view === "day" ? t.nextDay : t.nextWeek} className={nav}>
         <ChevronRight aria-hidden className="size-4" strokeWidth={1.75} />
       </Link>
-      <h2 className="ml-1 font-semibold">{label}</h2>
+      <h2 className="ml-2 text-lg font-medium tracking-[-0.02em]">{label}</h2>
       {date !== today && (
-        <Link href={target(today)} className="ml-2 text-sm underline underline-offset-4 hover:opacity-70">
+        <Link href={target(today)} className={cn(smallButton, "ml-1")}>
           {t.today}
         </Link>
       )}
@@ -248,11 +254,11 @@ interface Filters {
 }
 
 const statusEdge: Record<AppointmentStatus, string> = {
-  PENDING: "border-l-brass bg-brass/10",
-  CONFIRMED: "border-l-ink bg-paper",
-  COMPLETED: "border-l-taupe bg-paper-deep/70 text-taupe-deep",
-  CANCELLED: "border-l-line-strong bg-paper-deep/40 text-taupe-deep line-through",
-  NO_SHOW: "border-l-danger bg-danger/5",
+  PENDING: "border-l-warning bg-warning-wash",
+  CONFIRMED: "border-l-success bg-surface",
+  COMPLETED: "border-l-ink-muted bg-stone/80 text-muted",
+  CANCELLED: "border-l-line-strong bg-canvas text-muted line-through",
+  NO_SHOW: "border-l-danger bg-danger-wash",
 };
 
 /* ------------------------------------------------------------------- Day */
@@ -312,7 +318,7 @@ async function DayView({
         href={link({ open: r.id, date: date === ctx.today ? undefined : date })}
         scroll={false}
         className={cn(
-          "block overflow-hidden border border-l-[3px] border-line px-2 py-1.5 text-xs leading-snug transition-shadow hover:shadow-[0_2px_12px_-4px_rgb(22_21_19/0.35)] focus-visible:z-10",
+          "block overflow-hidden rounded-md border border-l-[3px] border-line px-2 py-1.5 text-xs leading-snug transition-shadow duration-150 hover:shadow-[0_4px_14px_-6px_rgb(18_18_17/0.4)] focus-visible:z-10",
           statusEdge[r.status],
           compact ? "" : "h-full",
         )}
@@ -321,34 +327,34 @@ async function DayView({
           {start}–{end}
         </span>
         <span className="block truncate font-medium">{r.customerName}</span>
-        <span className="block truncate text-taupe-deep">{name(r.service.name)}</span>
+        <span className="block truncate text-muted">{name(r.service.name)}</span>
         <span className="sr-only">
           , {name(r.barber.name)}, {t.status[r.status]}
         </span>
-        {r.isDemo && <span className="mt-0.5 block text-[0.625rem] font-semibold uppercase tracking-wide text-taupe-deep">{t.common.sample}</span>}
+        {r.isDemo && <span className="mt-0.5 block text-[0.625rem] font-medium text-muted">{t.common.sample}</span>}
       </Link>
     );
   };
 
   return (
     <>
-      {rows.length === 0 && <p className="mb-4 text-sm text-taupe-deep">{t.appointments.emptyDay}</p>}
+      {rows.length === 0 && <p className="mb-4 text-sm text-muted">{t.appointments.emptyDay}</p>}
 
       {/* Phones and tablets: agenda per barber. */}
-      <div className="space-y-6 md:hidden">
+      <div className="space-y-3 md:hidden">
         {columns.map((b) => {
           const own = visible.filter((r) => r.barberId === b.id);
           const blocks = hours.filter((h) => h.barberId === b.id);
           return (
-            <section key={b.id} aria-label={name(b.name)}>
-              <h3 className="flex items-baseline justify-between border-b border-line-strong pb-2 text-sm font-semibold">
+            <section key={b.id} aria-label={name(b.name)} className="rounded-2xl border border-line bg-surface p-4">
+              <h3 className="flex items-baseline justify-between gap-3 border-b border-line pb-2.5 text-sm font-medium">
                 {name(b.name)}
-                <span className="tabular text-xs font-normal text-taupe-deep">
+                <span className="tabular text-xs font-normal text-muted">
                   {blocks.length ? blocks.map((h) => `${zonedLabel(h.startMinute)}–${zonedLabel(h.endMinute)}`).join(", ") : t.appointments.dayOff}
                 </span>
               </h3>
               {own.length === 0 ? (
-                <p className="py-3 text-sm text-taupe-deep">—</p>
+                <p className="py-3 text-sm text-muted">—</p>
               ) : (
                 <ul className="mt-2 space-y-2">
                   {own.map((r) => (
@@ -362,19 +368,19 @@ async function DayView({
       </div>
 
       {/* Desktop: time grid with one column per barber. */}
-      <div role="region" aria-label={longDate(date, dict)} tabIndex={0} className="hidden overflow-x-auto md:block">
+      <div role="region" aria-label={longDate(date, dict)} tabIndex={0} className="hidden overflow-x-auto rounded-2xl border border-line bg-canvas p-3 md:block">
         <div className="grid min-w-full" style={{ gridTemplateColumns: `3.5rem repeat(${columns.length}, minmax(9.5rem, 1fr))` }}>
           <div />
           {columns.map((b) => (
-            <div key={b.id} className="truncate border-b border-line-strong px-2 pb-2 text-sm font-semibold">
+            <div key={b.id} className="truncate border-b border-line-strong px-2 pb-2.5 text-sm font-medium">
               {name(b.name)}
-              {!b.active && <span className="ml-1 text-xs font-normal text-taupe-deep">({t.common.inactive})</span>}
+              {!b.active && <span className="ml-1 text-xs font-normal text-muted">({t.common.inactive})</span>}
             </div>
           ))}
 
           <div aria-hidden className="relative" style={{ height }}>
             {hourMarks.map((m) => (
-              <span key={m} className="tabular absolute right-2 -translate-y-1/2 text-[0.6875rem] text-taupe-deep" style={{ top: y(m) }}>
+              <span key={m} className="tabular absolute right-2 -translate-y-1/2 text-[0.6875rem] text-muted" style={{ top: y(m) }}>
                 {zonedLabel(m)}
               </span>
             ))}
@@ -383,12 +389,12 @@ async function DayView({
             const blocks = hours.filter((h) => h.barberId === b.id);
             const off = timeOff.filter((o) => o.barberId === null || o.barberId === b.id);
             return (
-              <div key={b.id} className="relative border-l border-line bg-[repeating-linear-gradient(135deg,transparent_0_6px,rgb(22_21_19/0.035)_6px_7px)]" style={{ height }}>
+              <div key={b.id} className="relative border-l border-line bg-[repeating-linear-gradient(135deg,transparent_0_6px,rgb(18_18_17/0.035)_6px_7px)]" style={{ height }}>
                 {hourMarks.map((m) => (
                   <span key={m} aria-hidden className="absolute inset-x-0 h-px bg-line" style={{ top: y(m) }} />
                 ))}
                 {blocks.map((h) => (
-                  <span key={h.id} aria-hidden className="absolute inset-x-0 bg-paper" style={{ top: y(h.startMinute), height: (h.endMinute - h.startMinute) * PX_PER_MINUTE }} />
+                  <span key={h.id} aria-hidden className="absolute inset-x-0 bg-surface" style={{ top: y(h.startMinute), height: (h.endMinute - h.startMinute) * PX_PER_MINUTE }} />
                 ))}
                 {off.map((o) => {
                   const from = minutesOf(o.startsAt);
@@ -396,7 +402,7 @@ async function DayView({
                   return (
                     <span
                       key={o.id}
-                      className="absolute inset-x-0 flex items-start bg-sand/45 px-2 py-1 text-[0.6875rem] font-semibold uppercase tracking-wide text-taupe-deep"
+                      className="absolute inset-x-0 flex items-start bg-stone-deep/50 px-2 py-1 text-[0.6875rem] font-medium text-muted"
                       style={{ top: y(Math.max(first, from)), height: Math.max(0, (Math.min(last, to) - Math.max(first, from)) * PX_PER_MINUTE) }}
                     >
                       {o.barberId === null ? t.common.wholeStudio : t.appointments.timeOff}
@@ -419,7 +425,7 @@ async function DayView({
           })}
         </div>
       </div>
-      <p className="mt-3 text-xs text-taupe-deep">
+      <p className="mt-3 text-xs text-muted">
         {t.appointments.outsideHoursNote}
         {cancelled > 0 && (
           <>
@@ -471,20 +477,20 @@ async function WeekView({
   const weekdayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
 
   return (
-    <ol className="grid gap-px border border-line bg-line md:grid-cols-7">
+    <ol className="grid gap-px overflow-hidden rounded-2xl border border-line bg-line md:grid-cols-7">
       {days.map((day) => {
         const own = rows.filter((r) => zoned(r.startsAt, ctx.timeZone).date === day);
         return (
-          <li key={day} className={cn("min-w-0 bg-paper p-2", day === ctx.today && "bg-paper-deep/50")}>
+          <li key={day} className={cn("min-w-0 p-2 md:min-h-40", day === ctx.today ? "bg-accent-wash/50" : "bg-surface")}>
             <Link
               href={link({ view: undefined, date: day === ctx.today ? undefined : day })}
               className="flex items-baseline justify-between gap-2 px-1 pb-2 text-sm hover:underline"
             >
               <span className="font-semibold">{dict.calendar.weekdaysShort[weekdayKeys[isoWeekday(day)]]}</span>
-              <span className="tabular text-taupe-deep">{shortDate(day, locale, dict)}</span>
+              <span className="tabular text-muted">{shortDate(day, locale, dict)}</span>
             </Link>
             {own.length === 0 ? (
-              <p className="px-1 pb-2 text-xs text-taupe-deep">—</p>
+              <p className="px-1 pb-2 text-xs text-muted">—</p>
             ) : (
               <ul className="space-y-1.5">
                 {own.map((r) => (
@@ -492,11 +498,11 @@ async function WeekView({
                     <Link
                       href={link({ open: r.id })}
                       scroll={false}
-                      className={cn("block border border-l-[3px] border-line px-2 py-1 text-xs leading-snug hover:shadow-[0_2px_12px_-4px_rgb(22_21_19/0.35)]", statusEdge[r.status])}
+                      className={cn("block rounded-md border border-l-[3px] border-line px-2 py-1 text-xs leading-snug transition-shadow duration-150 hover:shadow-[0_4px_14px_-6px_rgb(18_18_17/0.4)]", statusEdge[r.status])}
                     >
                       <span className="tabular font-semibold">{zoned(r.startsAt, ctx.timeZone).time}</span>{" "}
                       <span className="font-medium">{r.customerName}</span>
-                      <span className="block truncate text-taupe-deep">
+                      <span className="block truncate text-muted">
                         {name(r.service.name)}
                         {ctx.scope === "all" && ` · ${name(r.barber.name)}`}
                       </span>
@@ -551,7 +557,7 @@ async function ListView({
 
   return (
     <>
-      <p className="mb-3 text-sm text-taupe-deep">{format(t.common.results, { count: result.total })}</p>
+      <p className="mb-3 text-sm text-muted">{format(t.common.results, { count: result.total })}</p>
       <TableFrame label={t.appointments.title}>
         <thead>
           <tr>
@@ -567,7 +573,7 @@ async function ListView({
           {result.rows.map((r) => {
             const when = zoned(r.startsAt, ctx.timeZone);
             return (
-              <tr key={r.id} className="hover:bg-paper-deep/40">
+              <tr key={r.id} className="hover:bg-stone/40">
                 <td className={cn(td, "tabular whitespace-nowrap")}>
                   <Link href={link({ open: r.id, page: query.page })} scroll={false} className="font-medium underline-offset-4 hover:underline">
                     {tableDate(when.date, locale, dict)}, {when.time}
@@ -582,7 +588,7 @@ async function ListView({
                 <td className={td}>
                   <StatusBadge status={r.status} label={t.status[r.status]} />
                 </td>
-                <td className={cn(td, "tabular text-taupe-deep")}>{r.reference}</td>
+                <td className={cn(td, "tabular text-muted")}>{r.reference}</td>
               </tr>
             );
           })}

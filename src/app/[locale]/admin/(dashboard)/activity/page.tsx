@@ -11,7 +11,18 @@ import { db } from "@/lib/server/db";
 import { adminContext } from "@/lib/server/admin-context";
 import { auditGroups, listAuditLog, type AuditGroup } from "@/lib/server/audit";
 import { hrefWith, queryOf } from "@/components/admin/filters";
-import { EmptyState, Forbidden, PageHeader, PageSkeleton, Pagination, TableFrame, td, th } from "@/components/admin/ui";
+import {
+  EmptyState,
+  Forbidden,
+  PageHeader,
+  PageSkeleton,
+  Pagination,
+  segment,
+  segmentGroup,
+  TableFrame,
+  td,
+  th,
+} from "@/components/admin/ui";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dict = await getDictionary();
@@ -52,13 +63,13 @@ async function Activity({ locale, dict, searchParams }: { locale: Locale; dict: 
   return (
     <>
       <PageHeader title={t.title} lead={t.lead} />
-      <nav aria-label={t.filterLabel} className="mt-6 flex flex-wrap gap-1">
+      <nav aria-label={t.filterLabel} className={cn(segmentGroup, "mt-6")}>
         {[undefined, ...(Object.keys(auditGroups) as AuditGroup[])].map((g) => (
           <Link
             key={g ?? "all"}
             href={hrefWith(base, {}, { group: g })}
             aria-current={group === g ? "true" : undefined}
-            className={cn("rounded-full px-3 py-1.5 text-sm", group === g ? "bg-ink text-paper" : "text-taupe-deep hover:bg-paper-deep hover:text-ink")}
+            className={segment(group === g)}
           >
             {g ? t.groups[g] : t.all}
           </Link>
@@ -81,13 +92,13 @@ async function Activity({ locale, dict, searchParams }: { locale: Locale; dict: 
               <tbody>
                 {result.rows.map((r) => (
                   <tr key={r.id}>
-                    <td className={cn(td, "tabular whitespace-nowrap text-taupe-deep")}>{dateTime(r.createdAt, ctx.timeZone, locale, dict)}</td>
+                    <td className={cn(td, "tabular whitespace-nowrap text-muted")}>{dateTime(r.createdAt, ctx.timeZone, locale, dict)}</td>
                     <td className={td}>{r.actor?.name ?? t.anonymous}</td>
                     <td className={td}>
                       {t.labels[r.action as keyof typeof t.labels] ?? r.action}
-                      {r.entityId && <span className="block text-xs text-taupe-deep">{r.entityType} · {r.entityId}</span>}
+                      {r.entityId && <span className="block text-xs text-muted">{r.entityType} · {r.entityId}</span>}
                     </td>
-                    <td className={cn(td, "max-w-md break-words text-xs text-taupe-deep")}>{details(r.metadata)}</td>
+                    <td className={cn(td, "max-w-md break-words text-xs text-muted")}>{details(r.metadata)}</td>
                   </tr>
                 ))}
               </tbody>

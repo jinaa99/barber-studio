@@ -52,6 +52,7 @@ export function RevenueTrend({
       tableLabel={dict.admin.analytics.showTable}
       periodLabel={periodHeading(dict, trend.granularity)}
       valueLabel={dict.admin.analytics.revenue}
+      emptyLabel={dict.admin.analytics.noData}
     />
   );
 }
@@ -80,6 +81,7 @@ export function BookingTrend({
       tableLabel={dict.admin.analytics.showTable}
       periodLabel={periodHeading(dict, trend.granularity)}
       valueLabel={dict.admin.analytics.appointments}
+      emptyLabel={dict.admin.analytics.noData}
     />
   );
 }

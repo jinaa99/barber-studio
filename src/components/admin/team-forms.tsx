@@ -51,7 +51,7 @@ export function ResetPasswordButton({ userId, name, labels }: { userId: string; 
       {(close) => (
         <ActionForm action={resetPasswordAction} onSuccess={close} className="space-y-4">
           <input type="hidden" name="userId" value={userId} />
-          <p className="text-sm text-taupe-deep">{labels.resetHint}</p>
+          <p className="text-sm text-muted">{labels.resetHint}</p>
           <TextField label={labels.password} name="password" type="password" autoComplete="new-password" minLength={12} maxLength={200} hint={labels.passwordHint} required />
           <div className="flex justify-end pt-2">
             <SubmitButton>{labels.save}</SubmitButton>

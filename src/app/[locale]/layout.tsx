@@ -1,23 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { Onest } from "next/font/google";
 import { locales } from "@/i18n/config";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { getStudioProfile } from "@/lib/data";
 import { siteOrigin } from "@/lib/metadata";
 import "../globals.css";
 
-// Both families ship Cyrillic Extended, which covers Mongolian Ө ө Ү ү.
-const manrope = Manrope({
-  variable: "--font-manrope",
+// One variable family for both languages. Cyrillic Extended covers Mongolian Ө ө Ү ү.
+const onest = Onest({
+  variable: "--font-onest",
   subsets: ["latin", "cyrillic", "cyrillic-ext"],
-  display: "swap",
-});
-
-const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
-  subsets: ["latin", "cyrillic", "cyrillic-ext"],
-  weight: ["400", "500"],
-  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -36,7 +28,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#f3efe7",
+  themeColor: "#f4f4f1",
   width: "device-width",
   initialScale: 1,
 };
@@ -46,7 +38,7 @@ export default async function LocaleLayout({ children }: LayoutProps<"/[locale]"
   const locale = await getLocale();
 
   return (
-    <html lang={locale} id="top" className={`${manrope.variable} ${cormorant.variable}`}>
+    <html lang={locale} id="top" className={onest.variable}>
       <body className="flex min-h-dvh flex-col">{children}</body>
     </html>
   );

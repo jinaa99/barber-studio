@@ -12,7 +12,7 @@ import { dateTime, displayPhone, tableDate, zoned } from "@/lib/admin/format";
 import { db } from "@/lib/server/db";
 import { adminContext } from "@/lib/server/admin-context";
 import { getCustomerDetail } from "@/lib/server/customers";
-import { Forbidden, Notice, NotFoundState, PageHeader, PageSkeleton, Pagination, Section, StatTile, StatusBadge, TableFrame, Tag, td, textLink, th } from "@/components/admin/ui";
+import { Forbidden, Notice, NotFoundState, PageHeader, PageSkeleton, Pagination, Section, StatGroup, StatTile, StatusBadge, TableFrame, Tag, td, textLink, th } from "@/components/admin/ui";
 
 export async function generateMetadata(): Promise<Metadata> {
   const dict = await getDictionary();
@@ -47,7 +47,7 @@ async function Customer({ locale, dict, params, searchParams }: { locale: Locale
 
   return (
     <>
-      <Link href={back} className="mb-4 inline-flex items-center gap-2 text-sm text-taupe-deep hover:text-ink">
+      <Link href={back} className="mb-4 inline-flex items-center gap-2 text-sm text-muted hover:text-ink">
         <ArrowLeft aria-hidden className="size-4" strokeWidth={1.75} />
         {t.customers.title}
       </Link>
@@ -58,30 +58,30 @@ async function Customer({ locale, dict, params, searchParams }: { locale: Locale
       />
       <Notice className="mt-6">{t.customers.privacy}</Notice>
 
-      <dl className="mt-6 grid gap-x-8 gap-y-2 text-sm sm:grid-cols-[8rem_1fr]">
-        <dt className="text-taupe-deep">{t.common.phone}</dt>
+      <dl className="mt-6 grid gap-x-8 gap-y-2 rounded-2xl border border-line bg-surface px-5 py-4 text-sm sm:grid-cols-[8rem_1fr] sm:px-6">
+        <dt className="text-muted">{t.common.phone}</dt>
         <dd>
           <a href={`tel:+${customer.phone}`} className={cn(textLink, "tabular")}>
             {displayPhone(customer.phone)}
           </a>
         </dd>
-        <dt className="text-taupe-deep">{t.common.email}</dt>
+        <dt className="text-muted">{t.common.email}</dt>
         <dd className="break-all">{customer.email ? <a href={`mailto:${customer.email}`} className={textLink}>{customer.email}</a> : "—"}</dd>
       </dl>
 
-      <div className={cn("mt-10 grid gap-6", ctx.can("finance.view") ? "sm:grid-cols-4" : "sm:grid-cols-3")}>
+      <StatGroup className={cn("mt-6 grid-cols-2", ctx.can("finance.view") ? "sm:grid-cols-4" : "sm:grid-cols-3")}>
         <StatTile label={t.customers.completed} value={detail.byStatus.COMPLETED ?? 0} />
         <StatTile label={t.customers.cancelled} value={detail.byStatus.CANCELLED ?? 0} />
         <StatTile label={t.customers.noShows} value={detail.byStatus.NO_SHOW ?? 0} />
         {ctx.can("finance.view") && <StatTile label={t.customers.completedSpend} value={formatPrice(detail.completedSpend, locale)} />}
-      </div>
+      </StatGroup>
 
-      <Section id={`history-${locale}`} title={t.customers.history}>
+      <Section id={`history-${locale}`} title={t.customers.history} flush={detail.total > 0}>
         {detail.total === 0 ? (
-          <p className="text-sm text-taupe-deep">{t.customers.historyEmpty}</p>
+          <p className="text-sm text-muted">{t.customers.historyEmpty}</p>
         ) : (
           <>
-            <TableFrame label={t.customers.history}>
+            <TableFrame label={t.customers.history} flush>
               <thead>
                 <tr>
                   <th scope="col" className={th}>{t.common.date}</th>
@@ -102,7 +102,7 @@ async function Customer({ locale, dict, params, searchParams }: { locale: Locale
                     </td>
                     <td className={td}>
                       {name(a.service.name)}
-                      {a.notes && <p className="mt-1 whitespace-pre-line text-xs text-taupe-deep">{a.notes}</p>}
+                      {a.notes && <p className="mt-1 whitespace-pre-line text-xs text-muted">{a.notes}</p>}
                     </td>
                     <td className={td}>{name(a.barber.name)}</td>
                     <td className={td}>
@@ -113,7 +113,9 @@ async function Customer({ locale, dict, params, searchParams }: { locale: Locale
                 ))}
               </tbody>
             </TableFrame>
-            <Pagination dict={dict} page={detail.page} pageSize={detail.pageSize} total={detail.total} href={(p) => (p === 1 ? self : `${self}?page=${p}`)} />
+            <div className="px-5 pb-4 sm:px-6">
+              <Pagination dict={dict} page={detail.page} pageSize={detail.pageSize} total={detail.total} href={(p) => (p === 1 ? self : `${self}?page=${p}`)} />
+            </div>
           </>
         )}
       </Section>

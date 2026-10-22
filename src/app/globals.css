@@ -3,52 +3,99 @@
 /*
  * Design tokens — the single source of truth for colour, type, spacing and
  * motion. Re-skinning the site for a new studio starts here.
+ *
+ * Neutrals carry the design; the olive accent marks only what is active,
+ * selected or focused. Text colours are chosen for contrast, not mood:
+ * `muted` passes 4.5:1 on canvas, stone and surface; `faint` (3:1) is for
+ * icons, rules and decoration only.
  */
 @theme {
-  /* Palette: paper, ink, sand, taupe, muted brass */
-  --color-paper: #f3efe7;
-  --color-paper-deep: #e8e1d4;
-  --color-sand: #d6cab6;
-  --color-taupe: #8a7e6f;
-  --color-taupe-deep: #5c5348;
-  --color-ink: #161513;
-  --color-ink-soft: #24221f;
-  --color-ink-muted: #3a3732;
-  --color-brass: #9b7f4f;
-  --color-brass-soft: #c2a877;
-  --color-line: rgb(22 21 19 / 0.12);
-  --color-line-strong: rgb(22 21 19 / 0.24);
-  --color-line-inverse: rgb(243 239 231 / 0.16);
-  --color-danger: #9a3b2c;
+  /* Neutrals */
+  --color-canvas: #f4f4f1;
+  --color-surface: #ffffff;
+  --color-stone: #e9e8e3;
+  --color-stone-deep: #d9d8d1;
+  --color-ink: #121211;
+  --color-ink-soft: #1b1b19;
+  --color-ink-muted: #2c2c29;
+  --color-muted: #5c5c57;
+  --color-faint: #8b8b84;
+  --color-line: rgb(18 18 17 / 0.1);
+  --color-line-strong: rgb(18 18 17 / 0.2);
+  --color-line-inverse: rgb(244 244 241 / 0.14);
 
-  /* Type scale */
-  --text-eyebrow: 0.6875rem;
-  --text-eyebrow--line-height: 1.2;
-  --text-eyebrow--letter-spacing: 0.18em;
-  --text-display-xl: clamp(2.75rem, 8.2vw, 8rem);
-  --text-display-xl--line-height: 0.96;
-  --text-display-xl--letter-spacing: -0.035em;
-  --text-display-lg: clamp(2.25rem, 5.4vw, 5rem);
-  --text-display-lg--line-height: 1;
-  --text-display-lg--letter-spacing: -0.03em;
-  --text-display-md: clamp(1.875rem, 3.6vw, 3.25rem);
-  --text-display-md--line-height: 1.06;
-  --text-display-md--letter-spacing: -0.025em;
-  --text-statement: clamp(1.625rem, 3.4vw, 3rem);
-  --text-statement--line-height: 1.18;
-  --text-statement--letter-spacing: -0.015em;
+  /* Accent: a restrained olive. `accent` passes 4.5:1 as text on canvas; `accent-soft` on ink. */
+  --color-accent: #56602f;
+  --color-accent-deep: #444c24;
+  --color-accent-soft: #bcc58f;
+  --color-accent-wash: #e6e8d6;
+
+  /* Semantic status colours (always paired with text, never colour alone). */
+  --color-danger: #a1361f;
+  --color-danger-wash: #f6e5e0;
+  --color-warning: #8a5a0b;
+  --color-warning-wash: #f5ead3;
+  --color-success: #2f6a43;
+  --color-success-wash: #e0ece2;
+
+  /*
+   * Type scale (Onest). Large sizes tighten their tracking; body copy keeps
+   * the face's default. Line heights are set per size so headings never need
+   * one-off `leading-*` fixes.
+   */
+  --text-hero: clamp(3rem, 8.6vw, 9rem);
+  --text-hero--line-height: 0.9;
+  --text-hero--letter-spacing: -0.052em;
+  --text-display-lg: clamp(2.5rem, 5.8vw, 5.5rem);
+  --text-display-lg--line-height: 0.96;
+  --text-display-lg--letter-spacing: -0.045em;
+  --text-display-md: clamp(2rem, 3.7vw, 3.375rem);
+  --text-display-md--line-height: 1.02;
+  --text-display-md--letter-spacing: -0.036em;
+  --text-display-sm: clamp(1.5rem, 2.3vw, 2.125rem);
+  --text-display-sm--line-height: 1.1;
+  --text-display-sm--letter-spacing: -0.028em;
+  --text-statement: clamp(1.625rem, 3.4vw, 3.125rem);
+  --text-statement--line-height: 1.12;
+  --text-statement--letter-spacing: -0.032em;
+  --text-lead: clamp(1.0625rem, 1.25vw, 1.25rem);
+  --text-lead--line-height: 1.55;
+  --text-lead--letter-spacing: -0.012em;
+  --text-eyebrow: 0.8125rem;
+  --text-eyebrow--line-height: 1.3;
+  --text-eyebrow--letter-spacing: -0.003em;
+  --text-micro: 0.6875rem;
+  --text-micro--line-height: 1.2;
+  --text-micro--letter-spacing: 0.06em;
 
   /* Layout */
-  --container-page: 90rem;
+  --container-page: 92rem;
   --container-prose: 38rem;
-  --spacing-section: clamp(5rem, 11vw, 10rem);
-  --spacing-header: 4.5rem;
+  --spacing-section: clamp(5rem, 10vw, 9.5rem);
+  --spacing-section-sm: clamp(3.5rem, 7vw, 6rem);
+  --spacing-header: 4.25rem;
 
-  /* Motion */
-  --ease-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
-  --ease-cinematic: cubic-bezier(0.16, 1, 0.3, 1);
+  /*
+   * Motion. `standard` for state changes (hover, select, open), `emphasis`
+   * for things arriving (sections, dialogs, images). Durations: 160ms for
+   * hover/press, 240ms for state, 500–700ms for entrances.
+   */
+  --ease-standard: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-emphasis: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
 
-  --animate-slow-zoom: slow-zoom 24s var(--ease-soft) forwards;
+  --animate-slow-zoom: slow-zoom 24s var(--ease-standard) forwards;
+  --animate-dialog-in: dialog-in 280ms var(--ease-emphasis);
+  --animate-fade-in: fade-in 240ms var(--ease-standard);
+  --animate-shake: shake 360ms var(--ease-standard);
+  --animate-rise: rise 520ms var(--ease-emphasis) backwards;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 0.625rem, 0);
+    }
+  }
 
   @keyframes slow-zoom {
     from {
@@ -56,6 +103,39 @@
     }
     to {
       transform: scale(1);
+    }
+  }
+
+  @keyframes dialog-in {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 0.75rem, 0) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes shake {
+    0%,
+    100% {
+      transform: none;
+    }
+    25% {
+      transform: translateX(-3px);
+    }
+    75% {
+      transform: translateX(3px);
     }
   }
 }
@@ -77,35 +157,44 @@
  */
 @custom-variant cinematic (@media (scripting: enabled) and (prefers-reduced-motion: no-preference));
 
+/* Controls that only work with JavaScript (e.g. gallery filters) stay hidden without it. */
+@custom-variant scripted (@media (scripting: enabled));
+
 @theme inline {
-  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-cormorant), ui-serif, Georgia, serif;
+  --font-sans: var(--font-onest), ui-sans-serif, system-ui, sans-serif;
 }
 
 @layer base {
   html {
-    background-color: var(--color-paper);
+    background-color: var(--color-canvas);
     color: var(--color-ink);
     -webkit-text-size-adjust: 100%;
     scroll-padding-top: var(--spacing-header);
   }
 
   body {
-    background-color: var(--color-paper);
+    background-color: var(--color-canvas);
     font-family: var(--font-sans);
-    font-feature-settings: "ss01", "cv11";
+    font-optical-sizing: auto;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* Headings carry the weight of the type system: medium, never bold. */
+  h1,
+  h2,
+  h3 {
+    font-weight: 500;
+  }
+
   ::selection {
-    background-color: var(--color-ink);
-    color: var(--color-paper);
+    background-color: var(--color-accent-soft);
+    color: var(--color-ink);
   }
 
   :focus-visible {
-    outline: 1.5px solid var(--color-brass);
+    outline: 2px solid var(--color-accent);
     outline-offset: 3px;
   }
 
@@ -114,12 +203,36 @@
       scroll-behavior: smooth;
     }
   }
+
+  dialog[open] {
+    animation: var(--animate-dialog-in);
+  }
+
+  dialog::backdrop {
+    background-color: rgb(18 18 17 / 0.42);
+    backdrop-filter: blur(2px);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    dialog[open]::backdrop {
+      animation: var(--animate-fade-in);
+    }
+  }
 }
 
+/* Small sentence-case label above a heading or a value. */
 @utility eyebrow {
   font-size: var(--text-eyebrow);
   line-height: var(--text-eyebrow--line-height);
   letter-spacing: var(--text-eyebrow--letter-spacing);
+  font-weight: 500;
+}
+
+/* Tiny uppercase tag, used sparingly (scene counters, sample tags). */
+@utility micro {
+  font-size: var(--text-micro);
+  line-height: var(--text-micro--line-height);
+  letter-spacing: var(--text-micro--letter-spacing);
   text-transform: uppercase;
   font-weight: 600;
 }
@@ -134,28 +247,115 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Prices and metrics: tabular figures, slightly tightened. */
+@utility numeric {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* An underline that draws in from the left on hover and focus. */
+@utility link-draw {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 320ms var(--ease-emphasis);
+
+  &:hover,
+  &:focus-visible,
+  &[aria-current="page"] {
+    background-size: 100% 1px;
+  }
+}
+
 /*
- * Scroll reveal. Content is only hidden when scripting is available, so the
- * page stays fully readable without JavaScript and with reduced motion.
+ * Scroll reveal. Content is only hidden when scripting is available and
+ * motion is welcome, so the page stays fully readable otherwise. Variants:
+ * `up` (default) for copy, `fade` for wide blocks, `mask` for photographs
+ * (a clip that opens upward), `scale` for a photo settling into its frame.
  */
 @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
   [data-reveal] {
-    opacity: 0;
-    transform: translate3d(0, 1.25rem, 0);
-    transition:
-      opacity 900ms var(--ease-cinematic),
-      transform 1100ms var(--ease-cinematic);
     transition-delay: var(--reveal-delay, 0ms);
   }
 
-  [data-reveal="shown"] {
-    opacity: 1;
-    transform: none;
+  [data-reveal=""][data-variant="up"] {
+    opacity: 0;
+    transform: translate3d(0, 1rem, 0);
+  }
+  [data-variant="up"] {
+    transition:
+      opacity 700ms var(--ease-emphasis),
+      transform 800ms var(--ease-emphasis);
+  }
+
+  [data-reveal=""][data-variant="fade"] {
+    opacity: 0;
+  }
+  [data-variant="fade"] {
+    transition: opacity 900ms var(--ease-standard);
+  }
+
+  [data-reveal=""][data-variant="mask"] {
+    clip-path: inset(12% 0 0 0);
+    opacity: 0;
+  }
+  [data-variant="mask"] {
+    transition:
+      clip-path 1000ms var(--ease-emphasis),
+      opacity 500ms var(--ease-standard);
+  }
+
+  [data-reveal=""][data-variant="scale"] img {
+    transform: scale(1.06);
+  }
+  [data-reveal=""][data-variant="scale"] {
+    opacity: 0;
+  }
+  [data-variant="scale"] {
+    transition: opacity 700ms var(--ease-standard);
+  }
+  [data-variant="scale"] img {
+    transition: transform 1400ms var(--ease-emphasis);
+  }
+}
+
+/*
+ * Route changes crossfade with a short rise (React <ViewTransition> in the
+ * site layout). Browsers without the View Transitions API simply swap pages.
+ */
+::view-transition-old(.page) {
+  animation: 160ms var(--ease-exit) both vt-fade-out;
+}
+::view-transition-new(.page) {
+  animation: 420ms var(--ease-emphasis) 60ms both vt-rise-in;
+}
+
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .motion-safe-zoom {
     animation: none !important;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+
+  dialog[open] {
+    animation: none;
   }
 }

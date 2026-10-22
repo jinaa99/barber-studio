@@ -8,7 +8,10 @@ import type { BookingDict } from "./types";
 
 export const bookingSteps: BookingStep[] = ["service", "barber", "time", "details", "review"];
 
-/** Step indicator. Completed steps are buttons so visitors can jump back. */
+/**
+ * Step indicator with a continuous progress rule underneath. Completed steps
+ * are buttons so visitors can jump back; later steps are plain text.
+ */
 export function StepProgress({
   dict,
   current,
@@ -19,19 +22,16 @@ export function StepProgress({
   onSelect: (step: BookingStep) => void;
 }) {
   const currentIndex = bookingSteps.indexOf(current);
+  const progress = (currentIndex + 1) / bookingSteps.length;
+  const label = format(dict.booking.stepOf, { current: currentIndex + 1, total: bookingSteps.length });
   return (
-    <nav aria-label={format(dict.booking.stepOf, { current: currentIndex + 1, total: bookingSteps.length })}>
-      <p className="eyebrow text-taupe-deep sm:hidden">
-        {format(dict.booking.stepOf, { current: currentIndex + 1, total: bookingSteps.length })} ·{" "}
-        <span className="text-ink">{dict.booking.steps[current]}</span>
+    <nav aria-label={label}>
+      <p className="flex items-baseline justify-between gap-4 text-sm sm:hidden">
+        <span className="font-medium">{dict.booking.steps[current]}</span>
+        <span className="tabular text-muted">{label}</span>
       </p>
-      <div aria-hidden className="mt-3 flex gap-1.5 sm:hidden">
-        {bookingSteps.map((step, i) => (
-          <span key={step} className={cn("h-0.5 flex-1 transition-colors duration-500", i <= currentIndex ? "bg-ink" : "bg-line-strong")} />
-        ))}
-      </div>
 
-      <ol className="hidden border-b border-line sm:flex">
+      <ol className="hidden sm:flex">
         {bookingSteps.map((step, i) => {
           const done = i < currentIndex;
           const active = i === currentIndex;
@@ -39,36 +39,44 @@ export function StepProgress({
             <>
               <span
                 className={cn(
-                  "tabular flex size-6 items-center justify-center rounded-full border text-[0.6875rem] font-semibold transition-colors duration-300",
-                  active && "border-ink bg-ink text-paper",
-                  done && "border-ink text-ink",
-                  !active && !done && "border-line-strong text-taupe-deep",
+                  "tabular flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium transition-[background-color,color,border-color] duration-300",
+                  active && "bg-ink text-canvas",
+                  done && "bg-accent-wash text-accent-deep",
+                  !active && !done && "border border-line-strong text-muted",
                 )}
               >
-                {done ? <Check className="size-3" strokeWidth={2.5} /> : i + 1}
+                {done ? <Check aria-hidden className="size-3.5" strokeWidth={2.25} /> : i + 1}
               </span>
-              <span className={cn("text-sm", active ? "font-semibold text-ink" : done ? "text-ink" : "text-taupe-deep")}>
+              <span className={cn("truncate text-sm", active ? "font-medium text-ink" : done ? "text-ink" : "text-muted")}>
                 {dict.booking.steps[step]}
               </span>
             </>
           );
           return (
-            <li
-              key={step}
-              aria-current={active ? "step" : undefined}
-              className={cn("relative flex-1 pb-5", active && "after:absolute after:inset-x-0 after:-bottom-px after:h-px after:bg-ink")}
-            >
+            <li key={step} aria-current={active ? "step" : undefined} className="min-w-0 flex-1 pb-4">
               {done ? (
-                <button type="button" onClick={() => onSelect(step)} className="flex items-center gap-3 hover:opacity-70">
+                <button
+                  type="button"
+                  onClick={() => onSelect(step)}
+                  className="-m-1 flex max-w-full items-center gap-2.5 rounded-full p-1 transition-colors hover:bg-surface"
+                >
                   {content}
                 </button>
               ) : (
-                <span className="flex items-center gap-3">{content}</span>
+                <span className="flex items-center gap-2.5">{content}</span>
               )}
             </li>
           );
         })}
       </ol>
+
+      {/* One continuous rule that fills as the visitor advances. */}
+      <div aria-hidden className="mt-3 h-0.5 overflow-hidden rounded-full bg-line sm:mt-0">
+        <div
+          className="h-full origin-left rounded-full bg-ink transition-transform duration-500 ease-emphasis"
+          style={{ transform: `scaleX(${progress})` }}
+        />
+      </div>
     </nav>
   );
 }

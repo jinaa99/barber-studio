@@ -18,6 +18,8 @@ The owner handles all Git operations.
   `@prisma/adapter-pg`). zod for server-side validation. Booking backend: [docs/BOOKING.md](docs/BOOKING.md).
 - sharp (server-side image re-encoding for the media library). Media library, providers,
   storage and security: [docs/MEDIA.md](docs/MEDIA.md).
+- three.js 0.186 + React Three Fiber 9.8 (pinned) for the home hero's 3D walk-through only;
+  GSAP ScrollTrigger maps native scroll onto it. Assets and licences: [docs/MEDIA.md](docs/MEDIA.md).
 - Meta (Facebook Pages, Instagram professional accounts) via Graph API v26.0, no SDK. Setup,
   permissions and limits: [docs/SOCIAL.md](docs/SOCIAL.md).
 - This Next version differs from older training data. Check
@@ -77,6 +79,7 @@ src/
   lib/media/               pure media logic: media references, website slots, stock provider
                            parsing and host allow-lists, file-type sniffing
   lib/social/              pure Meta logic: scopes, config, OAuth URLs, response/error parsing
+  lib/hero/journey.ts      pure hero timeline: camera keys (landscape/portrait), beats, door/overlay curves
   lib/server/              server-only: db client, booking service, auth/sessions,
                            accounts, notifications, audit, rate limit, origin check, settings,
                            appointments, catalog, staff, customers, metrics, content,
@@ -85,12 +88,15 @@ src/
 prisma/                    schema, migrations (hand-written constraints at the end), seed
 scripts/                   local db, admin bootstrap, demo removal, email retry, test runner
 tests/integration/         database tests
-  components/ui|layout|sections|booking|media|visit|admin
+  components/ui|layout|sections|booking|media|visit|admin|hero3d
 ```
 
 - **Server components by default.** Client components are the header, language
-  switcher, `Reveal`, the hero sequence, the booking flow and the dashboard's forms,
-  dialogs (native `<dialog>`), navigation and schedule editor.
+  switcher, `Reveal`, the hero stage and its 3D scene, the gallery grid (barber filter), the public
+  error boundary, the booking flow and the dashboard's forms, dialogs (native `<dialog>`),
+  navigation and schedule editor. Client-only strings without a server parent come from
+  a small context (`SiteStrings` on the site, `AdminStrings` in the dashboard), never a
+  whole dictionary import.
 - **Content** goes through `lib/data.ts`. Database rows store `LocalizedText`
   (`{ mn, en }`) as JSON; getters return single-language view models. Reads are
   `use cache` + `cacheTag` (`catalogTag`, `settingsTag`, `contentTag`, `mediaTag`); call `updateTag` after writes.
@@ -124,6 +130,17 @@ tests/integration/         database tests
   pages with editable copy use `getSiteDictionary(locale)`. `content/site.ts` is only the default.
 - **Times:** appointments are UTC instants; working hours are minutes in the
   studio zone (`BusinessSettings.timeZone`, Asia/Ulaanbaatar). Convert with `lib/booking/time.ts`.
+- **Home hero (3D):** `HomeHero` (server: copy, CTAs, per-locale posters) → `HeroStage`
+  (client: picks `scene` or `still` once via `useSyncExternalStore`; still = reduced motion,
+  no WebGL, constrained device or lost context) → `hero-scene.tsx`, loaded with
+  `next/dynamic({ ssr: false })`. Scroll progress is a mutable object tweened by ScrollTrigger;
+  the scene reads it in `useFrame` and never re-renders React per frame. The canvas renders on
+  demand (continuous only once the animated interior is in view) and stops off screen.
+  Materials, textures and custom geometries are created once in the scene kit (`kit.tsx`) and
+  disposed on unmount. Camera, door and overlay timing live only in `lib/hero/journey.ts`
+  (tested: continuity, door clearance, room bounds). Mutate three.js objects through the
+  `useFrame` state argument or refs, not hook return values (React Compiler lint). After
+  changing the opening frame, re-render the posters (docs/MEDIA.md).
 - **Booking state** lives in `components/booking/use-booking-store.ts`
   (`useSyncExternalStore` over sessionStorage), so a language switch or reload keeps progress.
 
@@ -133,14 +150,36 @@ tests/integration/         database tests
   *and* `en.ts`. `en` is typed as `Dictionary`, so a missing key fails the
   type-check. Content data uses `LocalizedText`. Mongolian is the default language.
 - **Links** use `localizedPath(locale, routes.x)` from `lib/navigation.ts`.
-- **Contrast:** `text-taupe` (3.5:1 on paper) is for icons and decoration only; readable
-  text uses `text-taupe-deep` or darker, and `text-paper/60`+ on ink.
-- **Design tokens** are in `src/app/globals.css` (`@theme`): palette `paper`,
-  `paper-deep`, `sand`, `taupe`, `taupe-deep`, `ink`, `brass`; type scale
-  `text-display-*`, `text-statement`, `eyebrow`; `max-w-page`, `py-section`.
-  Use tokens, not raw hex values or one-off sizes.
-- **Type:** Manrope (UI and body) plus Cormorant Garamond italic for sparing
-  display accents. Both load the `cyrillic-ext` subset for Ө/Ү.
+- **Contrast:** `text-faint` (≈3:1) is for icons, rules and decoration only; readable
+  text uses `text-muted` (≥5.4:1 on canvas, stone and surface) or darker, and
+  `text-canvas/65`+ on ink. `text-accent` passes 4.5:1 on canvas; use `accent-soft` on ink.
+- **Design tokens** are in `src/app/globals.css` (`@theme`). Neutrals: `canvas` (page),
+  `surface` (white panels), `stone`/`stone-deep` (alternate sections, tracks), `ink`,
+  `ink-muted`, `muted`, `faint`, `line`/`line-strong`/`line-inverse`. Accent: a muted olive
+  (`accent`, `accent-deep`, `accent-soft`, `accent-wash`). Status: `danger`, `warning`,
+  `success`, each with a `-wash`. Type scale: `text-hero`, `text-display-lg|md|sm`,
+  `text-statement`, `text-lead`, `eyebrow` (sentence-case label), `micro` (tiny uppercase
+  tag, sparing). Numbers use `numeric` (prices, metrics) or `tabular`. Layout:
+  `max-w-page`, `py-section`, `py-section-sm`. Use tokens, not raw hex values or one-off sizes.
+- **Accent discipline:** olive marks what is active, selected, focused or in progress
+  (active nav dot, focus ring, completed booking steps, hovered chart column, primary
+  button hover). It is not for every label, index number or border.
+- **Type:** Onest only (variable, `latin` + `cyrillic` + `cyrillic-ext` for Ө ө Ү ү),
+  for both languages. Headings are weight 500 with negative tracking from the scale;
+  no italic serif accents, no all-caps headings. Labels are sentence case (`eyebrow`).
+- **Public site composition:** editorial and asymmetric. `SectionHeading` has `stack` and
+  `split` layouts; `PageIntro` sets the title left and the lead on its baseline right.
+  Alternate backgrounds deliberately (canvas → surface → stone → ink) rather than
+  repeating one section pattern. Photography is square-cornered; interactive controls
+  (booking options, inputs) use `rounded-lg`/`rounded-xl`; buttons are pills.
+- **Dashboard UI:** white panels (`Section`, `rounded-2xl border-line bg-surface`) on the
+  canvas. Use the `ui.tsx` primitives: `PageHeader`, `Section` (`flush` for edge-to-edge
+  tables/lists), `StatGroup` + `StatTile` (one hairline-split surface, not separate cards),
+  `StatusBadge` (tinted chip + dot + text), `segmentGroup`/`segment()` for view switches and
+  filters, `inputClass`/`compactInputClass`/`field`, `smallButton`/`primarySmallButton`/
+  `dangerSmallButton`, `TableFrame` + `th`/`td`, `Notice`, `EmptyState`, `Pagination`.
+  Navigation is grouped (`operations`, `catalog`, `insights`, `website`, `system`) in the
+  rail; the desktop top bar shows the breadcrumb, the public site link and the language.
 - **Icons:** Lucide only, `strokeWidth` 1.25–1.75, `aria-hidden` when decorative.
   Lucide v1 has no brand icons, so social links are text.
 - **Images:** go through `<Photo>` with a real `sizes` value and a fixed ratio.
@@ -151,16 +190,23 @@ tests/integration/         database tests
   marked as demo (`site.isDemo`, `<DemoNotice>`, `isSample`). Seeded
   appointments are `isDemo`. Never present samples as real, and never tell a
   customer an email was sent unless the notification is `SENT`.
-- **Motion:** subtle and purposeful. Use `Reveal` for fade-ups. Everything must
-  respect `prefers-reduced-motion`, and content stays visible without JS.
+- **Motion:** subtle and purposeful. Easing tokens: `ease-standard` (state changes,
+  160–240ms) and `ease-emphasis` (entrances, 500–1000ms). `Reveal` has variants: `up` for
+  copy, `fade` for wide blocks, `mask` for photographs, `scale` for gallery images; don't
+  use one variant everywhere. Other pieces: `animate-rise` (menu items, booking steps),
+  `animate-shake` (submit errors), `animate-fade-in` (field errors), `link-draw` (drawn
+  underline), `dialog[open]` entrance in `globals.css`, and route crossfades through
+  React `<ViewTransition default="page">` in the site layout. JS-only controls use the
+  `scripted:` variant. Everything must respect `prefers-reduced-motion`, and content
+  stays visible without JS.
 - Layouts must work at 390px with a 16px gutter and no horizontal scroll.
   Check mobile as carefully as desktop.
 
 ## Phases
 
 - Phase 01 (done): foundation, all public pages, i18n, frontend booking demo.
-- Phase 02 (done): scroll-controlled cinematic hero (`components/sections/hero-sequence.tsx`,
-  `heroClipRecords` in `content/media.ts`, GSAP ScrollTrigger). Media sources and licences: [docs/MEDIA.md](docs/MEDIA.md).
+- Phase 02 (done, superseded by Cinematic hero V2): scroll-crossfade hero over four clips
+  (`heroClipRecords` in `content/media.ts`, still the defaults of the dashboard's hero scenes).
 - Phase 03 (done): PostgreSQL/Prisma, DB-backed `lib/data.ts`, real booking behind
   `BookingProvider`, staff auth and dashboard, notifications, seed, tests. See docs/BOOKING.md.
 - Phase 04 (done): full staff dashboard with roles (ADMIN/STAFF/BARBER), calendar and staff
@@ -169,6 +215,10 @@ tests/integration/         database tests
   database-backed media for hero scenes, page photos, gallery and barber photos. See docs/MEDIA.md.
 - Phase 06 (done): Facebook Page and Instagram professional account connections, read-only
   insights, token refresh (`npm run social:check`). See docs/SOCIAL.md.
+- Visual redesign V1 (done): Onest type system, neutral + olive tokens, editorial public
+  layouts, grouped dashboard shell and panel-based admin UI, motion system (see Conventions).
+- Cinematic hero V2 (done): scroll-directed 3D walk-through replacing the clip crossfade
+  (storefront → door → interior → barber at work → close-up → release). See docs/MEDIA.md.
 - Phase 07 (done): QA and production readiness: security headers (`next.config.ts`),
   `sitemap.ts`/`robots.ts`, contrast fixes, deployment, backups and verification status in
   [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).

@@ -42,7 +42,7 @@ async function Settings({ locale, dict }: { locale: Locale; dict: Dictionary }) 
             <dt className="font-medium">{t.timeZone}</dt>
             <dd className="mt-1">
               <span className="tabular">{rules.timeZone}</span>
-              <p className="mt-1 text-xs text-taupe-deep">{t.timeZoneHint}</p>
+              <p className="mt-1 text-xs text-muted">{t.timeZoneHint}</p>
             </dd>
           </dl>
           <div className="grid gap-6 sm:grid-cols-2">
@@ -57,13 +57,13 @@ async function Settings({ locale, dict }: { locale: Locale; dict: Dictionary }) 
             <SubmitButton>{dict.admin.common.save}</SubmitButton>
           </div>
         </ActionForm>
-        <p className="mt-10 text-sm text-taupe-deep">
+        <p className="mt-10 text-sm text-muted">
           <Link href={localizedPath(locale, routes.adminContent)} className={textLink}>
             {t.contentLink}
           </Link>
         </p>
         {ctx.can("social.manage") && (
-          <p className="mt-3 text-sm text-taupe-deep">
+          <p className="mt-3 text-sm text-muted">
             <Link href={localizedPath(locale, routes.adminSocial)} className={textLink}>
               {t.socialLink}
             </Link>

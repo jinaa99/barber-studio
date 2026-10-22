@@ -43,7 +43,7 @@ async function EditService({ locale, dict, params, searchParams }: { locale: Loc
   if (!service) return <NotFoundState dict={dict} backHref={back} />;
   return (
     <>
-      <Link href={back} className="mb-4 inline-flex items-center gap-2 text-sm text-taupe-deep hover:text-ink">
+      <Link href={back} className="mb-4 inline-flex items-center gap-2 text-sm text-muted hover:text-ink">
         <ArrowLeft aria-hidden className="size-4" strokeWidth={1.75} />
         {dict.admin.services.title}
       </Link>

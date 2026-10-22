@@ -14,12 +14,12 @@ export function DemoNotice({
   return (
     <p
       className={cn(
-        "flex items-start gap-2.5 text-xs leading-relaxed",
-        tone === "inverse" ? "text-paper/55" : "text-taupe-deep",
+        "flex items-start gap-2.5 text-[0.8125rem] leading-relaxed",
+        tone === "inverse" ? "text-canvas/65" : "text-muted",
         className,
       )}
     >
-      <Info aria-hidden className="mt-px size-3.5 shrink-0 text-brass" strokeWidth={1.75} />
+      <Info aria-hidden className={cn("mt-0.5 size-3.5 shrink-0", tone === "inverse" ? "text-canvas/50" : "text-faint")} strokeWidth={1.75} />
       <span>{children}</span>
     </p>
   );

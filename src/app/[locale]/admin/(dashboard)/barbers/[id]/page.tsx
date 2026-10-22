@@ -53,7 +53,7 @@ async function EditBarber({ locale, dict, params, searchParams }: { locale: Loca
 
   return (
     <>
-      <Link href={back} className="mb-4 inline-flex items-center gap-2 text-sm text-taupe-deep hover:text-ink">
+      <Link href={back} className="mb-4 inline-flex items-center gap-2 text-sm text-muted hover:text-ink">
         <ArrowLeft aria-hidden className="size-4" strokeWidth={1.75} />
         {t.title}
       </Link>
@@ -61,7 +61,7 @@ async function EditBarber({ locale, dict, params, searchParams }: { locale: Loca
         title={format(t.editTitle, { name: displayName })}
         actions={
           barber.active && (
-            <Link href={`${localizedPath(locale, routes.barbers)}#${barber.id}`} className="inline-flex items-center gap-1.5 text-sm text-taupe-deep hover:text-ink">
+            <Link href={`${localizedPath(locale, routes.barbers)}#${barber.id}`} className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-ink">
               {t.viewOnSite}
               <ArrowUpRight aria-hidden className="size-3.5" strokeWidth={1.75} />
             </Link>

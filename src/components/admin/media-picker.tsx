@@ -37,7 +37,7 @@ export async function mediaChoices(locale: Locale, kind: "IMAGE" | "VIDEO"): Pro
  * session, preview too.
  */
 export function MediaThumb({ src, alt, sizes, fit = "cover" }: { src: StaticImageData | string | null; alt: string; sizes: string; fit?: "cover" | "contain" }) {
-  if (!src) return <span className="absolute inset-0 bg-paper-deep" />;
+  if (!src) return <span className="absolute inset-0 bg-stone" />;
   const className = fit === "cover" ? "object-cover" : "object-contain";
   return typeof src === "string" ? (
     <Image src={src} alt={alt} fill sizes={sizes} unoptimized className={className} />
@@ -71,17 +71,17 @@ export function MediaPicker({
 }) {
   const frame = ratio === "portrait" ? "aspect-[4/5]" : "aspect-video";
   const tile =
-    "relative block overflow-hidden border-2 bg-paper-deep peer-checked:border-ink peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-brass";
+    "relative block overflow-hidden border-2 bg-stone peer-checked:border-ink peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent";
   return (
     <fieldset className="min-w-0">
       <legend className="text-sm font-semibold">{legend}</legend>
-      {hint && <p className="mt-1 text-xs leading-relaxed text-taupe-deep">{hint}</p>}
+      {hint && <p className="mt-1 text-xs leading-relaxed text-muted">{hint}</p>}
       <div className="mt-3 max-h-[26rem] overflow-y-auto overscroll-contain pr-1">
         <div className={cn("grid gap-3", ratio === "portrait" ? "grid-cols-3 sm:grid-cols-6" : "grid-cols-2 sm:grid-cols-4")}>
           {none !== undefined && (
             <label className="relative block cursor-pointer">
               <input type="radio" name={name} value="" defaultChecked={!defaultValue} className="peer sr-only" />
-              <span className={cn(tile, frame, "flex items-center justify-center border-dashed border-line-strong p-2 text-center text-xs text-taupe-deep")}>
+              <span className={cn(tile, frame, "flex items-center justify-center border-dashed border-line-strong p-2 text-center text-xs text-muted")}>
                 {none}
               </span>
             </label>
@@ -92,7 +92,7 @@ export function MediaPicker({
               <span className={cn(tile, frame, "border-transparent")}>
                 <MediaThumb src={c.src} alt={c.alt} sizes="120px" />
                 {c.library && (
-                  <span className="absolute left-1 top-1 rounded-full bg-ink/80 px-1.5 py-0.5 text-[0.625rem] font-semibold tracking-wide text-paper uppercase">
+                  <span className="absolute left-1 top-1 rounded-full bg-ink/80 px-1.5 py-0.5 text-[0.625rem] font-medium text-canvas">
                     {libraryLabel}
                   </span>
                 )}

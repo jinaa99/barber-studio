@@ -18,18 +18,22 @@ export default async function AdminLoginPage() {
   const t = dict.admin.login;
 
   return (
-    <Container as="main" id={`main-${locale}`} className="py-section">
-      <div className="mx-auto max-w-sm">
-        <Link href={localizedPath(locale)} aria-label={studio.name} className="mb-12 inline-block">
-          <Wordmark wordmark={studio.wordmark} />
-        </Link>
-        <p className="eyebrow text-taupe-deep">{dict.admin.eyebrow}</p>
-        <h1 className="mt-4 text-display-md font-medium">{t.title}</h1>
-        <p className="mt-3 text-sm text-taupe-deep">{t.lead}</p>
-        <div className="mt-10">
-          <LoginForm locale={locale} dict={t} />
+    <main id={`main-${locale}`} className="flex min-h-dvh flex-col bg-canvas">
+      <Container className="flex flex-1 flex-col items-center justify-center py-16">
+        <div className="w-full max-w-sm">
+          <Link href={localizedPath(locale)} aria-label={studio.name} className="mb-10 inline-block">
+            <Wordmark wordmark={studio.wordmark} />
+          </Link>
+          <div className="rounded-2xl border border-line bg-surface p-6 shadow-[0_24px_60px_-40px_rgb(18_18_17/0.35)] sm:p-8">
+            <p className="text-sm text-muted">{dict.admin.eyebrow}</p>
+            <h1 className="mt-2 text-[1.75rem] font-medium leading-tight tracking-[-0.03em]">{t.title}</h1>
+            <p className="mt-2 text-sm leading-relaxed text-muted">{t.lead}</p>
+            <div className="mt-8">
+              <LoginForm locale={locale} dict={t} />
+            </div>
+          </div>
         </div>
-      </div>
-    </Container>
+      </Container>
+    </main>
   );
 }

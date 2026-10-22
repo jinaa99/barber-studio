@@ -70,12 +70,12 @@ export async function AppointmentDetail({
       <dl className="mt-5 border-t border-line text-sm">
         {rows.map(([label, value]) => (
           <div key={label} className="grid gap-1 border-b border-line py-2.5 sm:grid-cols-[9rem_1fr] sm:gap-4">
-            <dt className="text-taupe-deep">{label}</dt>
+            <dt className="text-muted">{label}</dt>
             <dd className="min-w-0">{value}</dd>
           </div>
         ))}
       </dl>
-      {!ctx.can("customers.view") && <p className="mt-3 text-xs text-taupe-deep">{t.appointments.contactHidden}</p>}
+      {!ctx.can("customers.view") && <p className="mt-3 text-xs text-muted">{t.appointments.contactHidden}</p>}
 
       {(next.length > 0 || canReschedule) && (
         <div className="mt-6 flex flex-wrap items-start gap-2">
@@ -103,7 +103,7 @@ export async function AppointmentDetail({
           )}
         </div>
       )}
-      {isActiveStatus(a.status) && a.startsAt > ctx.now && <p className="mt-3 text-xs text-taupe-deep">{t.appointments.afterStartNote}</p>}
+      {isActiveStatus(a.status) && a.startsAt > ctx.now && <p className="mt-3 text-xs text-muted">{t.appointments.afterStartNote}</p>}
       {!isActiveStatus(a.status) && <Notice className="mt-6">{t.appointments.finalNote}</Notice>}
 
       {ctx.can("customers.view") && (
@@ -117,7 +117,7 @@ export async function AppointmentDetail({
       {a.notifications.length > 0 && (
         <section className="mt-8">
           <h3 className="text-sm font-semibold">{t.appointments.notifications}</h3>
-          <ul className="mt-2 space-y-1 text-sm text-taupe-deep">
+          <ul className="mt-2 space-y-1 text-sm text-muted">
             {a.notifications.map((n, i) => (
               <li key={i}>
                 {t.notification[n.status]} · {dateTime(n.createdAt, ctx.timeZone, locale, dict)}
@@ -130,7 +130,7 @@ export async function AppointmentDetail({
       <section className="mt-8">
         <h3 className="text-sm font-semibold">{t.appointments.history}</h3>
         {a.history.length === 0 ? (
-          <p className="mt-2 text-sm text-taupe-deep">{t.appointments.historyEmpty}</p>
+          <p className="mt-2 text-sm text-muted">{t.appointments.historyEmpty}</p>
         ) : (
           <ol className="mt-2 space-y-2 text-sm">
             {a.history.map((h) => {
@@ -148,9 +148,9 @@ export async function AppointmentDetail({
               return (
                 <li key={h.id} className="flex flex-wrap justify-between gap-x-4">
                   <span>
-                    {what} <span className="text-taupe-deep">· {format(t.appointments.by, { name: actorName(h) })}</span>
+                    {what} <span className="text-muted">· {format(t.appointments.by, { name: actorName(h) })}</span>
                   </span>
-                  <span className="tabular text-xs text-taupe-deep">{dateTime(h.createdAt, ctx.timeZone, locale, dict)}</span>
+                  <span className="tabular text-xs text-muted">{dateTime(h.createdAt, ctx.timeZone, locale, dict)}</span>
                 </li>
               );
             })}

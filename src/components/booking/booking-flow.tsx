@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { AlertCircle } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import type { Locale } from "@/i18n/config";
 import type { ServiceCategory } from "@/content/types";
@@ -116,8 +117,18 @@ export function BookingFlow({ locale, dict, services, barbers, categoryLabels, c
 
   if (!state) {
     return (
-      <div className="flex min-h-[28rem] items-center justify-center border border-line" aria-busy>
-        <p className="text-sm text-taupe-deep">{t.loading}</p>
+      <div className="grid gap-12 lg:grid-cols-12 lg:gap-10" aria-busy>
+        <div role="status" className="animate-pulse motion-reduce:animate-none lg:col-span-8">
+          <span className="sr-only">{t.loading}</span>
+          <div className="h-6 w-full rounded-full bg-stone" />
+          <div className="mt-10 h-8 w-64 max-w-full rounded-lg bg-stone" />
+          <div className="mt-8 space-y-2.5">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="h-24 rounded-xl bg-stone" />
+            ))}
+          </div>
+        </div>
+        <div aria-hidden className="hidden h-72 animate-pulse rounded-2xl bg-stone motion-reduce:animate-none lg:col-span-4 lg:block" />
       </div>
     );
   }
@@ -246,17 +257,23 @@ export function BookingFlow({ locale, dict, services, barbers, categoryLabels, c
       <div className="min-w-0 lg:col-span-8">
         <StepProgress dict={dict} current={step} onSelect={goTo} />
 
-        <h2 ref={headingRef} tabIndex={-1} className="mt-10 text-2xl font-semibold tracking-tight focus:outline-none sm:text-3xl">
+        <h2
+          key={step}
+          ref={headingRef}
+          tabIndex={-1}
+          className="mt-10 animate-rise text-display-sm focus:outline-none motion-reduce:animate-none"
+        >
           {t[step].title}
         </h2>
 
         {notice && (
-          <p role="alert" className="mt-5 border-l-2 border-danger pl-4 text-sm text-danger">
+          <p role="alert" className="mt-5 flex animate-shake items-start gap-2.5 rounded-xl bg-danger-wash px-4 py-3 text-sm text-danger motion-reduce:animate-none">
+            <AlertCircle aria-hidden className="mt-px size-4 shrink-0" strokeWidth={1.75} />
             {notice}
           </p>
         )}
 
-        <div className="mt-8">
+        <div key={`${step}-body`} className="mt-8 animate-rise motion-reduce:animate-none" style={{ animationDelay: "60ms" }}>
           {step === "service" && (
             <ServiceStep
               idPrefix={idPrefix}
@@ -302,7 +319,7 @@ export function BookingFlow({ locale, dict, services, barbers, categoryLabels, c
           )}
         </div>
 
-        <div className="sticky bottom-0 z-10 -mx-4 mt-10 flex items-center gap-3 border-t border-line bg-paper px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:mx-0 sm:px-0 lg:static lg:pb-0">
+        <div className="sticky bottom-0 z-10 -mx-4 mt-10 flex items-center gap-3 border-t border-line bg-canvas/95 px-4 py-3.5 pb-[max(0.875rem,env(safe-area-inset-bottom))] backdrop-blur-sm sm:-mx-6 sm:px-6 lg:static lg:mx-0 lg:bg-transparent lg:px-0 lg:pb-0 lg:pt-6 lg:backdrop-blur-none">
           {stepIndex > 0 ? (
             <Button variant="secondary" onClick={() => goTo(bookingSteps[stepIndex - 1])} disabled={submitting}>
               {t.back}
@@ -311,7 +328,7 @@ export function BookingFlow({ locale, dict, services, barbers, categoryLabels, c
             <span />
           )}
           {selection.service && (
-            <span className="tabular ml-auto text-sm font-semibold lg:hidden">
+            <span className="numeric ml-auto text-base font-medium lg:hidden">
               {formatPrice(selection.service.price, locale)}
             </span>
           )}
@@ -327,7 +344,7 @@ export function BookingFlow({ locale, dict, services, barbers, categoryLabels, c
       </div>
 
       <aside className="hidden lg:col-span-4 lg:block">
-        <div className="sticky top-28 space-y-5">
+        <div className="sticky top-28 space-y-4">
           <BookingSummary locale={locale} dict={dict} selection={selection} />
           {isDemo && <DemoNotice>{t.demoNotice}</DemoNotice>}
         </div>

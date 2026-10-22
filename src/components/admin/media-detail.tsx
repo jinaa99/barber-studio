@@ -79,7 +79,7 @@ export function MediaDetail({
               <MediaThumb src={file} alt={alt[locale] ?? ""} sizes="(min-width: 768px) 520px, 100vw" fit="contain" />
             )}
           </div>
-          <a href={file} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs text-taupe-deep hover:text-ink">
+          <a href={file} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-1 text-xs text-muted hover:text-ink">
             {d.openFile}
             <ExternalLink aria-hidden className="size-3" strokeWidth={1.75} />
           </a>
@@ -87,7 +87,7 @@ export function MediaDetail({
 
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <Tag className={published ? "border-ink bg-ink text-paper" : undefined}>{t.statuses[asset.status]}</Tag>
+            <Tag tone={published ? "solid" : "default"}>{t.statuses[asset.status]}</Tag>
             <Tag>{t.kinds[asset.kind]}</Tag>
             <Tag>{t.sources[asset.source]}</Tag>
           </div>
@@ -95,7 +95,7 @@ export function MediaDetail({
             <input type="hidden" name="locale" value={locale} />
             <input type="hidden" name="id" value={asset.id} />
             <input type="hidden" name="status" value={published ? "DRAFT" : "PUBLISHED"} />
-            <p className="mb-3 text-xs leading-relaxed text-taupe-deep">{published ? (uses > 0 ? format(d.unpublishHint, { count: uses }) : d.publishedHint) : d.publishHint}</p>
+            <p className="mb-3 text-xs leading-relaxed text-muted">{published ? (uses > 0 ? format(d.unpublishHint, { count: uses }) : d.publishedHint) : d.publishHint}</p>
             <SubmitButton variant={published ? "secondary" : "primary"}>{published ? d.unpublish : d.publish}</SubmitButton>
           </ActionForm>
 
@@ -119,7 +119,7 @@ export function MediaDetail({
                   asset.creatorName
                 )
               ) : (
-                <span className="text-taupe-deep">{d.unknownCreator}</span>
+                <span className="text-muted">{d.unknownCreator}</span>
               )}
             </Row>
             <Row label={d.license}>
@@ -159,7 +159,7 @@ export function MediaDetail({
           {d.usage}
         </h3>
         {uses === 0 ? (
-          <p className="mt-2 text-taupe-deep">{d.unused}</p>
+          <p className="mt-2 text-muted">{d.unused}</p>
         ) : (
           <ul className="mt-2 divide-y divide-line border-y border-line">
             {usages.placements.map((p) => (
@@ -254,7 +254,7 @@ export function MediaDetail({
             </div>
           </fieldset>
         ) : (
-          <p className="text-xs leading-relaxed text-taupe-deep">{format(d.creditFixed, { provider: t.sources[asset.source] })}</p>
+          <p className="text-xs leading-relaxed text-muted">{format(d.creditFixed, { provider: t.sources[asset.source] })}</p>
         )}
         <TextAreaField label={d.notes} name="notes" defaultValue={asset.notes ?? ""} rows={2} maxLength={1000} optional hint={d.notesHint} />
         <SubmitButton>{c.save}</SubmitButton>
@@ -266,7 +266,7 @@ export function MediaDetail({
           <input type="hidden" name="locale" value={locale} />
           <input type="hidden" name="id" value={asset.id} />
           {replacements.length === 0 ? (
-            <p className="text-taupe-deep">{d.noReplacement}</p>
+            <p className="text-muted">{d.noReplacement}</p>
           ) : (
             <>
               <MediaPicker
@@ -285,7 +285,7 @@ export function MediaDetail({
 
       <div className="border-t border-line pt-6">
         <h3 className="font-semibold">{d.delete}</h3>
-        <p className="mt-1 text-xs leading-relaxed text-taupe-deep">{uses > 0 ? d.deleteInUse : d.deleteHint}</p>
+        <p className="mt-1 text-xs leading-relaxed text-muted">{uses > 0 ? d.deleteInUse : d.deleteHint}</p>
         {uses === 0 && (
           <div className="mt-3">
             <DeleteMediaButton locale={locale} id={asset.id} labels={{ delete: c.delete, close: c.close, title: d.deleteConfirm, body: d.deleteHint }} />
@@ -299,7 +299,7 @@ export function MediaDetail({
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="grid grid-cols-[7rem_minmax(0,1fr)] gap-3">
-      <dt className="text-taupe-deep">{label}</dt>
+      <dt className="text-muted">{label}</dt>
       <dd className="min-w-0 break-words">{children}</dd>
     </div>
   );

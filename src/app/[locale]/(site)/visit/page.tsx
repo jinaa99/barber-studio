@@ -25,29 +25,27 @@ export default async function VisitPage() {
   const [dict, studio, cover] = await Promise.all([getSiteDictionary(locale), getStudioProfile(), getSlotMedia("visit.cover", locale)]);
   const t = dict.visitPage;
   const { contact } = studio;
-  const iconClass = "mt-0.5 size-4 shrink-0 text-brass";
+  const iconClass = "mt-0.5 size-4 shrink-0 text-faint";
 
   return (
     <>
       <PageIntro eyebrow={t.eyebrow} title={t.title} lead={t.lead}>
-        {studio.isDemo && <DemoNotice className="mt-8">{t.demoNotice}</DemoNotice>}
+        {studio.isDemo && <DemoNotice className="mt-6">{t.demoNotice}</DemoNotice>}
       </PageIntro>
 
-      <Container className="pb-section">
-        <Reveal>
-          <Photo media={cover} ratio="16/10" sizes="(min-width: 1440px) 1360px, 100vw" />
+      <Container>
+        <Reveal variant="mask">
+          <Photo media={cover} ratio="4/5" className="sm:aspect-[16/10] lg:aspect-[21/9]" sizes="(min-width: 1472px) 1376px, 100vw" />
         </Reveal>
+      </Container>
 
-        <div className="mt-16 grid gap-14 sm:mt-24 md:grid-cols-2 lg:grid-cols-12 lg:gap-8">
-          <section aria-labelledby={`visit-address-${locale}`} className="lg:col-span-4">
-            <h2 id={`visit-address-${locale}`} className="eyebrow text-taupe-deep">{t.address}</h2>
-            <address className="mt-5 flex gap-3 text-lg not-italic leading-relaxed">
-              <MapPin aria-hidden className={iconClass} strokeWidth={1.5} />
-              <span>
-                {contact.address[locale]}
-                <br />
-                {contact.city[locale]}
-              </span>
+      <Container className="pb-section pt-14 sm:pt-20">
+        <div className="grid gap-14 md:grid-cols-2 lg:grid-cols-12 lg:gap-8">
+          <section aria-labelledby={`visit-address-${locale}`} className="md:col-span-2 lg:col-span-5">
+            <h2 id={`visit-address-${locale}`} className="eyebrow text-muted">{t.address}</h2>
+            <address className="mt-5 text-display-sm not-italic">
+              {contact.address[locale]}
+              <span className="block text-muted">{contact.city[locale]}</span>
             </address>
             {contact.mapsUrl && (
               <a
@@ -56,52 +54,53 @@ export default async function VisitPage() {
                 rel="noopener noreferrer"
                 className={buttonStyles({ variant: "secondary", className: "mt-8" })}
               >
+                <MapPin aria-hidden className="size-4" strokeWidth={1.5} />
                 {t.openMaps}
                 <ArrowUpRight aria-hidden className="size-4" strokeWidth={1.75} />
               </a>
             )}
 
             {contact.directions[locale] && (
-              <>
-                <h3 className="eyebrow mt-14 text-taupe-deep">{t.directionsTitle}</h3>
-                <p className="mt-4 max-w-sm text-[0.9375rem] leading-relaxed text-taupe-deep">{contact.directions[locale]}</p>
-              </>
+              <div className="mt-12 max-w-md border-t border-line pt-6">
+                <h3 className="eyebrow text-muted">{t.directionsTitle}</h3>
+                <p className="mt-3 text-[1.0625rem] leading-relaxed">{contact.directions[locale]}</p>
+              </div>
             )}
           </section>
 
-          <section aria-labelledby={`visit-hours-${locale}`} className="lg:col-span-4">
-            <h2 id={`visit-hours-${locale}`} className="eyebrow text-taupe-deep">{t.hours}</h2>
-            <OpeningHoursList dict={dict} hours={studio.hours} className="mt-3 text-[0.9375rem]" />
+          <section aria-labelledby={`visit-hours-${locale}`} className="lg:col-span-3 lg:col-start-7">
+            <h2 id={`visit-hours-${locale}`} className="eyebrow text-muted">{t.hours}</h2>
+            <OpeningHoursList dict={dict} hours={studio.hours} className="mt-3 border-t border-line-strong text-[0.9375rem]" />
           </section>
 
-          <section aria-labelledby={`visit-contact-${locale}`} className="md:col-span-2 lg:col-span-3 lg:col-start-10">
-            <h2 id={`visit-contact-${locale}`} className="eyebrow text-taupe-deep">{t.contact}</h2>
+          <section aria-labelledby={`visit-contact-${locale}`} className="lg:col-span-3 lg:col-start-10">
+            <h2 id={`visit-contact-${locale}`} className="eyebrow text-muted">{t.contact}</h2>
             <ul className="mt-5 space-y-4 text-[0.9375rem]">
               {contact.phoneHref && (
                 <li>
-                  <a href={contact.phoneHref} className="flex gap-3 hover:opacity-70">
+                  <a href={contact.phoneHref} className="group flex gap-3">
                     <Phone aria-hidden className={iconClass} strokeWidth={1.5} />
                     <span>
                       <span className="sr-only">{t.call}: </span>
-                      <span className="tabular">{contact.phoneDisplay}</span>
+                      <span className="tabular link-draw">{contact.phoneDisplay}</span>
                     </span>
                   </a>
                 </li>
               )}
               {contact.email && (
                 <li>
-                  <a href={`mailto:${contact.email}`} className="flex gap-3 break-all hover:opacity-70">
+                  <a href={`mailto:${contact.email}`} className="group flex gap-3 break-all">
                     <Mail aria-hidden className={iconClass} strokeWidth={1.5} />
                     <span>
                       <span className="sr-only">{t.email}: </span>
-                      {contact.email}
+                      <span className="link-draw">{contact.email}</span>
                     </span>
                   </a>
                 </li>
               )}
             </ul>
 
-            <h2 className="eyebrow mt-14 text-taupe-deep">{t.social}</h2>
+            <h2 className="eyebrow mt-12 text-muted">{t.social}</h2>
             <SocialLinks socials={studio.socials} className="mt-5" />
           </section>
         </div>

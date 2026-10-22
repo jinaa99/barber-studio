@@ -354,6 +354,7 @@ export async function getGallery(locale: Locale, ids?: string[]): Promise<Galler
         id: g.id,
         title: g.title[locale],
         image,
+        barberId: barber?.id,
         barberName: barber ? text(barber.name, locale) : undefined,
         layout: g.layout,
       },

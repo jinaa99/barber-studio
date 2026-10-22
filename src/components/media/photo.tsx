@@ -8,14 +8,18 @@ const ratios = {
   "3/4": "aspect-[3/4]",
   "2/3": "aspect-[2/3]",
   "3/2": "aspect-[3/2]",
+  "5/4": "aspect-[5/4]",
   "16/10": "aspect-[16/10]",
+  "21/9": "aspect-[21/9]",
   "1/1": "aspect-square",
   fill: "h-full",
 } as const;
 
+export type PhotoRatio = keyof typeof ratios;
+
 interface PhotoProps {
   media: Media;
-  ratio?: keyof typeof ratios;
+  ratio?: PhotoRatio;
   /** Responsive `sizes` hint — always set this to the real rendered width. */
   sizes: string;
   eager?: boolean;
@@ -26,12 +30,12 @@ interface PhotoProps {
 /**
  * Art-directed image frame. Crops to a fixed ratio with `object-cover`, shows
  * a blur placeholder while a bundled image loads (library images sit on the
- * paper-deep frame), and falls back to a designed frame when an asset is
- * missing so layouts never collapse.
+ * stone frame), and falls back to a designed frame when an asset is missing
+ * so layouts never collapse.
  */
 export function Photo({ media, ratio = "4/5", sizes, eager, className, imageClassName }: PhotoProps) {
   return (
-    <div className={cn("relative overflow-hidden bg-paper-deep", ratios[ratio], className)}>
+    <div className={cn("relative overflow-hidden bg-stone", ratios[ratio], className)}>
       {media.src ? (
         <Image
           src={media.src}
@@ -55,9 +59,9 @@ export function PhotoFallback({ label }: { label?: string }) {
     <div
       role={label ? "img" : undefined}
       aria-label={label || undefined}
-      className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(120%_90%_at_30%_20%,var(--color-sand),var(--color-paper-deep)_55%,var(--color-taupe)_140%)]"
+      className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(120%_90%_at_30%_20%,var(--color-stone),var(--color-stone-deep)_70%,var(--color-faint)_160%)]"
     >
-      <Scissors aria-hidden className="size-6 text-taupe-deep/50" strokeWidth={1.25} />
+      <Scissors aria-hidden className="size-6 text-faint" strokeWidth={1.25} />
     </div>
   );
 }

@@ -6,9 +6,8 @@ import { LoaderCircle, Upload } from "lucide-react";
 import type { Dictionary } from "@/i18n/dictionaries/mn";
 import type { FieldErrorCode } from "@/lib/admin/forms";
 import { IMAGE_MAX_BYTES, VIDEO_MAX_BYTES } from "@/lib/media/files";
-import { cn } from "@/lib/cn";
 import { useAdminStrings } from "./form";
-import { inputClass, primarySmallButton, textareaClass } from "./ui";
+import { fileInputClass, inputClass, primarySmallButton, textareaClass } from "./ui";
 
 type Strings = Dictionary["admin"]["media"]["upload"];
 
@@ -92,7 +91,7 @@ export function MediaUpload({ endpoint, libraryHref, t }: { endpoint: string; li
           {...props}
         />
         {hint && !message && (
-          <p id={`${id}-hint`} className="mt-1.5 text-xs leading-relaxed text-taupe-deep">
+          <p id={`${id}-hint`} className="mt-1.5 text-xs leading-relaxed text-muted">
             {hint}
           </p>
         )}
@@ -109,7 +108,7 @@ export function MediaUpload({ endpoint, libraryHref, t }: { endpoint: string; li
 
   return (
     <form ref={formRef} onSubmit={onSubmit} noValidate aria-busy={uploading} className="max-w-3xl space-y-7">
-      {input("file", t.file, { type: "file", accept, required: true, className: cn(inputClass, "h-auto py-2.5 file:mr-3 file:rounded-full file:border-0 file:bg-ink file:px-3 file:py-1 file:text-sm file:text-paper") }, t.fileHint)}
+      {input("file", t.file, { type: "file", accept, required: true, className: fileInputClass }, t.fileHint)}
 
       <fieldset>
         <legend className="text-sm font-semibold">{t.rights}</legend>
@@ -119,7 +118,7 @@ export function MediaUpload({ endpoint, libraryHref, t }: { endpoint: string; li
               <input type="radio" name="rights" value={value} checked={rights === value} onChange={() => setRights(value)} className="mt-0.5 size-4.5 shrink-0 accent-ink" />
               <span className="text-sm">
                 <span className="font-medium">{t.rightsOptions[value]}</span>
-                <span className="block text-xs text-taupe-deep">{t.rightsHints[value]}</span>
+                <span className="block text-xs text-muted">{t.rightsHints[value]}</span>
               </span>
             </label>
           ))}
@@ -139,12 +138,12 @@ export function MediaUpload({ endpoint, libraryHref, t }: { endpoint: string; li
           {input("alt.mn", strings.common.mn, { maxLength: 300, lang: "mn" })}
           {input("alt.en", strings.common.en, { maxLength: 300, lang: "en" })}
         </div>
-        <p className="mt-1.5 text-xs leading-relaxed text-taupe-deep">{t.altHint}</p>
+        <p className="mt-1.5 text-xs leading-relaxed text-muted">{t.altHint}</p>
       </fieldset>
 
       <div>
         <label htmlFor={`${formId}-notes`} className="mb-1.5 block text-sm font-medium">
-          {t.notes} <span className="font-normal text-taupe-deep">({strings.common.optional})</span>
+          {t.notes} <span className="font-normal text-muted">({strings.common.optional})</span>
         </label>
         <textarea id={`${formId}-notes`} name="notes" rows={2} maxLength={1000} className={textareaClass} />
       </div>
@@ -158,7 +157,7 @@ export function MediaUpload({ endpoint, libraryHref, t }: { endpoint: string; li
       </div>
 
       {error && (
-        <p role="alert" className="border-l-2 border-danger pl-3 text-sm text-danger">
+        <p role="alert" className="rounded-lg bg-danger-wash px-3 py-2.5 text-sm text-danger">
           {error}
         </p>
       )}
@@ -169,8 +168,8 @@ export function MediaUpload({ endpoint, libraryHref, t }: { endpoint: string; li
           {uploading ? t.uploading : t.submit}
         </button>
         {uploading && (
-          <div role="status" className="flex min-w-40 flex-1 items-center gap-3 text-xs text-taupe-deep">
-            <span className="h-1 flex-1 overflow-hidden bg-paper-deep">
+          <div role="status" className="flex min-w-40 flex-1 items-center gap-3 text-xs text-muted">
+            <span className="h-1 flex-1 overflow-hidden bg-stone">
               <span className="block h-full bg-ink transition-[width]" style={{ width: `${progress}%` }} />
             </span>
             <span className="tabular">{progress}%</span>

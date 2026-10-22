@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { AlertCircle, ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import type { Locale } from "@/i18n/config";
 import type { ServiceCategory } from "@/content/types";
 import { ANY_BARBER, type BookingProvider, type CustomerDetails, type TimeSlot } from "@/lib/booking/types";
@@ -38,8 +38,8 @@ export function ServiceStep({
       <div className="space-y-10">
         {categories.map((category) => (
           <div key={category}>
-            <p className="eyebrow mb-4 text-taupe-deep">{categoryLabels[category]}</p>
-            <div className="grid gap-3">
+            <p className="eyebrow mb-3 text-muted">{categoryLabels[category]}</p>
+            <div className="grid gap-2.5">
               {services
                 .filter((s) => s.category === category)
                 .map((service) => (
@@ -51,11 +51,12 @@ export function ServiceStep({
                     onSelect={onChange}
                   >
                     <span className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-                      <span className="text-lg font-semibold tracking-tight">{service.name}</span>
-                      <span className="tabular font-semibold">{formatPrice(service.price, locale)}</span>
+                      <span className="text-lg font-medium tracking-[-0.02em]">{service.name}</span>
+                      <span className="numeric text-lg font-medium">{formatPrice(service.price, locale)}</span>
                     </span>
-                    <span className="mt-1.5 block text-sm leading-relaxed text-taupe-deep">{service.summary}</span>
-                    <span className="tabular mt-2 block text-xs text-taupe-deep">
+                    <span className="mt-1 block text-sm leading-relaxed text-muted">{service.summary}</span>
+                    <span className="tabular mt-2.5 inline-flex items-center gap-1.5 text-[0.8125rem] text-muted">
+                      <Clock aria-hidden className="size-3.5 text-faint" strokeWidth={1.75} />
                       {formatDuration(service.durationMinutes, dict.common.minutes)}
                     </span>
                   </OptionCard>
@@ -89,10 +90,10 @@ export function BarberStep({
   return (
     <fieldset>
       <legend className="sr-only">{t.title}</legend>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-2.5 sm:grid-cols-2">
         <OptionCard name={`${idPrefix}-barber`} value={ANY_BARBER} checked={value === ANY_BARBER} onSelect={onChange} className="sm:col-span-2">
-          <span className="block text-lg font-semibold tracking-tight">{t.any}</span>
-          <span className="mt-1 block text-sm text-taupe-deep">{t.anyHint}</span>
+          <span className="block text-lg font-medium tracking-[-0.02em]">{t.any}</span>
+          <span className="mt-1 block text-sm text-muted">{t.anyHint}</span>
         </OptionCard>
         {barbers.map((barber) => {
           const offers = serviceId ? barber.serviceIds.includes(serviceId) : true;
@@ -105,9 +106,9 @@ export function BarberStep({
               disabled={!offers}
               onSelect={onChange}
             >
-              <span className="block text-lg font-semibold tracking-tight">{barber.name}</span>
-              <span className="mt-1 block text-sm text-taupe-deep">{barber.role}</span>
-              <span className="mt-3 block text-xs leading-relaxed text-taupe-deep">
+              <span className="block text-lg font-medium tracking-[-0.02em]">{barber.name}</span>
+              <span className="mt-1 block text-sm text-muted">{barber.role}</span>
+              <span className="mt-3 block text-xs leading-relaxed text-muted">
                 {offers ? barber.specialties.join(" · ") : t.notOffered}
               </span>
             </OptionCard>
@@ -193,14 +194,14 @@ export function TimeStep({
     <div className="space-y-10">
       <fieldset>
         <div className="mb-4 flex items-center justify-between gap-4">
-          <legend className="eyebrow text-taupe-deep">{t.dateLabel}</legend>
+          <legend className="eyebrow text-muted">{t.dateLabel}</legend>
           <div className="flex gap-1">
             <button
               type="button"
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={page === 0}
               aria-label={t.prevDates}
-              className="inline-flex size-10 items-center justify-center rounded-full border border-line transition-colors hover:border-ink disabled:opacity-30 disabled:hover:border-line"
+              className="inline-flex size-10 items-center justify-center rounded-full border border-line-strong transition-colors hover:border-ink hover:bg-surface disabled:opacity-30 disabled:hover:border-line-strong disabled:hover:bg-transparent"
             >
               <ChevronLeft className="size-4" strokeWidth={1.75} />
             </button>
@@ -209,7 +210,7 @@ export function TimeStep({
               onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
               disabled={page >= pageCount - 1}
               aria-label={t.nextDates}
-              className="inline-flex size-10 items-center justify-center rounded-full border border-line transition-colors hover:border-ink disabled:opacity-30 disabled:hover:border-line"
+              className="inline-flex size-10 items-center justify-center rounded-full border border-line-strong transition-colors hover:border-ink hover:bg-surface disabled:opacity-30 disabled:hover:border-line-strong disabled:hover:bg-transparent"
             >
               <ChevronRight className="size-4" strokeWidth={1.75} />
             </button>
@@ -226,10 +227,10 @@ export function TimeStep({
               <label
                 key={iso}
                 className={cn(
-                  "relative flex cursor-pointer flex-col items-center gap-1 border py-3 text-center transition-colors duration-300",
-                  "has-focus-visible:outline has-focus-visible:outline-[1.5px] has-focus-visible:outline-offset-2 has-focus-visible:outline-brass",
-                  checked ? "border-ink bg-ink text-paper" : "border-line hover:border-line-strong",
-                  closed && "cursor-not-allowed opacity-40 hover:border-line",
+                  "relative flex cursor-pointer flex-col items-center gap-1 rounded-xl border py-3 text-center transition-[background-color,border-color,color] duration-200",
+                  "has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent",
+                  checked ? "border-ink bg-ink text-canvas" : "border-line-strong hover:border-ink/40 hover:bg-surface",
+                  closed && "cursor-not-allowed border-dashed opacity-45 hover:border-line-strong hover:bg-transparent",
                 )}
               >
                 <input
@@ -241,11 +242,11 @@ export function TimeStep({
                   onChange={() => onDateChange(iso)}
                   className="sr-only"
                 />
-                <span className={cn("text-[0.625rem] font-semibold tracking-[0.12em] uppercase", checked ? "text-paper/70" : "text-taupe-deep")}>
+                <span className={cn("text-[0.6875rem] font-medium", checked ? "text-canvas/75" : "text-muted")}>
                   {isToday ? dict.calendar.today : dict.calendar.weekdaysShort[weekday]}
                 </span>
-                <span className="tabular text-lg font-semibold leading-none sm:text-xl">{d.getDate()}</span>
-                <span className={cn("hidden text-[0.625rem] sm:block", checked ? "text-paper/60" : "text-taupe-deep")}>
+                <span className="numeric text-lg font-medium leading-none sm:text-xl">{d.getDate()}</span>
+                <span className={cn("hidden text-[0.6875rem] sm:block", checked ? "text-canvas/75" : "text-muted")}>
                   {dict.calendar.monthsShort[d.getMonth()]}
                 </span>
                 {closed && <span className="sr-only">{t.closed}</span>}
@@ -256,12 +257,13 @@ export function TimeStep({
       </fieldset>
 
       <fieldset aria-busy={loading}>
-        <legend className="eyebrow mb-4 text-taupe-deep">{t.slotsLabel}</legend>
+        <legend className="eyebrow mb-4 text-muted">{t.slotsLabel}</legend>
         {!date ? null : isClosed ? (
-          <p className="text-sm text-taupe-deep">{t.closed}</p>
+          <p className="rounded-xl border border-dashed border-line-strong px-4 py-6 text-center text-sm text-muted">{t.closed}</p>
         ) : failed ? (
-          <div className="flex flex-wrap items-center gap-4">
-            <p role="alert" className="text-sm text-danger">
+          <div className="flex flex-wrap items-center gap-4 rounded-xl bg-danger-wash px-4 py-3">
+            <p role="alert" className="flex items-center gap-2 text-sm text-danger">
+              <AlertCircle aria-hidden className="size-4 shrink-0" strokeWidth={1.75} />
               {t.loadError}
             </p>
             <button
@@ -275,11 +277,11 @@ export function TimeStep({
         ) : loading ? (
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5" aria-label={t.loadingSlots}>
             {Array.from({ length: 10 }, (_, i) => (
-              <span key={i} className="h-11 animate-pulse bg-paper-deep" />
+              <span key={i} className="h-11 animate-pulse rounded-lg bg-stone motion-reduce:animate-none" style={{ animationDelay: `${i * 60}ms` }} />
             ))}
           </div>
         ) : !anyAvailable ? (
-          <p className="text-sm text-taupe-deep">{t.noSlots}</p>
+          <p className="rounded-xl border border-dashed border-line-strong px-4 py-6 text-center text-sm text-muted">{t.noSlots}</p>
         ) : (
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5">
             {slots.map((slot) => {
@@ -288,10 +290,10 @@ export function TimeStep({
                 <label
                   key={slot.time}
                   className={cn(
-                    "tabular relative flex h-11 cursor-pointer items-center justify-center border text-sm font-medium transition-colors duration-300",
-                    "has-focus-visible:outline has-focus-visible:outline-[1.5px] has-focus-visible:outline-offset-2 has-focus-visible:outline-brass",
-                    checked ? "border-ink bg-ink text-paper" : "border-line hover:border-line-strong",
-                    !slot.available && "cursor-not-allowed text-taupe/60 line-through decoration-taupe/40 hover:border-line",
+                    "tabular relative flex h-11 cursor-pointer items-center justify-center rounded-lg border text-[0.9375rem] font-medium transition-[background-color,border-color,color] duration-200",
+                    "has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent",
+                    checked ? "border-ink bg-ink text-canvas" : "border-line-strong bg-surface/60 hover:border-ink",
+                    !slot.available && "cursor-not-allowed border-transparent bg-transparent text-faint line-through decoration-faint/60 hover:border-transparent",
                   )}
                 >
                   <input
@@ -309,7 +311,10 @@ export function TimeStep({
             })}
           </div>
         )}
-        <p className="mt-5 text-xs text-taupe-deep">{t.liveNotice}</p>
+        <p className="mt-5 flex items-center gap-2 text-[0.8125rem] text-muted">
+          <span aria-hidden className="size-1.5 rounded-full bg-accent" />
+          {t.liveNotice}
+        </p>
       </fieldset>
     </div>
   );
@@ -347,7 +352,7 @@ export function DetailsStep({
     onChange({ ...value, [key]: e.target.value });
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2">
+    <div className="grid gap-5 sm:grid-cols-2">
       <Field id={id("name")} label={t.name} error={errors.name}>
         <input
           id={id("name")}
@@ -414,8 +419,8 @@ export function DetailsStep({
 
 function inputClass(invalid: boolean) {
   return cn(
-    "h-12 w-full border bg-paper px-4 text-base text-ink placeholder:text-taupe-deep/90 transition-colors duration-300 focus:outline-none focus-visible:outline-none focus:border-ink",
-    invalid ? "border-danger" : "border-line-strong hover:border-ink/50",
+    "h-12 w-full rounded-lg border bg-surface px-4 text-base text-ink placeholder:text-faint transition-[border-color,box-shadow] duration-200 focus:outline-none focus-visible:outline-none focus:border-ink focus:shadow-[0_0_0_3px_rgb(86_96_47/0.18)]",
+    invalid ? "border-danger focus:shadow-[0_0_0_3px_rgb(161_54_31/0.15)]" : "border-line-strong hover:border-ink/50",
   );
 }
 
@@ -439,7 +444,8 @@ function Field({
       </label>
       {children}
       {error && (
-        <p id={`${id}-error`} className="mt-2 text-sm text-danger">
+        <p id={`${id}-error`} className="mt-2 flex animate-fade-in items-center gap-1.5 text-sm text-danger motion-reduce:animate-none">
+          <AlertCircle aria-hidden className="size-3.5 shrink-0" strokeWidth={2} />
           {error}
         </p>
       )}

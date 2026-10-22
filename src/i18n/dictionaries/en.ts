@@ -41,21 +41,17 @@ export const en: Dictionary = {
   home: {
     hero: {
       eyebrow: "Ulaanbaatar · Appointment-only barber studio",
-      titleLead: "Precise cuts.",
+      titleLead: "A cut that feels like you.",
       titleAccent: "Unhurried time.",
       lead: "Haircuts, beard work and hot-towel shaves from a small studio that gives every appointment the time it deserves.",
       primaryCta: "Book a chair",
       secondaryCta: "View services",
-      scroll: "Scroll",
       skipIntro: "Skip intro",
-      footageNote: "Demo footage: {providers} stock media, not this studio's work.",
-      footageNoteLicensed: "Licensed footage, not this studio's work.",
-      scenes: [
-        { label: "Arrival", line: "A quiet room, kept that way on purpose." },
-        { label: "The chair", line: "Clipper work by hand and by eye, never rushed." },
-        { label: "Detail", line: "Scissors over comb, one section at a time." },
-        { label: "Finish", line: "A shape that suits you and grows out well." },
-      ],
+      finaleTitle: "Your turn in the chair.",
+      sceneNote: "Illustration: a 3D rendering of the studio, not a photograph.",
+      posterAlt: "The barber studio's storefront at dusk: a lit sign, a glass door and warm light inside.",
+      signLine: "Barber studio",
+      windowLine: "Barber studio · By appointment",
     },
     statement:
       "We cut for the person in the chair, not the queue at the door. One chair, one barber, complete attention.",
@@ -126,6 +122,7 @@ export const en: Dictionary = {
       "We accept cash, cards and QPay.",
     ],
     demoNotice: "Prices and durations are sample values for demonstration.",
+    categoriesLabel: "Service categories",
   },
   barbersPage: {
     eyebrow: "The barbers",
@@ -145,6 +142,11 @@ export const en: Dictionary = {
     photoBy: "Photo by",
     footage: "Footage",
     unnamed: "Unnamed creator",
+    filterLabel: "Filter by barber",
+    all: "All work",
+    studio: "Studio",
+    showing: "Showing {count}",
+    empty: "No work has been published yet.",
   },
   visitPage: {
     eyebrow: "Visit",
@@ -298,6 +300,13 @@ export const en: Dictionary = {
       signOut: "Sign out",
       language: "Language",
       roles: { ADMIN: "Admin", STAFF: "Front desk", BARBER: "Barber" },
+      groups: {
+        operations: "Operations",
+        catalog: "Catalogue",
+        insights: "Insights",
+        website: "Website & social",
+        system: "System",
+      },
     },
     nav: {
       overview: "Overview",
@@ -809,7 +818,7 @@ export const en: Dictionary = {
       saveGallery: "Save gallery",
       hero: "Home hero scenes",
       heroLead:
-        "Each of the four scenes can use a still and a video from the media library. A still alone works too. Without a choice, a scene keeps its bundled clip.",
+        "Not shown on the site at the moment: the home page now opens with a 3D walk-through of the studio. Choices saved here are kept. Each of the four scenes can use a still and a video from the media library; without a choice, a scene keeps its bundled clip.",
       barbersLink: "Barber profiles and photos are edited under Barbers & staff.",
     },
     media: {
@@ -1251,6 +1260,13 @@ export const en: Dictionary = {
     title: "We couldn't find that page",
     lead: "The link may be out of date, or the page may have moved.",
     cta: "Back to home",
+  },
+  errorPage: {
+    eyebrow: "Error",
+    title: "This page didn't load",
+    lead: "Something went wrong on our side, probably briefly. Please wait a moment and try again.",
+    retry: "Try again",
+    home: "Back to home",
   },
   calendar: {
     weekdaysShort: { mon: "Mon", tue: "Tue", wed: "Wed", thu: "Thu", fri: "Fri", sat: "Sat", sun: "Sun" },

@@ -64,7 +64,7 @@ async function Services({ locale, dict }: { locale: Locale; dict: Dictionary }) 
           <Section key={category.id} id={`cat-${category.id}-${locale}`} title={name(category.name)}>
             <ul className="border-t border-line">
               {items.map((s) => (
-                <li key={s.id} className={cn("flex flex-wrap items-center justify-between gap-4 border-b border-line py-3", !s.active && "text-taupe-deep")}>
+                <li key={s.id} className={cn("flex flex-wrap items-center justify-between gap-4 border-b border-line py-3", !s.active && "text-muted")}>
                   <div className="min-w-0">
                     <p className="flex flex-wrap items-center gap-2 font-medium">
                       <Link href={`${base}/${s.id}`} className="underline-offset-4 hover:underline">
@@ -73,7 +73,7 @@ async function Services({ locale, dict }: { locale: Locale; dict: Dictionary }) 
                       {s.featured && <Tag>{t.featured}</Tag>}
                       {!s.active && <Tag>{c.inactive}</Tag>}
                     </p>
-                    <p className="tabular mt-0.5 text-sm text-taupe-deep">
+                    <p className="tabular mt-0.5 text-sm text-muted">
                       {s.durationMinutes} {c.minutes} · {formatPrice(s.priceMnt, locale)} ·{" "}
                       {s._count.barbers ? format(t.barbersCount, { count: s._count.barbers }) : <span className="text-danger">{t.noBarbers}</span>}
                     </p>

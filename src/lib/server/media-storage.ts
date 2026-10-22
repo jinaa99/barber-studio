@@ -58,7 +58,7 @@ export async function removeStoredFile(fileName: string | null | undefined): Pro
 /**
  * Decode and re-encode an image as a baseline JPEG: applies the EXIF
  * orientation, drops every metadata block (location, camera, embedded
- * profiles), flattens transparency onto the paper colour and caps the size.
+ * profiles), flattens transparency onto the canvas colour and caps the size.
  * Anything that doesn't decode as an image is rejected here.
  */
 export async function processImage(input: Uint8Array): Promise<{ data: Buffer; width: number; height: number } | null> {
@@ -66,7 +66,7 @@ export async function processImage(input: Uint8Array): Promise<{ data: Buffer; w
     const { data, info } = await sharp(input, { limitInputPixels: 120_000_000, failOn: "error" })
       .rotate()
       .resize({ width: IMAGE_MAX_EDGE, height: IMAGE_MAX_EDGE, fit: "inside", withoutEnlargement: true })
-      .flatten({ background: "#f3efe7" })
+      .flatten({ background: "#f4f4f1" })
       .jpeg({ quality: 86, mozjpeg: true })
       .toBuffer({ resolveWithObject: true });
     return { data, width: info.width, height: info.height };

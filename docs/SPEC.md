@@ -10,8 +10,8 @@ real barber shops. Brand, business details, content and imagery must be easy to 
 
 - Minimal editorial layout with cinematic realism: high-quality photography (video in Phase 02).
 - Subtle, purposeful motion only.
-- Palette: neutral paper, ink, sand, taupe and muted brass.
-- Generous whitespace and tightly controlled typography: Manrope, with Cormorant Garamond for display accents (both Cyrillic-compatible).
+- Palette: near-white canvas, white surfaces, stone neutrals and rich ink, with one restrained muted-olive accent for active and selected states (visual redesign V1).
+- Generous whitespace and tightly controlled typography: Onest (variable, Cyrillic Extended) for both languages; no decorative or italic display face.
 - Minimal, consistent Lucide icons.
 - Avoid: generic AI-looking layouts, excessive cards, glowing gradients and unnecessary glassmorphism.
 
@@ -79,7 +79,7 @@ Details: [BOOKING.md](BOOKING.md).
 
 - **Phase 02 (done):** scroll-controlled cinematic hero with licensed video. The page scrolls
   natively past a sticky stage, and GSAP ScrollTrigger maps the scroll onto a timeline:
-  doorway → arrival (scrubbed) → the chair → detail → finish (scrubbed) → paper hand-over.
+  doorway → arrival (scrubbed) → the chair → detail → finish (scrubbed) → light hand-over.
   With reduced motion or without JS, the hero is a single still screen.
 - **Phase 03 (done):** PostgreSQL + Prisma, database-backed content, server-side availability,
   conflict-safe booking (row locks + exclusion constraint), staff sign-in with roles,

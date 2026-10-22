@@ -79,7 +79,7 @@ export function StockSearch({
             aria-describedby={`${statusId}-hint`}
             className={inputClass}
           />
-          <span id={`${statusId}-hint`} className="mt-1.5 block text-xs text-taupe-deep">
+          <span id={`${statusId}-hint`} className="mt-1.5 block text-xs text-muted">
             {t.queryHint}
           </span>
         </label>
@@ -119,7 +119,7 @@ export function StockSearch({
           {pending ? t.searching : t.submit}
         </button>
         {stockProviders.some((p) => !configured[p]) && (
-          <p className="text-xs text-taupe-deep lg:col-span-5">
+          <p className="text-xs text-muted lg:col-span-5">
             {stockProviders
               .filter((p) => !configured[p])
               .map((p) => format(t.providerMissing, { provider: providerLicense[p].label }))
@@ -134,7 +134,7 @@ export function StockSearch({
         </p>
 
         {result && (
-          <p className="mb-4 flex flex-wrap items-baseline justify-between gap-2 text-xs text-taupe-deep">
+          <p className="mb-4 flex flex-wrap items-baseline justify-between gap-2 text-xs text-muted">
             <a href={providerLicense[provider].homepage} target="_blank" rel="noopener noreferrer" className={cn(textLink, "font-medium text-ink")}>
               {format(t.attribution, { provider: providerLicense[provider].label })}
             </a>
@@ -161,25 +161,25 @@ export function StockSearch({
                     type="button"
                     onClick={() => setSelected(item)}
                     aria-haspopup="dialog"
-                    className="group block w-full text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brass"
+                    className="group block w-full text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
                   >
-                    <span className="relative block aspect-[4/3] overflow-hidden bg-paper-deep">
+                    <span className="relative block aspect-[4/3] overflow-hidden bg-stone">
                       <Image
                         src={item.thumbnailUrl}
                         alt={item.description ?? ""}
                         fill
                         unoptimized
                         sizes="(min-width: 1024px) 25vw, 50vw"
-                        className="object-cover transition-transform duration-500 ease-soft group-hover:scale-[1.03] motion-reduce:transition-none"
+                        className="object-cover transition-transform duration-500 ease-standard group-hover:scale-[1.03] motion-reduce:transition-none"
                       />
                       {item.kind === "video" && (
-                        <span className="absolute bottom-1.5 left-1.5 inline-flex items-center gap-1 rounded-full bg-ink/80 px-2 py-0.5 text-[0.6875rem] font-semibold text-paper tabular">
+                        <span className="absolute bottom-1.5 left-1.5 inline-flex items-center gap-1 rounded-full bg-ink/80 px-2 py-0.5 text-[0.6875rem] font-semibold text-canvas tabular">
                           <Film aria-hidden className="size-3" strokeWidth={1.75} />
                           {formatClipLength(item.durationSeconds)}
                         </span>
                       )}
                     </span>
-                    <span className="mt-1.5 block truncate text-xs text-taupe-deep">
+                    <span className="mt-1.5 block truncate text-xs text-muted">
                       {item.creatorName ?? t.unknownCreator} · {item.width}×{item.height}
                     </span>
                   </button>
@@ -230,7 +230,7 @@ function Segmented<T extends string>({
               onChange={() => onChange(o.value)}
               className="peer sr-only"
             />
-            <span className="flex cursor-pointer items-center px-3 text-sm text-taupe-deep peer-checked:bg-ink peer-checked:text-paper peer-focus-visible:outline-2 peer-focus-visible:outline-brass peer-disabled:cursor-not-allowed">
+            <span className="flex cursor-pointer items-center px-3 text-sm text-muted peer-checked:bg-ink peer-checked:text-canvas peer-focus-visible:outline-2 peer-focus-visible:outline-accent peer-disabled:cursor-not-allowed">
               {o.label}
             </span>
           </label>
@@ -245,8 +245,8 @@ function ResultsSkeleton() {
     <ul aria-hidden className="grid animate-pulse grid-cols-2 gap-3 motion-reduce:animate-none sm:grid-cols-3 lg:grid-cols-4">
       {Array.from({ length: 8 }, (_, i) => (
         <li key={i}>
-          <span className="block aspect-[4/3] bg-paper-deep" />
-          <span className="mt-1.5 block h-3 w-2/3 bg-paper-deep" />
+          <span className="block aspect-[4/3] bg-stone" />
+          <span className="mt-1.5 block h-3 w-2/3 bg-stone" />
         </li>
       ))}
     </ul>
@@ -279,13 +279,13 @@ function StockDetail({ item, libraryHref, t, onClose }: { item: StockItem; libra
       ref={ref}
       aria-labelledby={titleId}
       onClose={onClose}
-      className="m-auto max-h-[min(100dvh-2rem,60rem)] w-[min(100%-2rem,56rem)] overflow-y-auto border border-line-strong bg-paper p-0 text-ink shadow-[0_24px_80px_-24px_rgb(22_21_19/0.35)] backdrop:bg-ink/40"
+      className="m-auto max-h-[min(100dvh-2rem,60rem)] w-[min(100%-2rem,56rem)] overflow-y-auto rounded-2xl border border-line bg-surface p-0 text-ink shadow-[0_32px_80px_-24px_rgb(18_18_17/0.45)]"
     >
-      <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-line bg-paper px-5 py-4 sm:px-6">
+      <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-line bg-surface/95 px-5 py-4 backdrop-blur-sm sm:px-6">
         <h2 id={titleId} className="min-w-0 text-lg font-semibold tracking-tight">
           {item.kind === "video" ? t.videoTitle : t.photoTitle} · {license.label} #{item.id}
         </h2>
-        <button type="button" onClick={() => ref.current?.close()} aria-label={t.close} className="-mr-2 inline-flex size-9 shrink-0 items-center justify-center rounded-full hover:bg-paper-deep">
+        <button type="button" onClick={() => ref.current?.close()} aria-label={t.close} className="-mr-2 inline-flex size-9 shrink-0 items-center justify-center rounded-full hover:bg-stone">
           <X aria-hidden className="size-4.5" strokeWidth={1.5} />
         </button>
       </div>
@@ -299,7 +299,7 @@ function StockDetail({ item, libraryHref, t, onClose }: { item: StockItem; libra
               <Image src={item.previewUrl} alt={item.description ?? ""} fill unoptimized sizes="(min-width: 768px) 520px, 100vw" className="object-contain" />
             )}
           </div>
-          <p className="mt-2 text-xs text-taupe-deep">{t.previewNote}</p>
+          <p className="mt-2 text-xs text-muted">{t.previewNote}</p>
         </div>
 
         <div className="min-w-0 text-sm">
@@ -314,7 +314,7 @@ function StockDetail({ item, libraryHref, t, onClose }: { item: StockItem; libra
                   item.creatorName
                 )
               ) : (
-                <span className="text-taupe-deep">{t.unknownCreator}</span>
+                <span className="text-muted">{t.unknownCreator}</span>
               )}
             </Row>
             <Row label={t.source}>
@@ -336,12 +336,12 @@ function StockDetail({ item, libraryHref, t, onClose }: { item: StockItem; libra
             </Row>
             {item.description && <Row label={t.description}>{item.description}</Row>}
           </dl>
-          {item.provider === "pixabay" && item.kind === "photo" && <p className="mt-4 text-xs leading-relaxed text-taupe-deep">{t.pixabayNote}</p>}
+          {item.provider === "pixabay" && item.kind === "photo" && <p className="mt-4 text-xs leading-relaxed text-muted">{t.pixabayNote}</p>}
 
           {saved?.ok ? (
-            <div role="status" className="mt-6 border-l-2 border-ink pl-3">
+            <div role="status" className="mt-6 rounded-lg bg-success-wash px-3 py-2.5 text-success">
               <p className="flex items-center gap-2 font-medium">
-                <Check aria-hidden className="size-4 text-brass" strokeWidth={1.75} />
+                <Check aria-hidden className="size-4" strokeWidth={1.75} />
                 {saved.existing ? t.alreadySaved : t.saved}
               </p>
               <Link href={`${libraryHref}?asset=${saved.id}`} className={cn(smallButton, "mt-3")}>
@@ -351,7 +351,7 @@ function StockDetail({ item, libraryHref, t, onClose }: { item: StockItem; libra
           ) : (
             <div className="mt-6 border-t border-line pt-5">
               <p className="font-semibold">{t.checklistTitle}</p>
-              <ul className="mt-2 list-disc space-y-1.5 pl-4 text-xs leading-relaxed text-taupe-deep">
+              <ul className="mt-2 list-disc space-y-1.5 pl-4 text-xs leading-relaxed text-muted">
                 {t.checklist.map((line) => (
                   <li key={line}>{line}</li>
                 ))}
@@ -361,7 +361,7 @@ function StockDetail({ item, libraryHref, t, onClose }: { item: StockItem; libra
                 <span className="text-sm font-medium">{t.confirm}</span>
               </label>
               {saved && !saved.ok && (
-                <p role="alert" className="mt-4 border-l-2 border-danger pl-3 text-sm text-danger">
+                <p role="alert" className="mt-4 rounded-lg bg-danger-wash px-3 py-2.5 text-sm text-danger">
                   {format(t.errors[saved.error], { seconds: saved.retryAfterSeconds ?? 60 })}
                 </p>
               )}
@@ -380,7 +380,7 @@ function StockDetail({ item, libraryHref, t, onClose }: { item: StockItem; libra
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-3">
-      <dt className="text-taupe-deep">{label}</dt>
+      <dt className="text-muted">{label}</dt>
       <dd className="min-w-0 break-words">{children}</dd>
     </div>
   );

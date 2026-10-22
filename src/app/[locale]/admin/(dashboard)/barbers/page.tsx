@@ -69,22 +69,28 @@ async function Barbers({ locale, dict }: { locale: Locale; dict: Dictionary }) {
             {barbers.map((b) => {
               const image = images.find((m) => m.ref === b.imageId);
               return (
-                <li key={b.id}>
-                  <Link href={`${base}/${b.id}`} className={cn("flex gap-4 border border-line p-3 transition-colors hover:border-ink", !b.active && "opacity-70")}>
-                    <span className="relative block aspect-[4/5] w-20 shrink-0 overflow-hidden bg-paper-deep">
+                <li key={b.id} className="min-w-0">
+                  <Link
+                    href={`${base}/${b.id}`}
+                    className={cn(
+                      "flex gap-4 rounded-xl border border-line bg-canvas/40 p-3 transition-colors hover:border-ink/40 hover:bg-canvas",
+                      !b.active && "opacity-70",
+                    )}
+                  >
+                    <span className="relative block aspect-[4/5] w-20 shrink-0 overflow-hidden rounded-lg bg-stone">
                       {image && <MediaThumb src={image.src} alt="" sizes="80px" />}
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center gap-2">
-                        <span className="truncate font-semibold">{name(b.name)}</span>
+                        <span className="truncate font-medium">{name(b.name)}</span>
                         {!b.active && <Tag>{t.common.inactive}</Tag>}
                       </span>
-                      <span className="block truncate text-sm text-taupe-deep">{name(b.role)}</span>
-                      <span className="mt-2 block text-xs text-taupe-deep">
+                      <span className="block truncate text-sm text-muted">{name(b.role)}</span>
+                      <span className="mt-2 block text-xs text-muted">
                         {format(t.barbers.services, { count: b._count.services })} ·{" "}
                         {b._count.workingHours ? format(t.barbers.upcoming, { count: b.upcoming }) : t.barbers.noHours}
                       </span>
-                      <span className="mt-1 block truncate text-xs text-taupe-deep">
+                      <span className="mt-1 block truncate text-xs text-muted">
                         {t.barbers.login}: {b.user ? b.user.email : t.barbers.noLogin}
                       </span>
                     </span>
@@ -126,7 +132,7 @@ async function Barbers({ locale, dict }: { locale: Locale; dict: Dictionary }) {
             {(["ADMIN", "STAFF", "BARBER"] as const).map((r) => (
               <div key={r} className="border-l-2 border-line-strong pl-3">
                 <dt className="font-semibold">{t.shell.roles[r]}</dt>
-                <dd className="mt-0.5 text-xs leading-relaxed text-taupe-deep">{t.team.roleHelp[r]}</dd>
+                <dd className="mt-0.5 text-xs leading-relaxed text-muted">{t.team.roleHelp[r]}</dd>
               </div>
             ))}
           </dl>
@@ -142,8 +148,8 @@ async function Barbers({ locale, dict }: { locale: Locale; dict: Dictionary }) {
                       {u.id === ctx.user.id && <Tag>{t.team.you}</Tag>}
                       {!u.active && <Tag>{t.common.inactive}</Tag>}
                     </p>
-                    <p className="break-all text-taupe-deep">{u.email}</p>
-                    <p className="mt-1 text-xs text-taupe-deep">
+                    <p className="break-all text-muted">{u.email}</p>
+                    <p className="mt-1 text-xs text-muted">
                       {t.team.lastLogin}: {u.lastLoginAt ? dateTime(u.lastLoginAt, ctx.timeZone, locale, dict) : t.team.never}
                     </p>
                     {u.lockedUntil && u.lockedUntil > ctx.now && <p className="mt-1 text-xs text-danger">{t.team.locked}</p>}

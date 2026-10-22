@@ -53,10 +53,10 @@ export function StatusActions({
               <input type="hidden" name="locale" value={locale} />
               <input type="hidden" name="appointmentId" value={appointmentId} />
               <input type="hidden" name="status" value="CANCELLED" />
-              <p className="text-sm leading-relaxed text-taupe-deep">{labels.cancelBody}</p>
+              <p className="text-sm leading-relaxed text-muted">{labels.cancelBody}</p>
               <TextAreaField label={labels.cancelReasonLabel} name="reason" rows={3} maxLength={300} className="mt-5" />
               <div className="mt-6 flex flex-wrap justify-end gap-2">
-                <button type="button" onClick={close} className="h-9 rounded-full px-4 text-sm font-medium hover:bg-paper-deep">
+                <button type="button" onClick={close} className="h-9 rounded-full px-4 text-sm font-medium hover:bg-stone">
                   {labels.keep}
                 </button>
                 <SubmitButton variant="danger" pendingLabel={labels.saving}>

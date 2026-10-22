@@ -14,6 +14,7 @@ function rememberLocale(locale: Locale) {
 /**
  * Switches language while staying on the same page: the locale segment is
  * swapped, query string and hash are kept, and scroll position is preserved.
+ * Presented as a two-option segmented control.
  */
 export function LanguageSwitcher({
   locale,
@@ -41,34 +42,42 @@ export function LanguageSwitcher({
     router.push(`${switchLocalePath(pathname, next)}${search}${hash}`, { scroll: false });
   }
 
+  const inverse = tone === "inverse";
   return (
-    <nav aria-label={label} className={cn("flex items-center text-xs font-semibold tracking-[0.14em]", className)}>
-      {locales.map((l, i) => {
+    <nav
+      aria-label={label}
+      className={cn(
+        "inline-flex items-center rounded-full border p-0.5 text-xs font-semibold tracking-[0.04em] transition-colors duration-300",
+        inverse ? "border-canvas/25" : "border-line-strong",
+        className,
+      )}
+    >
+      {locales.map((l) => {
         const active = l === locale;
         return (
-          <span key={l} className="flex items-center">
-            {i > 0 && (
-              <span aria-hidden className={cn("mx-1.5", tone === "inverse" ? "text-paper/35" : "text-ink/25")}>
-                /
-              </span>
+          <Link
+            key={l}
+            href={switchLocalePath(pathname, l)}
+            hrefLang={l}
+            lang={l}
+            aria-current={active ? "true" : undefined}
+            title={localeNames[l].native}
+            onClick={(e) => handleClick(e, l)}
+            scroll={false}
+            className={cn(
+              "inline-flex h-8 min-w-9 items-center justify-center rounded-full px-2 transition-colors duration-200",
+              active
+                ? inverse
+                  ? "bg-canvas text-ink"
+                  : "bg-ink text-canvas"
+                : inverse
+                  ? "text-canvas/70 hover:text-canvas"
+                  : "text-muted hover:text-ink",
             )}
-            <Link
-              href={switchLocalePath(pathname, l)}
-              hrefLang={l}
-              lang={l}
-              aria-current={active ? "true" : undefined}
-              title={localeNames[l].native}
-              onClick={(e) => handleClick(e, l)}
-              scroll={false}
-              className={cn(
-                "inline-flex min-h-11 min-w-8 items-center justify-center transition-opacity duration-300",
-                active ? "opacity-100" : "opacity-45 hover:opacity-80",
-              )}
-            >
-              <span className="sr-only">{localeNames[l].native}</span>
-              <span aria-hidden>{localeNames[l].short}</span>
-            </Link>
-          </span>
+          >
+            <span className="sr-only">{localeNames[l].native}</span>
+            <span aria-hidden>{localeNames[l].short}</span>
+          </Link>
         );
       })}
     </nav>

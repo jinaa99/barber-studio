@@ -30,7 +30,7 @@ export function TimeOffManager({
     <div className="grid gap-10 lg:grid-cols-2">
       <div>
         {entries.length === 0 ? (
-          <p className="text-sm text-taupe-deep">{emptyLabel}</p>
+          <p className="text-sm text-muted">{emptyLabel}</p>
         ) : (
           <ul className="border-t border-line">
             {entries.map((e) => (
@@ -39,7 +39,7 @@ export function TimeOffManager({
                   <span className="tabular block font-medium">
                     {dateTime(e.startsAt, timeZone, locale, dict)} – {dateTime(e.endsAt, timeZone, locale, dict)}
                   </span>
-                  {e.reason && <span className="block text-taupe-deep">{e.reason}</span>}
+                  {e.reason && <span className="block text-muted">{e.reason}</span>}
                 </span>
                 <ActionForm action={deleteTimeOffAction} showSuccess={false}>
                   <input type="hidden" name="id" value={e.id} />

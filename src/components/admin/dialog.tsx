@@ -12,18 +12,19 @@ import { smallButton } from "./ui";
  * no extra dependency.
  */
 
+// Entrance animation and backdrop live in globals.css (`dialog[open]`, `dialog::backdrop`).
 const panelBase =
-  "m-auto max-h-[min(100dvh-2rem,56rem)] overflow-y-auto border border-line-strong bg-paper p-0 text-ink shadow-[0_24px_80px_-24px_rgb(22_21_19/0.35)] backdrop:bg-ink/40";
+  "m-auto max-h-[min(100dvh-2rem,56rem)] overflow-y-auto rounded-2xl border border-line bg-surface p-0 text-ink shadow-[0_32px_80px_-24px_rgb(18_18_17/0.45)]";
 const panel = `${panelBase} w-[min(100%-2rem,40rem)]`;
 const widePanel = `${panelBase} w-[min(100%-2rem,60rem)]`;
 
 function DialogHeader({ title, titleId, closeLabel, onClose }: { title: ReactNode; titleId: string; closeLabel: string; onClose: () => void }) {
   return (
-    <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-line bg-paper px-5 py-4 sm:px-6">
-      <h2 id={titleId} className="min-w-0 text-lg font-semibold tracking-tight">
+    <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-line bg-surface/95 px-5 py-4 backdrop-blur-sm sm:px-6">
+      <h2 id={titleId} className="min-w-0 text-lg font-medium tracking-[-0.02em]">
         {title}
       </h2>
-      <button type="button" onClick={onClose} aria-label={closeLabel} className="-mr-2 inline-flex size-9 shrink-0 items-center justify-center rounded-full hover:bg-paper-deep">
+      <button type="button" onClick={onClose} aria-label={closeLabel} className="-mr-2 inline-flex size-9 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-stone hover:text-ink">
         <X aria-hidden className="size-4.5" strokeWidth={1.5} />
       </button>
     </div>
@@ -76,7 +77,9 @@ export function RouteDialog({
       aria-labelledby={titleId}
       className={wide ? widePanel : panel}
       onClose={() => {
-        if (!closing.current) router.replace(closeHref, { scroll: false });
+        // "close" fires asynchronously. After a remount (React's dev double-mount, or an
+        // <Activity> coming back) a stale event can arrive once the dialog is open again: ignore it.
+        if (!closing.current && !ref.current?.open) router.replace(closeHref, { scroll: false });
       }}
     >
       <DialogHeader title={title} titleId={titleId} closeLabel={closeLabel} onClose={() => ref.current?.close()} />

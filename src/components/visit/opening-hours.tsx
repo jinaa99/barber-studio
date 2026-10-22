@@ -46,11 +46,11 @@ export function OpeningHoursList({
     <dl className={cn("text-sm", compact ? "space-y-1.5" : "divide-y", tone === "inverse" ? "divide-line-inverse" : "divide-line", className)}>
       {rows.map((row) => (
         <div key={row.from} className={cn("flex items-baseline justify-between gap-6", !compact && "py-3")}>
-          <dt className={tone === "inverse" ? "text-paper/60" : "text-taupe-deep"}>
+          <dt className={tone === "inverse" ? "text-canvas/60" : "text-muted"}>
             {names[row.from]}
             {row.to !== row.from && `–${names[row.to]}`}
           </dt>
-          <dd className={cn("tabular", !row.open && (tone === "inverse" ? "text-paper/60" : "text-taupe-deep"))}>
+          <dd className={cn("tabular", !row.open && (tone === "inverse" ? "text-canvas/60" : "text-muted"))}>
             {row.open && row.close ? `${row.open}–${row.close}` : dict.common.closed}
           </dd>
         </div>

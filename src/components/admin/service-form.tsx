@@ -79,7 +79,7 @@ export function ServiceForm({
               label={
                 <>
                   {(b.name as LocalizedText)[locale]}
-                  {!b.active && <span className="ml-1.5 font-normal text-taupe-deep">({c.inactive})</span>}
+                  {!b.active && <span className="ml-1.5 font-normal text-muted">({c.inactive})</span>}
                 </>
               }
               defaultChecked={values ? values.barberIds.includes(b.id) : b.active}

@@ -36,7 +36,7 @@ async function NewService({ locale, dict }: { locale: Locale; dict: Dictionary }
   ]);
   return (
     <>
-      <Link href={localizedPath(locale, routes.adminServices)} className="mb-4 inline-flex items-center gap-2 text-sm text-taupe-deep hover:text-ink">
+      <Link href={localizedPath(locale, routes.adminServices)} className="mb-4 inline-flex items-center gap-2 text-sm text-muted hover:text-ink">
         <ArrowLeft aria-hidden className="size-4" strokeWidth={1.75} />
         {dict.admin.services.title}
       </Link>

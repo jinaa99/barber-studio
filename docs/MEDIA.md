@@ -10,7 +10,52 @@ The stills in `src/assets/media/studio-*.jpg` and `work-*.jpg` are used under th
 [Unsplash License](https://unsplash.com/license). Author and source URL per
 image are in `mediaRecords` (`src/content/media.ts`).
 
-## Home hero footage: Mixkit
+## Home hero: 3D walk-through (no third-party assets)
+
+The home hero is a real-time three.js scene (`src/components/hero3d/`, camera
+path and timing in `src/lib/hero/journey.ts`). Scroll moves a perspective
+camera from the pavement outside the studio, through its hinged glass door,
+into the shop and up to a haircut in close-up, then hands over to the page.
+
+Everything in it is made in this repository, so there is no asset licence to
+track:
+
+| Part | Source | Licence |
+| --- | --- | --- |
+| Geometry: facade, shopfront, door, room, stations, chairs, figures, clipper | Built in code from three.js primitives (`storefront.tsx`, `interior.tsx`, `figures.tsx`) | Project code |
+| Textures: paving, terrazzo, plaster, oak, cladding, signage, hair density | Drawn on 2D canvases at runtime with a seeded generator (`textures.ts`) | Project code |
+| Reflections | `RoomEnvironment` from three.js's examples, prefiltered once; mirrors use a one-off cube-camera capture of the scene | three.js, MIT |
+| Signage text | The studio's own name and dictionary strings, set in Onest | Onest: SIL Open Font License 1.1 (via `next/font`) |
+| Posters `src/assets/media/hero-storefront[-portrait]-{mn,en}.jpg` | Frame one of the scene, rendered from the site in headless Chrome (1920×1080 and 1080×2340), one pair per language because the sign is localized | Project output |
+| Libraries | `three` 0.186.1, `@react-three/fiber` 9.8.2 | MIT |
+
+**People.** No realistic, animated barber or customer model with terms
+confirmed to allow redistribution in a public website bundle was sourced for
+this phase. Free CC0 character packs are stylized low-poly, and the usual
+sources of realistic rigged characters attach conditions to redistributing the
+model files themselves; their current terms were not re-verified, so check
+them before adopting one. Rather than ship an unverified or mismatched model,
+the barber and customer are deliberate
+sculptural figures (matte plaster, archviz style), with real 3D geometry,
+two-bone IK arms and a clipper that works along the fade. The haircut uses
+stacked hair shells whose density thins into a skin fade. Replacing them with
+licensed models later only touches `figures.tsx`.
+
+**Honesty.** The hero says it is an illustration (`home.hero.sceneNote`):
+it is a rendering, not a photograph of the studio.
+
+**Regenerating the posters.** After changing the scene's opening frame,
+render frame one again at both sizes with the copy, header and scrims hidden,
+for each language, and save over the four files (JPEG, quality ~82). The
+poster is shown while the scene loads and is the whole hero when motion is
+reduced, WebGL is unavailable or the device is constrained.
+
+## Former home hero footage: Mixkit
+
+The scroll-crossfade hero these clips were made for has been replaced by the
+3D walk-through above. The clips stay bundled as the defaults of the
+dashboard's Website → Home hero scenes, which are kept (and say they are not
+shown on the site at the moment).
 
 Downloaded 2026-10-21 from each clip's Mixkit page (720p MP4). Each page's
 structured data lists `https://mixkit.co/license/#videoFree`, the
@@ -83,7 +128,7 @@ and publishing requires alt text in Mongolian and English. Where media is used:
 
 | Place | How it's chosen | Default |
 | --- | --- | --- |
-| Hero scenes (arrival, chair, detail, finish) | Website → Home hero scenes: a still, a video, a focal point | the bundled Mixkit clip |
+| Hero scenes (arrival, chair, detail, finish), not shown while the 3D hero is in use | Website → Home hero scenes: a still, a video, a focal point | the bundled Mixkit clip |
 | Studio introduction, home visit section, services page photo, visit page photo | Website → Page photos | the bundled photo |
 | Gallery | Media item → Add to gallery (caption, shape, barber); order and visibility on Website → Gallery | the bundled gallery |
 | Barber photos | Barbers → profile → Photo | the photo chosen at creation |
