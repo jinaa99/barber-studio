@@ -30,6 +30,10 @@ export type Permission =
   | "staff.manage"
   /** Booking rules and website content. */
   | "settings.manage"
+  /** Media library: stock search, uploads, publishing and placing media on the website. */
+  | "media.manage"
+  /** Connect, check and disconnect the studio's Facebook Page and Instagram account; view their insights. */
+  | "social.manage"
   /** The audit log. */
   | "audit.view";
 
@@ -43,6 +47,8 @@ const grants: Record<UserRole, readonly Permission[]> = {
     "catalog.manage",
     "staff.manage",
     "settings.manage",
+    "media.manage",
+    "social.manage",
     "audit.view",
   ],
   STAFF: ["appointments.viewAll", "appointments.manage", "appointments.updateStatus", "customers.view"],

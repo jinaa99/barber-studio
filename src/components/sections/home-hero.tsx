@@ -4,6 +4,7 @@ import type { HeroClip } from "@/content/types";
 import { ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { routes } from "@/lib/navigation";
+import { format } from "@/lib/format";
 import { HeroSequence } from "./hero-sequence";
 
 /**
@@ -23,12 +24,16 @@ export function HomeHero({
   afterId: string;
 }) {
   const t = dict.home.hero;
+  // Name the stock libraries in use; other licensed media gets a general note, the studio's own none.
+  const stock = clips.flatMap((c) => (c.credit?.stock ? [c.credit] : []));
+  const providers = [...new Set(stock.flatMap((c) => (c.provider ? [c.provider] : [])))];
+  const footageNote = providers.length > 0 ? format(t.footageNote, { providers: providers.join(", ") }) : stock.length > 0 ? t.footageNoteLicensed : "";
   return (
     <HeroSequence
       clips={clips}
       captions={t.scenes}
       skipLabel={t.skipIntro}
-      footageNote={t.footageNote}
+      footageNote={footageNote}
       afterId={afterId}
       intro={
         <Container className="pb-10 pt-[calc(var(--spacing-header)+3rem)] sm:pb-14">

@@ -44,9 +44,13 @@ model User {
   createdAt    DateTime  @default(now()) @db.Timestamptz(3)
   updatedAt    DateTime  @updatedAt @db.Timestamptz(3)
 
-  sessions  Session[]
-  auditLogs AuditLog[]
-  barber    Barber?
+  sessions    Session[]
+  auditLogs   AuditLog[]
+  barber      Barber?
+  mediaAssets MediaAsset[]
+
+  socialConnections SocialConnection[]
+  socialOAuthStates SocialOAuthState[]
 
   @@map("users")
 }
@@ -145,7 +149,8 @@ model Barber {
   /// LocalizedText[]
   specialties     Json     @default("[]")
   yearsExperience Int      @default(0)
-  /// Key into `content/media.ts` (images ship with the app).
+  /// Media reference: a bundled image id from `content/media.ts`, or
+  /// `asset:<MediaAsset.id>` for a published library image (see `lib/media/refs.ts`).
   imageId         String
   active          Boolean  @default(true)
   sortOrder       Int      @default(0)
@@ -242,6 +247,95 @@ model SiteContent {
   updatedAt DateTime @updatedAt @db.Timestamptz(3)
 
   @@map("site_content")
+}
+
+// ------------------------------------------------------------ Media library
+
+enum MediaKind {
+  IMAGE
+  VIDEO
+}
+
+enum MediaSource {
+  PEXELS
+  PIXABAY
+  /// Uploaded by staff from their own files.
+  UPLOAD
+}
+
+/// DRAFT assets are only visible in the dashboard; the site shows PUBLISHED ones.
+enum MediaStatus {
+  DRAFT
+  PUBLISHED
+}
+
+/// A photo or video in the studio's media library. Stock assets are downloaded
+/// from the provider when saved (see docs/MEDIA.md) and served from the media
+/// storage directory, like uploads. Source and licence fields hold what the
+/// provider reported (or what staff entered for an upload), never guesses.
+model MediaAsset {
+  id                  String      @id @default(cuid())
+  kind                MediaKind
+  source              MediaSource
+  /// The provider's id for the asset; null for uploads.
+  providerAssetId     String?
+  /// The asset's page on the provider's site, or where an upload came from.
+  sourceUrl           String?
+  creatorName         String?
+  creatorUrl          String?
+  licenseName         String
+  licenseUrl          String?
+  /// The provider's own description (Pexels alt text, Pixabay tags), as received.
+  providerDescription String?
+  /// Thumbnail URL from the provider at save time. May expire; never used on the site.
+  providerPreviewUrl  String?
+  /// LocalizedText. Both languages are required before publishing.
+  alt                 Json        @default("{\"mn\": \"\", \"en\": \"\"}")
+  /// Staff notes, e.g. checks done before use.
+  notes               String?
+  /// File name in the media storage directory, and its served type.
+  fileName            String      @unique
+  mimeType            String
+  bytes               Int
+  width               Int?
+  height              Int?
+  durationSeconds     Float?
+  /// Still frame for a video (JPEG in the storage directory).
+  posterFileName      String?     @unique
+  status              MediaStatus @default(DRAFT)
+  publishedAt         DateTime?   @db.Timestamptz(3)
+  createdById         String?
+  createdAt           DateTime    @default(now()) @db.Timestamptz(3)
+  updatedAt           DateTime    @updatedAt @db.Timestamptz(3)
+
+  createdBy User? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@unique([source, providerAssetId])
+  @@index([status, kind])
+  @@index([createdAt])
+  @@map("media_assets")
+}
+
+/// Where media appears on the website. `slot` is defined in `src/lib/media/slots.ts`
+/// ("home.intro", "hero.arrival.video", "gallery", …). Single-asset slots hold at most
+/// one row (partial unique index in the migration); "gallery" holds many. A slot with
+/// no row shows its bundled default.
+model MediaPlacement {
+  id        String   @id @default(cuid())
+  slot      String
+  /// Media reference: bundled image id or `asset:<MediaAsset.id>`.
+  ref       String
+  position  Int      @default(0)
+  /// Gallery caption (LocalizedText).
+  caption   Json?
+  /// Slot options: hero focal point, gallery layout and barber.
+  options   Json     @default("{}")
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  @@index([slot, position])
+  @@index([ref])
+  @@map("media_placements")
 }
 
 // ------------------------------------------------------------ Appointments
@@ -397,4 +491,70 @@ model AuditLog {
   @@index([entityType, entityId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// ---------------------------------------------------------- Social accounts
+
+/// See docs/SOCIAL.md for the Meta app setup, permissions and limits.
+enum SocialProvider {
+  FACEBOOK // a Facebook Page, through Facebook Login
+  INSTAGRAM // an Instagram professional account, through Business Login for Instagram
+}
+
+enum SocialConnectionStatus {
+  CONNECTED
+  NEEDS_RECONNECT // the token expired, was revoked or stopped working; it has been erased
+}
+
+/// At most one connected account per provider. Disconnecting deletes the row.
+model SocialConnection {
+  id                  String                 @id @default(cuid())
+  provider            SocialProvider         @unique
+  status              SocialConnectionStatus @default(CONNECTED)
+  /// The Page id, or the Instagram professional account id.
+  accountId           String
+  /// App-scoped id of the person who authorized; matched by the deauthorize callback.
+  authorizedUserId    String?
+  name                String
+  username            String?
+  /// Instagram only: BUSINESS or MEDIA_CREATOR, as Meta reports it.
+  accountType         String?
+  /// Permissions Meta confirmed as granted, not the ones requested.
+  grantedScopes       String[]
+  /// AES-256-GCM ciphertext (lib/server/social-crypto.ts). Null once erased.
+  encryptedToken      String?
+  /// Null when Meta reports no expiry (long-lived Page tokens).
+  tokenExpiresAt      DateTime?              @db.Timestamptz(3)
+  /// Facebook only: when Meta stops returning data until someone signs in again.
+  dataAccessExpiresAt DateTime?              @db.Timestamptz(3)
+  tokenIssuedAt       DateTime               @db.Timestamptz(3)
+  /// A SocialProblem code (lib/social/meta.ts) while the connection needs attention.
+  problem             String?
+  lastCheckedAt       DateTime?              @db.Timestamptz(3)
+  connectedById       String?
+  connectedAt         DateTime               @db.Timestamptz(3)
+  updatedAt           DateTime               @updatedAt @db.Timestamptz(3)
+
+  connectedBy User? @relation(fields: [connectedById], references: [id], onDelete: SetNull)
+
+  @@map("social_connections")
+}
+
+/// A pending OAuth round trip: a hashed, single-use state bound to one staff
+/// login. After a Facebook callback that returned several Pages the row
+/// instead holds the encrypted choices (`stateHash` null) until one is picked.
+model SocialOAuthState {
+  id               String         @id @default(cuid())
+  stateHash        String?        @unique
+  provider         SocialProvider
+  userId           String
+  locale           String
+  encryptedPending String?
+  expiresAt        DateTime       @db.Timestamptz(3)
+  createdAt        DateTime       @default(now()) @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("social_oauth_states")
 }

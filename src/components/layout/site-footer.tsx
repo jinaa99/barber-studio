@@ -34,7 +34,7 @@ export function SiteFooter({
           </div>
 
           <div className="md:col-span-2">
-            <h2 className="eyebrow text-paper/45">{t.explore}</h2>
+            <h2 className="eyebrow text-paper/60">{t.explore}</h2>
             <ul className="mt-5 space-y-3 text-sm">
               {items.map((item) => (
                 <li key={item.href}>
@@ -47,7 +47,7 @@ export function SiteFooter({
           </div>
 
           <div className="md:col-span-3">
-            <h2 className="eyebrow text-paper/45">{t.visit}</h2>
+            <h2 className="eyebrow text-paper/60">{t.visit}</h2>
             <address className="mt-5 text-sm not-italic leading-relaxed text-paper/80">
               {studio.contact.address[locale]}
               <br />
@@ -63,7 +63,7 @@ export function SiteFooter({
           </div>
 
           <div className="md:col-span-3">
-            <h2 className="eyebrow text-paper/45">{t.follow}</h2>
+            <h2 className="eyebrow text-paper/60">{t.follow}</h2>
             <SocialLinks socials={studio.socials} tone="inverse" className="mt-5" />
           </div>
         </div>
@@ -71,7 +71,7 @@ export function SiteFooter({
         <div className="mt-20 flex flex-col gap-6 border-t border-line-inverse pt-8 md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
             {studio.isDemo && <DemoNotice tone="inverse">{t.demoNotice}</DemoNotice>}
-            <p className="text-xs text-paper/45">
+            <p className="text-xs text-paper/60">
               © {studio.name}. {t.rights}{" "}
               <Link href={`${localizedPath(locale, "/gallery")}#credits`} className="underline underline-offset-4 hover:text-paper">
                 {t.credits}

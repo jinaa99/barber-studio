@@ -28,6 +28,13 @@ npm run dev                  # http://localhost:3000 → redirects to /mn; staff
 | `npm test` | Unit tests |
 | `npm run test:integration` | Database tests (needs `TEST_DATABASE_URL`) |
 | `npm run build` / `npm start` | Production build (needs the database) and server |
+| `npm run social:check` | Daily: refresh and check Facebook/Instagram connections |
+| `npm run notifications:retry` | Retry failed or skipped confirmation emails |
+
+**Deploying:** host requirements, environment variables, proxy settings, backups, free-tier
+limits and what has been verified are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). Every
+variable is listed in `.env.example`. Email, stock search and Meta connections are optional
+and need their own credentials.
 
 ## Customising for a studio
 

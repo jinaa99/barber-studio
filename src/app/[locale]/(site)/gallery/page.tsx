@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
-import { getAllMedia, getGallery, getHeroClips, getSiteDictionary, getStudioProfile } from "@/lib/data";
+import { getGallery, getMediaCredits, getSiteDictionary, getStudioProfile } from "@/lib/data";
 import { pageMetadata } from "@/lib/metadata";
 import { routes } from "@/lib/navigation";
 import { Container } from "@/components/ui/container";
@@ -17,24 +17,13 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function GalleryPage() {
   const locale = await getLocale();
-  const [dict, items, media, clips, studio] = await Promise.all([
+  const [dict, items, credits, studio] = await Promise.all([
     getSiteDictionary(locale),
     getGallery(locale),
-    getAllMedia(locale),
-    getHeroClips(locale),
+    getMediaCredits(locale),
     getStudioProfile(),
   ]);
   const t = dict.galleryPage;
-  const credits = [
-    ...media.flatMap((m) =>
-      m.credit ? [{ id: m.id, label: t.photoBy, name: m.credit.author, provider: "Unsplash", url: m.credit.sourceUrl }] : [],
-    ),
-    ...clips.flatMap((c) =>
-      c.credit
-        ? [{ id: c.id, label: t.footage, name: c.credit.title, provider: c.credit.provider, url: c.credit.sourceUrl }]
-        : [],
-    ),
-  ];
 
   return (
     <>
@@ -67,14 +56,26 @@ export default async function GalleryPage() {
               <p className="mt-4 max-w-sm text-sm leading-relaxed text-taupe-deep">{t.creditsLead}</p>
             </div>
             <ul className="grid gap-x-8 gap-y-3 text-sm sm:grid-cols-2 lg:col-span-8">
-              {credits.map((c) => (
-                <li key={c.id} className="flex items-baseline justify-between gap-4 border-b border-line pb-3">
-                  <span className="shrink-0 text-taupe-deep">{c.label}</span>
-                  <a href={c.url} target="_blank" rel="noopener noreferrer" className="text-right hover:opacity-70">
-                    {c.name} <span className="text-taupe">/ {c.provider}</span>
-                  </a>
-                </li>
-              ))}
+              {credits.map((c) => {
+                const label = (
+                  <>
+                    {c.name ?? t.unnamed}
+                    {(c.provider ?? c.license) && <span className="text-taupe-deep"> / {c.provider ?? c.license}</span>}
+                  </>
+                );
+                return (
+                  <li key={c.id} className="flex items-baseline justify-between gap-4 border-b border-line pb-3">
+                    <span className="shrink-0 text-taupe-deep">{c.kind === "footage" ? t.footage : t.photoBy}</span>
+                    {c.url ? (
+                      <a href={c.url} target="_blank" rel="noopener noreferrer" className="min-w-0 text-right break-words hover:opacity-70">
+                        {label}
+                      </a>
+                    ) : (
+                      <span className="min-w-0 text-right break-words">{label}</span>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         </section>

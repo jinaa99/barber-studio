@@ -12,8 +12,10 @@ import { smallButton } from "./ui";
  * no extra dependency.
  */
 
-const panel =
-  "m-auto w-[min(100%-2rem,40rem)] max-h-[min(100dvh-2rem,56rem)] overflow-y-auto border border-line-strong bg-paper p-0 text-ink shadow-[0_24px_80px_-24px_rgb(22_21_19/0.35)] backdrop:bg-ink/40";
+const panelBase =
+  "m-auto max-h-[min(100dvh-2rem,56rem)] overflow-y-auto border border-line-strong bg-paper p-0 text-ink shadow-[0_24px_80px_-24px_rgb(22_21_19/0.35)] backdrop:bg-ink/40";
+const panel = `${panelBase} w-[min(100%-2rem,40rem)]`;
+const widePanel = `${panelBase} w-[min(100%-2rem,60rem)]`;
 
 function DialogHeader({ title, titleId, closeLabel, onClose }: { title: ReactNode; titleId: string; closeLabel: string; onClose: () => void }) {
   return (
@@ -37,11 +39,14 @@ export function RouteDialog({
   title,
   closeHref,
   closeLabel,
+  wide,
   children,
 }: {
   title: ReactNode;
   closeHref: string;
   closeLabel: string;
+  /** Room for a two-column layout (e.g. a media preview beside its details). */
+  wide?: boolean;
   children: ReactNode;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -69,7 +74,7 @@ export function RouteDialog({
       ref={ref}
       open
       aria-labelledby={titleId}
-      className={panel}
+      className={wide ? widePanel : panel}
       onClose={() => {
         if (!closing.current) router.replace(closeHref, { scroll: false });
       }}
@@ -116,7 +121,7 @@ export function DialogTrigger({
       <button type="button" onClick={() => setOpen(true)} className={cn(triggerClassName ?? smallButton)} aria-haspopup="dialog">
         {label}
       </button>
-      <dialog ref={ref} aria-labelledby={titleId} className={cn(panel, "w-[min(100%-2rem,28rem)]")} onClose={() => setOpen(false)}>
+      <dialog ref={ref} aria-labelledby={titleId} className={`${panelBase} w-[min(100%-2rem,28rem)]`} onClose={() => setOpen(false)}>
         {open && (
           <>
             <DialogHeader title={title} titleId={titleId} closeLabel={closeLabel} onClose={() => setOpen(false)} />

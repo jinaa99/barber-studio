@@ -102,21 +102,41 @@ export interface TestimonialRecord {
 
 /* ---------- Resolved, single-language view models ---------- */
 
+/** Where a photo or clip shown on the site came from, for the credits list. */
+export interface Credit {
+  /** Photographer, videographer or clip title, when the source names one. */
+  name: string | null;
+  /** Stock library ("Unsplash", "Pexels"…); null for uploads. */
+  provider: string | null;
+  /** Licence name, e.g. "Pexels License"; null for the studio's own media. */
+  license: string | null;
+  url: string | null;
+  /** Stock media doesn't show this studio, and is labelled as such. */
+  stock: boolean;
+}
+
+/**
+ * A bundled image (static import, with a blur placeholder) or a media library
+ * file (a URL under /api/media). `null` renders the designed fallback frame.
+ */
+export type ImageSource = StaticImageData | string | null;
+
 export interface Media {
+  /** Media reference (bundled id or `asset:<id>`). */
   id: string;
-  src: StaticImageData | null;
+  src: ImageSource;
   alt: string;
-  credit?: MediaCredit;
+  credit?: Credit;
 }
 
 export interface HeroClip {
   id: HeroClipId;
   sources: HeroClipRecord["sources"];
   playback: HeroClipRecord["playback"];
-  poster: StaticImageData | null;
+  poster: ImageSource;
   alt: string;
   focus: HeroClipRecord["focus"];
-  credit?: VideoCredit;
+  credit?: Credit;
 }
 
 export interface Service {

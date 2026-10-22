@@ -19,7 +19,9 @@ export const routes = {
   adminCustomers: "/admin/customers",
   adminAnalytics: "/admin/analytics",
   adminContent: "/admin/content",
+  adminMedia: "/admin/media",
   adminSettings: "/admin/settings",
+  adminSocial: "/admin/social",
   adminActivity: "/admin/activity",
 } as const;
 

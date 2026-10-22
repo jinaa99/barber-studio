@@ -9,6 +9,8 @@ import { galleryRecords } from "@/content/demo/gallery";
 import { db } from "@/lib/server/db";
 import { saveBookingRules } from "@/lib/server/settings";
 import { saveSiteContent } from "@/lib/server/content";
+import { listPlacements } from "@/lib/server/media-library";
+import { GALLERY_SLOT } from "@/lib/media/slots";
 import { createAccount, resetPassword, updateAccount, type StaffError } from "@/lib/server/staff";
 import { permitted } from "./shared";
 
@@ -92,10 +94,13 @@ export async function saveTextsAction(_previous: FormState, formData: FormData):
 export async function saveGalleryAction(_previous: FormState, formData: FormData): Promise<FormState> {
   const user = await permitted("settings.manage", formData);
   if (!user) return failure("forbidden");
-  const known = new Set(galleryRecords.map((g) => g.id));
+  // Bundled items and photos added from the media library, in the order the form lists them.
+  const library = (await listPlacements(db)).filter((p) => p.slot === GALLERY_SLOT);
+  const ids = [...galleryRecords.map((g) => g.id), ...library.map((p) => p.id)];
+  const known = new Set(ids);
   const hidden = texts(formData, "hidden").filter((id) => known.has(id));
-  const order = galleryRecords
-    .map((g, index) => ({ id: g.id, position: Number(text(formData, `position.${g.id}`)) || index + 1, index }))
+  const order = ids
+    .map((id, index) => ({ id, position: Number(text(formData, `position.${id}`)) || index + 1, index }))
     .sort((a, b) => a.position - b.position || a.index - b.index)
     .map((g) => g.id);
   await saveSiteContent(db, "gallery", { order, hidden }, user.id);

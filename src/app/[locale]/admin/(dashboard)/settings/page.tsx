@@ -62,6 +62,13 @@ async function Settings({ locale, dict }: { locale: Locale; dict: Dictionary }) 
             {t.contentLink}
           </Link>
         </p>
+        {ctx.can("social.manage") && (
+          <p className="mt-3 text-sm text-taupe-deep">
+            <Link href={localizedPath(locale, routes.adminSocial)} className={textLink}>
+              {t.socialLink}
+            </Link>
+          </p>
+        )}
       </Section>
     </>
   );

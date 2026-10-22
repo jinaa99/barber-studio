@@ -5,10 +5,12 @@ import { redirect } from "next/navigation";
 import { localizedPath } from "@/i18n/config";
 import { mediaRecords } from "@/content/media";
 import { catalogTag } from "@/lib/data";
+import { assetRef } from "@/lib/media/refs";
 import { routes } from "@/lib/navigation";
 import { checkbox, failure, lines, parseForm, success, text, texts, type FormState } from "@/lib/admin/forms";
 import { barberSchema, categorySchema, serviceSchema, timeOffSchema, validateBlocks } from "@/lib/admin/schemas";
 import { db } from "@/lib/server/db";
+import { listPublishedAssets } from "@/lib/server/media-library";
 import {
   addTimeOff,
   deleteCategory,
@@ -138,13 +140,12 @@ export async function saveBarberAction(mode: Mode, _previous: FormState, formDat
     serviceIds: texts(formData, "serviceIds"),
   });
   if (!parsed.ok) return parsed.state;
-  const result = await saveBarber(
-    db,
-    parsed.data,
-    user.id,
-    mode,
-    mediaRecords.filter((m) => m.src).map((m) => m.id),
-  );
+  // Bundled photos and published library images (`asset:<id>`).
+  const library = await listPublishedAssets(db, "IMAGE");
+  const result = await saveBarber(db, parsed.data, user.id, mode, [
+    ...mediaRecords.filter((m) => m.src).map((m) => m.id),
+    ...library.map((a) => assetRef(a.id)),
+  ]);
   if (!result.ok) return catalogFailure(result.error);
   changed();
   if (mode === "create") {

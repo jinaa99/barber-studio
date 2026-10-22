@@ -42,12 +42,12 @@ export function StepProgress({
                   "tabular flex size-6 items-center justify-center rounded-full border text-[0.6875rem] font-semibold transition-colors duration-300",
                   active && "border-ink bg-ink text-paper",
                   done && "border-ink text-ink",
-                  !active && !done && "border-line-strong text-taupe",
+                  !active && !done && "border-line-strong text-taupe-deep",
                 )}
               >
                 {done ? <Check className="size-3" strokeWidth={2.5} /> : i + 1}
               </span>
-              <span className={cn("text-sm", active ? "font-semibold text-ink" : done ? "text-ink" : "text-taupe")}>
+              <span className={cn("text-sm", active ? "font-semibold text-ink" : done ? "text-ink" : "text-taupe-deep")}>
                 {dict.booking.steps[step]}
               </span>
             </>

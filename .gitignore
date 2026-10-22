@@ -44,5 +44,8 @@ next-env.d.ts
 # local database (npm run db:local)
 /.data/
 
+# media library files (MEDIA_STORAGE_DIR default)
+/storage/
+
 # generated Prisma client
 /src/generated/

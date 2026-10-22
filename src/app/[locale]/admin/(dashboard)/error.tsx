@@ -12,7 +12,7 @@ export default function AdminError({ error, retry }: { error: unknown; retry: ()
       <EmptyState>
         <p className="font-semibold text-ink">{t.errorTitle}</p>
         <p className="mt-1">{t.errorBody}</p>
-        {digest && <p className="tabular mt-2 text-xs text-taupe">{digest}</p>}
+        {digest && <p className="tabular mt-2 text-xs text-taupe-deep">{digest}</p>}
         <button type="button" onClick={() => retry()} className={`${smallButton} mt-4`}>
           {t.retry}
         </button>

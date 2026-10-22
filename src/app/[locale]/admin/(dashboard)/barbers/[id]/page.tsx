@@ -12,6 +12,7 @@ import { adminContext } from "@/lib/server/admin-context";
 import { getBarberForEdit } from "@/lib/server/catalog";
 import { saveHoursAction } from "@/app/[locale]/admin/actions/catalog";
 import { BarberForm } from "@/components/admin/barber-form";
+import { mediaChoices } from "@/components/admin/media-picker";
 import { ActionForm, SubmitButton } from "@/components/admin/form";
 import { ScheduleEditor } from "@/components/admin/schedule-editor";
 import { TimeOffManager } from "@/components/admin/time-off";
@@ -42,9 +43,10 @@ async function EditBarber({ locale, dict, params, searchParams }: { locale: Loca
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const t = dict.admin.barbers;
   const back = localizedPath(locale, routes.adminBarbers);
-  const [barber, services] = await Promise.all([
+  const [barber, services, images] = await Promise.all([
     getBarberForEdit(db, decodeURIComponent(id).slice(0, 64), ctx.now),
     db.service.findMany({ orderBy: [{ sortOrder: "asc" }, { id: "asc" }], select: { id: true, name: true, active: true } }),
+    mediaChoices(locale, "IMAGE"),
   ]);
   if (!barber) return <NotFoundState dict={dict} backHref={back} />;
   const displayName = (barber.name as LocalizedText)[locale];
@@ -80,6 +82,7 @@ async function EditBarber({ locale, dict, params, searchParams }: { locale: Loca
             dict={dict}
             mode="update"
             services={services}
+            images={images}
             values={{
               id: barber.id,
               name: barber.name as LocalizedText,

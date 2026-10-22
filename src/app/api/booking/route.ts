@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import type { BookingResult } from "@/lib/booking/types";
 import { db } from "@/lib/server/db";
 import { createBooking } from "@/lib/server/booking";
+import { isSameOrigin } from "@/lib/server/origin";
 import { clientAddress, rateLimit } from "@/lib/server/rate-limit";
 
 const MAX_BODY_BYTES = 8 * 1024;
@@ -24,9 +25,8 @@ function reply(result: BookingResult) {
 /** POST /api/booking — validate, re-check availability and create the appointment. */
 export async function POST(request: NextRequest) {
   // Same-origin JSON only: blocks cross-site form posts.
-  const origin = request.headers.get("origin");
-  if (origin && new URL(origin).host !== request.headers.get("host")) {
-    return Response.json({ ok: false, error: "invalid" }, { status: 403 });
+  if (!isSameOrigin(request.headers, { allowMissing: true })) {
+    return Response.json({ ok: false, error: "invalid" }, { status: 403, headers: { "Cache-Control": "no-store" } });
   }
   if (!request.headers.get("content-type")?.startsWith("application/json")) {
     return reply({ ok: false, error: "invalid" });

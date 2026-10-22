@@ -55,7 +55,7 @@ export function ServiceStep({
                       <span className="tabular font-semibold">{formatPrice(service.price, locale)}</span>
                     </span>
                     <span className="mt-1.5 block text-sm leading-relaxed text-taupe-deep">{service.summary}</span>
-                    <span className="tabular mt-2 block text-xs text-taupe">
+                    <span className="tabular mt-2 block text-xs text-taupe-deep">
                       {formatDuration(service.durationMinutes, dict.common.minutes)}
                     </span>
                   </OptionCard>
@@ -107,7 +107,7 @@ export function BarberStep({
             >
               <span className="block text-lg font-semibold tracking-tight">{barber.name}</span>
               <span className="mt-1 block text-sm text-taupe-deep">{barber.role}</span>
-              <span className="mt-3 block text-xs leading-relaxed text-taupe">
+              <span className="mt-3 block text-xs leading-relaxed text-taupe-deep">
                 {offers ? barber.specialties.join(" · ") : t.notOffered}
               </span>
             </OptionCard>
@@ -245,7 +245,7 @@ export function TimeStep({
                   {isToday ? dict.calendar.today : dict.calendar.weekdaysShort[weekday]}
                 </span>
                 <span className="tabular text-lg font-semibold leading-none sm:text-xl">{d.getDate()}</span>
-                <span className={cn("hidden text-[0.625rem] sm:block", checked ? "text-paper/60" : "text-taupe")}>
+                <span className={cn("hidden text-[0.625rem] sm:block", checked ? "text-paper/60" : "text-taupe-deep")}>
                   {dict.calendar.monthsShort[d.getMonth()]}
                 </span>
                 {closed && <span className="sr-only">{t.closed}</span>}
@@ -353,6 +353,7 @@ export function DetailsStep({
           id={id("name")}
           name="name"
           autoComplete="name"
+          aria-required
           maxLength={LIMITS.name}
           value={value.name}
           onChange={set("name")}
@@ -367,6 +368,7 @@ export function DetailsStep({
           id={id("phone")}
           name="phone"
           type="tel"
+          aria-required
           inputMode="tel"
           autoComplete="tel"
           value={value.phone}
@@ -412,7 +414,7 @@ export function DetailsStep({
 
 function inputClass(invalid: boolean) {
   return cn(
-    "h-12 w-full border bg-paper px-4 text-base text-ink placeholder:text-taupe/70 transition-colors duration-300 focus:outline-none focus-visible:outline-none focus:border-ink",
+    "h-12 w-full border bg-paper px-4 text-base text-ink placeholder:text-taupe-deep/90 transition-colors duration-300 focus:outline-none focus-visible:outline-none focus:border-ink",
     invalid ? "border-danger" : "border-line-strong hover:border-ink/50",
   );
 }

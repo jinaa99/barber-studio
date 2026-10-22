@@ -271,7 +271,7 @@ export function HeroSequence({
                     alt={clip.alt}
                     fill
                     sizes="100vw"
-                    placeholder="blur"
+                    placeholder={typeof clip.poster === "object" ? "blur" : "empty"}
                     loading={i === 0 ? "eager" : "lazy"}
                     fetchPriority={i === 0 ? "high" : undefined}
                     className="object-cover [object-position:var(--focus-p)] landscape:[object-position:var(--focus-l)]"

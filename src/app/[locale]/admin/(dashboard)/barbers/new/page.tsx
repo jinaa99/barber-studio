@@ -9,6 +9,7 @@ import { routes } from "@/lib/navigation";
 import { db } from "@/lib/server/db";
 import { adminContext } from "@/lib/server/admin-context";
 import { BarberForm } from "@/components/admin/barber-form";
+import { mediaChoices } from "@/components/admin/media-picker";
 import { Forbidden, PageHeader, PageSkeleton } from "@/components/admin/ui";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -29,7 +30,10 @@ export default async function NewBarberPage() {
 async function NewBarber({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const ctx = await adminContext(locale);
   if (!ctx.can("catalog.manage")) return <Forbidden dict={dict} />;
-  const services = await db.service.findMany({ orderBy: [{ sortOrder: "asc" }, { id: "asc" }], select: { id: true, name: true, active: true } });
+  const [services, images] = await Promise.all([
+    db.service.findMany({ orderBy: [{ sortOrder: "asc" }, { id: "asc" }], select: { id: true, name: true, active: true } }),
+    mediaChoices(locale, "IMAGE"),
+  ]);
   return (
     <>
       <Link href={localizedPath(locale, routes.adminBarbers)} className="mb-4 inline-flex items-center gap-2 text-sm text-taupe-deep hover:text-ink">
@@ -38,7 +42,7 @@ async function NewBarber({ locale, dict }: { locale: Locale; dict: Dictionary })
       </Link>
       <PageHeader title={dict.admin.barbers.newTitle} />
       <div className="mt-8 max-w-3xl">
-        <BarberForm locale={locale} dict={dict} mode="create" services={services} />
+        <BarberForm locale={locale} dict={dict} mode="create" services={services} images={images} />
       </div>
     </>
   );

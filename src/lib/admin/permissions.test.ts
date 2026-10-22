@@ -4,7 +4,7 @@ import { appointmentScope, can, canAccessBarber } from "./permissions";
 
 describe("dashboard permissions", () => {
   it("gives admins everything", () => {
-    for (const p of ["finance.view", "catalog.manage", "staff.manage", "settings.manage", "audit.view", "customers.view"] as const) {
+    for (const p of ["finance.view", "catalog.manage", "staff.manage", "settings.manage", "media.manage", "social.manage", "audit.view", "customers.view"] as const) {
       assert.equal(can({ role: "ADMIN" }, p), true, p);
     }
   });
@@ -13,7 +13,7 @@ describe("dashboard permissions", () => {
     const staff = { role: "STAFF" } as const;
     assert.equal(can(staff, "appointments.manage"), true);
     assert.equal(can(staff, "customers.view"), true);
-    for (const p of ["finance.view", "catalog.manage", "staff.manage", "settings.manage", "audit.view"] as const) {
+    for (const p of ["finance.view", "catalog.manage", "staff.manage", "settings.manage", "media.manage", "social.manage", "audit.view"] as const) {
       assert.equal(can(staff, p), false, p);
     }
   });
@@ -21,7 +21,7 @@ describe("dashboard permissions", () => {
   it("limits a barber login to their own appointments", () => {
     const barber = { role: "BARBER", barberId: "enkhjin" } as const;
     assert.equal(can(barber, "appointments.updateStatus"), true);
-    for (const p of ["appointments.viewAll", "appointments.manage", "customers.view", "finance.view"] as const) {
+    for (const p of ["appointments.viewAll", "appointments.manage", "customers.view", "finance.view", "media.manage", "social.manage"] as const) {
       assert.equal(can(barber, p), false, p);
     }
     assert.equal(appointmentScope(barber), "enkhjin");

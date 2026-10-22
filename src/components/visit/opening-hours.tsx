@@ -50,7 +50,7 @@ export function OpeningHoursList({
             {names[row.from]}
             {row.to !== row.from && `–${names[row.to]}`}
           </dt>
-          <dd className={cn("tabular", !row.open && (tone === "inverse" ? "text-paper/45" : "text-taupe"))}>
+          <dd className={cn("tabular", !row.open && (tone === "inverse" ? "text-paper/60" : "text-taupe-deep"))}>
             {row.open && row.close ? `${row.open}–${row.close}` : dict.common.closed}
           </dd>
         </div>

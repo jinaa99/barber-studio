@@ -251,7 +251,7 @@ const statusEdge: Record<AppointmentStatus, string> = {
   PENDING: "border-l-brass bg-brass/10",
   CONFIRMED: "border-l-ink bg-paper",
   COMPLETED: "border-l-taupe bg-paper-deep/70 text-taupe-deep",
-  CANCELLED: "border-l-line-strong bg-paper-deep/40 text-taupe line-through",
+  CANCELLED: "border-l-line-strong bg-paper-deep/40 text-taupe-deep line-through",
   NO_SHOW: "border-l-danger bg-danger/5",
 };
 
@@ -325,7 +325,7 @@ async function DayView({
         <span className="sr-only">
           , {name(r.barber.name)}, {t.status[r.status]}
         </span>
-        {r.isDemo && <span className="mt-0.5 block text-[0.625rem] font-semibold uppercase tracking-wide text-taupe">{t.common.sample}</span>}
+        {r.isDemo && <span className="mt-0.5 block text-[0.625rem] font-semibold uppercase tracking-wide text-taupe-deep">{t.common.sample}</span>}
       </Link>
     );
   };
@@ -368,7 +368,7 @@ async function DayView({
           {columns.map((b) => (
             <div key={b.id} className="truncate border-b border-line-strong px-2 pb-2 text-sm font-semibold">
               {name(b.name)}
-              {!b.active && <span className="ml-1 text-xs font-normal text-taupe">({t.common.inactive})</span>}
+              {!b.active && <span className="ml-1 text-xs font-normal text-taupe-deep">({t.common.inactive})</span>}
             </div>
           ))}
 
@@ -484,7 +484,7 @@ async function WeekView({
               <span className="tabular text-taupe-deep">{shortDate(day, locale, dict)}</span>
             </Link>
             {own.length === 0 ? (
-              <p className="px-1 pb-2 text-xs text-taupe">—</p>
+              <p className="px-1 pb-2 text-xs text-taupe-deep">—</p>
             ) : (
               <ul className="space-y-1.5">
                 {own.map((r) => (

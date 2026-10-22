@@ -46,7 +46,7 @@ async function Activity({ locale, dict, searchParams }: { locale: Locale; dict: 
   const t = dict.admin.activity;
   const query = queryOf(await searchParams);
   const base = localizedPath(locale, routes.adminActivity);
-  const group = query.group && query.group in auditGroups ? (query.group as AuditGroup) : undefined;
+  const group = query.group && Object.hasOwn(auditGroups, query.group) ? (query.group as AuditGroup) : undefined;
   const result = await listAuditLog(db, { group, page: Math.max(1, Number(query.page) || 1) });
 
   return (

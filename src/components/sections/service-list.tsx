@@ -41,7 +41,7 @@ export function ServiceList({
                 {service.summary}
               </span>
               {detailed && (
-                <span className="mt-3 block text-xs text-taupe">
+                <span className="mt-3 block text-xs text-taupe-deep">
                   <span className="sr-only">{dict.servicesPage.includes}: </span>
                   {service.includes.join(" · ")}
                 </span>

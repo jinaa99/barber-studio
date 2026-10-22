@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
-import { getMedia, getServiceCategories, getServices, getSiteDictionary, getStudioProfile } from "@/lib/data";
+import { getServiceCategories, getServices, getSiteDictionary, getSlotMedia, getStudioProfile } from "@/lib/data";
 import { pageMetadata } from "@/lib/metadata";
 import { routes } from "@/lib/navigation";
 import { Container } from "@/components/ui/container";
@@ -19,11 +19,12 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function ServicesPage() {
   const locale = await getLocale();
-  const [dict, services, categories, studio] = await Promise.all([
+  const [dict, services, categories, studio, feature] = await Promise.all([
     getSiteDictionary(locale),
     getServices(locale),
     getServiceCategories(locale),
     getStudioProfile(),
+    getSlotMedia("services.feature", locale),
   ]);
   const t = dict.servicesPage;
 
@@ -57,7 +58,7 @@ export default async function ServicesPage() {
 
         <div className="mt-24 grid gap-12 sm:mt-32 md:grid-cols-12 md:gap-8">
           <Reveal className="md:col-span-5">
-            <Photo media={getMedia("studio-tools", locale)} ratio="4/5" sizes="(min-width: 768px) 40vw, 100vw" />
+            <Photo media={feature} ratio="4/5" sizes="(min-width: 768px) 40vw, 100vw" />
           </Reveal>
           <Reveal delay={120} className="flex flex-col justify-end md:col-span-6 md:col-start-7">
             <h2 className="text-display-md font-medium">{t.notesTitle}</h2>

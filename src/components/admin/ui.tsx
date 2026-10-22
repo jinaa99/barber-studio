@@ -111,7 +111,7 @@ const statusTone: Record<AppointmentStatus, string> = {
   PENDING: "border-brass text-ink",
   CONFIRMED: "border-ink bg-ink text-paper",
   COMPLETED: "border-line-strong text-taupe-deep",
-  CANCELLED: "border-line text-taupe line-through",
+  CANCELLED: "border-line text-taupe-deep line-through",
   NO_SHOW: "border-danger text-danger",
 };
 

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ArrowUpRight, Mail, MapPin, Phone } from "lucide-react";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
-import { getMedia, getSiteDictionary, getStudioProfile } from "@/lib/data";
+import { getSiteDictionary, getSlotMedia, getStudioProfile } from "@/lib/data";
 import { pageMetadata } from "@/lib/metadata";
 import { routes } from "@/lib/navigation";
 import { buttonStyles } from "@/components/ui/button";
@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function VisitPage() {
   const locale = await getLocale();
-  const [dict, studio] = await Promise.all([getSiteDictionary(locale), getStudioProfile()]);
+  const [dict, studio, cover] = await Promise.all([getSiteDictionary(locale), getStudioProfile(), getSlotMedia("visit.cover", locale)]);
   const t = dict.visitPage;
   const { contact } = studio;
   const iconClass = "mt-0.5 size-4 shrink-0 text-brass";
@@ -35,7 +35,7 @@ export default async function VisitPage() {
 
       <Container className="pb-section">
         <Reveal>
-          <Photo media={getMedia("studio-interior", locale)} ratio="16/10" sizes="(min-width: 1440px) 1360px, 100vw" />
+          <Photo media={cover} ratio="16/10" sizes="(min-width: 1440px) 1360px, 100vw" />
         </Reveal>
 
         <div className="mt-16 grid gap-14 sm:mt-24 md:grid-cols-2 lg:grid-cols-12 lg:gap-8">

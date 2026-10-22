@@ -17,6 +17,8 @@ const sections: { key: AdminNavKey; path: string; permission?: Permission }[] = 
   { key: "services", path: routes.adminServices, permission: "catalog.manage" },
   { key: "analytics", path: routes.adminAnalytics, permission: "finance.view" },
   { key: "content", path: routes.adminContent, permission: "settings.manage" },
+  { key: "media", path: routes.adminMedia, permission: "media.manage" },
+  { key: "social", path: routes.adminSocial, permission: "social.manage" },
   { key: "settings", path: routes.adminSettings, permission: "settings.manage" },
   { key: "activity", path: routes.adminActivity, permission: "audit.view" },
 ];

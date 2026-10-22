@@ -1,9 +1,8 @@
-import Image from "next/image";
 import type { Locale, LocalizedText } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries/mn";
-import { mediaRecords } from "@/content/media";
 import { saveBarberAction } from "@/app/[locale]/admin/actions/catalog";
 import { ActionForm, CheckboxField, GroupError, LocalizedFields, SubmitButton, TextField } from "./form";
+import { MediaPicker, type MediaChoice } from "./media-picker";
 
 export interface BarberFormValues {
   id: string;
@@ -25,16 +24,18 @@ export function BarberForm({
   mode,
   values,
   services,
+  images,
 }: {
   locale: Locale;
   dict: Dictionary;
   mode: "create" | "update";
   values?: BarberFormValues;
   services: { id: string; name: unknown; active: boolean }[];
+  /** Published library images and bundled photos (`mediaChoices`). */
+  images: MediaChoice[];
 }) {
   const t = dict.admin.barbers;
   const c = dict.admin.common;
-  const images = mediaRecords.filter((m) => m.src);
   const lines = (list: LocalizedText[] | undefined, lang: "mn" | "en") => (list ?? []).map((s) => s[lang]).join("\n");
 
   return (
@@ -62,27 +63,16 @@ export function BarberForm({
         <TextField label={c.sortOrder} name="sortOrder" type="number" min={0} max={999} defaultValue={values?.sortOrder ?? 0} hint={c.sortOrderHint} />
       </div>
 
-      <fieldset>
-        <legend className="text-sm font-semibold">{t.photo}</legend>
-        <p className="mt-1 text-xs leading-relaxed text-taupe-deep">{t.photoHint}</p>
-        <div className="mt-3 grid grid-cols-3 gap-3 sm:grid-cols-6">
-          {images.map((m, i) => (
-            <label key={m.id} className="relative block cursor-pointer">
-              <input
-                type="radio"
-                name="imageId"
-                value={m.id}
-                defaultChecked={values ? values.imageId === m.id : i === 0}
-                className="peer sr-only"
-              />
-              <span className="block aspect-[4/5] overflow-hidden border-2 border-transparent peer-checked:border-ink peer-focus-visible:outline peer-focus-visible:outline-brass">
-                <Image src={m.src!} alt={m.alt[locale]} sizes="120px" className="size-full object-cover" placeholder="blur" />
-              </span>
-            </label>
-          ))}
-        </div>
+      <MediaPicker
+        name="imageId"
+        legend={t.photo}
+        hint={t.photoHint}
+        choices={images}
+        defaultValue={values ? values.imageId : images.find((m) => !m.library)?.ref}
+        libraryLabel={dict.admin.media.libraryBadge}
+      >
         <GroupError name="imageId" />
-      </fieldset>
+      </MediaPicker>
 
       <fieldset>
         <legend className="text-sm font-semibold">{t.servicesOffered}</legend>
@@ -96,7 +86,7 @@ export function BarberForm({
               label={
                 <>
                   {(s.name as LocalizedText)[locale]}
-                  {!s.active && <span className="ml-1.5 font-normal text-taupe">({c.inactive})</span>}
+                  {!s.active && <span className="ml-1.5 font-normal text-taupe-deep">({c.inactive})</span>}
                 </>
               }
               defaultChecked={values?.serviceIds.includes(s.id)}

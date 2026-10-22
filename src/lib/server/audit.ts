@@ -28,6 +28,18 @@ export type AuditAction =
   | "content.profile_updated"
   | "content.texts_updated"
   | "content.gallery_updated"
+  | "media.saved"
+  | "media.uploaded"
+  | "media.updated"
+  | "media.published"
+  | "media.unpublished"
+  | "media.deleted"
+  | "media.replaced"
+  | "media.placed"
+  | "media.unplaced"
+  | "social.connected"
+  | "social.disconnected"
+  | "social.needs_reconnect"
   | "user.created"
   | "user.updated"
   | "user.password_reset";
@@ -57,6 +69,18 @@ export const auditActions: AuditAction[] = [
   "content.profile_updated",
   "content.texts_updated",
   "content.gallery_updated",
+  "media.saved",
+  "media.uploaded",
+  "media.updated",
+  "media.published",
+  "media.unpublished",
+  "media.deleted",
+  "media.replaced",
+  "media.placed",
+  "media.unplaced",
+  "social.connected",
+  "social.disconnected",
+  "social.needs_reconnect",
   "user.created",
   "user.updated",
   "user.password_reset",
@@ -89,6 +113,8 @@ export const auditGroups = {
   appointment: ["appointment."],
   catalog: ["service.", "category.", "barber.", "time_off."],
   settings: ["settings.", "content."],
+  media: ["media."],
+  social: ["social."],
   user: ["user."],
 } as const;
 

@@ -16,6 +16,10 @@ The owner handles all Git operations.
 - Next.js 16 App Router, React 19, TypeScript (strict), Tailwind CSS v4, `lucide-react`.
 - PostgreSQL via Prisma 7 (`prisma-client` generator → `src/generated/prisma`, git-ignored;
   `@prisma/adapter-pg`). zod for server-side validation. Booking backend: [docs/BOOKING.md](docs/BOOKING.md).
+- sharp (server-side image re-encoding for the media library). Media library, providers,
+  storage and security: [docs/MEDIA.md](docs/MEDIA.md).
+- Meta (Facebook Pages, Instagram professional accounts) via Graph API v26.0, no SDK. Setup,
+  permissions and limits: [docs/SOCIAL.md](docs/SOCIAL.md).
 - This Next version differs from older training data. Check
   `node_modules/next/dist/docs/` before using an API. Specifically:
   - `src/proxy.ts` replaces `middleware.ts`.
@@ -44,6 +48,7 @@ The owner handles all Git operations.
 | Local Postgres | `npm run db:local` (port 5433, data in `.data/`) |
 | Migrations | `npm run db:migrate` (dev) / `npm run db:deploy` |
 | Seed / staff account | `npm run db:seed` / `npm run admin:create` |
+| Social token refresh + check (cron, daily) | `npm run social:check` |
 
 Run lint, typecheck, tests and build before saying a change is done.
 Never reset or drop a database; schema changes are new, additive migrations.
@@ -58,6 +63,9 @@ src/
   app/[locale]/admin/      login; (dashboard)/ = the staff dashboard shell and modules;
                            actions.ts = sign-in/out, actions/*.ts = dashboard Server Actions
   app/api/booking/         availability (GET) and booking (POST) route handlers
+  app/api/media/[file]     serves media library files (drafts to admins only)
+  app/api/admin/media/upload  staff uploads (multipart, admin only)
+  app/api/social/[provider]/ OAuth callback (GET) and Meta deauthorize callback (POST)
   i18n/                    locales config, dictionaries (mn is the source type), loader
   content/                 site.ts (brand + business details), media.ts (images + credits),
                            types.ts (records & view models), demo/* (seed source data)
@@ -65,10 +73,15 @@ src/
   lib/booking/             pure, shared booking domain: availability engine, time zone,
                            status rules, validation, HTTP provider, sessionStorage
   lib/admin/               pure dashboard logic: permissions, metric definitions, form
-                           schemas, website-content fallbacks, formatting
+                           schemas, website-content fallbacks, media form schemas, formatting
+  lib/media/               pure media logic: media references, website slots, stock provider
+                           parsing and host allow-lists, file-type sniffing
+  lib/social/              pure Meta logic: scopes, config, OAuth URLs, response/error parsing
   lib/server/              server-only: db client, booking service, auth/sessions,
-                           accounts, notifications, audit, rate limit, settings,
-                           appointments, catalog, staff, customers, metrics, content
+                           accounts, notifications, audit, rate limit, origin check, settings,
+                           appointments, catalog, staff, customers, metrics, content,
+                           media-library, media-storage, stock-media,
+                           social (connections), meta-api (HTTP client), social-crypto
 prisma/                    schema, migrations (hand-written constraints at the end), seed
 scripts/                   local db, admin bootstrap, demo removal, email retry, test runner
 tests/integration/         database tests
@@ -80,7 +93,14 @@ tests/integration/         database tests
   dialogs (native `<dialog>`), navigation and schedule editor.
 - **Content** goes through `lib/data.ts`. Database rows store `LocalizedText`
   (`{ mn, en }`) as JSON; getters return single-language view models. Reads are
-  `use cache` + `cacheTag` (`catalogTag`, `settingsTag`, `contentTag`); call `updateTag` after writes.
+  `use cache` + `cacheTag` (`catalogTag`, `settingsTag`, `contentTag`, `mediaTag`); call `updateTag` after writes.
+- **Media:** anything that shows a picture stores a media reference: a bundled id from
+  `content/media.ts` or `asset:<id>` (`lib/media/refs.ts`). Page slots, hero scenes and
+  library gallery items are `media_placements` rows (`lib/media/slots.ts`); barber photos are
+  `barbers.imageId`. Only PUBLISHED assets reach the site, and every slot falls back to its
+  bundled default. Read media through `getSlotMedia` / `getHeroClips` / `getGallery`; never
+  hardcode a library asset in a component. API keys stay in `lib/server/stock-media.ts`;
+  never accept a media URL from the browser.
 - **Booking UI** depends only on the `BookingProvider` interface
   (`lib/booking/types.ts`), implemented by `http-provider.ts`. Displayed slots are
   advisory: `lib/server/booking.ts` recomputes availability inside a transaction
@@ -94,6 +114,12 @@ tests/integration/         database tests
   `permitted(permission, formData)` itself. Appointment queries take the user's scope
   (`appointmentScope`) so BARBER logins only reach their own. Never rely on hidden UI.
   Roles and the metric definitions: [docs/ADMIN.md](docs/ADMIN.md).
+- **Social accounts:** `lib/server/social.ts` talks to Meta only through the `MetaApi`
+  interface (`lib/server/meta-api.ts`); tests use a fake. Tokens are AES-256-GCM encrypted
+  (`social-crypto.ts`, `SOCIAL_TOKEN_KEY`) and never leave the server: view models carry no
+  token, and logs never include a URL or token. A connection exists only after a verified
+  callback (hashed single-use state bound to the staff login); a token Meta rejects is erased
+  and the row flagged NEEDS_RECONNECT. Never fake a connection or an insight figure.
 - **Site content:** studio name, contact, hours and socials come from `getStudioProfile()`;
   pages with editable copy use `getSiteDictionary(locale)`. `content/site.ts` is only the default.
 - **Times:** appointments are UTC instants; working hours are minutes in the
@@ -107,6 +133,8 @@ tests/integration/         database tests
   *and* `en.ts`. `en` is typed as `Dictionary`, so a missing key fails the
   type-check. Content data uses `LocalizedText`. Mongolian is the default language.
 - **Links** use `localizedPath(locale, routes.x)` from `lib/navigation.ts`.
+- **Contrast:** `text-taupe` (3.5:1 on paper) is for icons and decoration only; readable
+  text uses `text-taupe-deep` or darker, and `text-paper/60`+ on ink.
 - **Design tokens** are in `src/app/globals.css` (`@theme`): palette `paper`,
   `paper-deep`, `sand`, `taupe`, `taupe-deep`, `ink`, `brass`; type scale
   `text-display-*`, `text-statement`, `eyebrow`; `max-w-page`, `py-section`.
@@ -116,8 +144,9 @@ tests/integration/         database tests
 - **Icons:** Lucide only, `strokeWidth` 1.25–1.75, `aria-hidden` when decorative.
   Lucide v1 has no brand icons, so social links are text.
 - **Images:** go through `<Photo>` with a real `sizes` value and a fixed ratio.
-  Alt text is localized in `content/media.ts`. Only use assets with a verified
-  licence and record the credit. Never hotlink random URLs.
+  Alt text is localized in `content/media.ts` (bundled) or on the asset (library; required in
+  both languages to publish). Only use assets with a verified licence and record the
+  credit. Never hotlink random URLs. `Media.src` is a static import or an `/api/media/…` URL.
 - **Honesty:** placeholder business details and sample reviews are visibly
   marked as demo (`site.isDemo`, `<DemoNotice>`, `isSample`). Seeded
   appointments are `isDemo`. Never present samples as real, and never tell a
@@ -136,5 +165,12 @@ tests/integration/         database tests
   `BookingProvider`, staff auth and dashboard, notifications, seed, tests. See docs/BOOKING.md.
 - Phase 04 (done): full staff dashboard with roles (ADMIN/STAFF/BARBER), calendar and staff
   booking, catalogue, customers, analytics, website content, activity log. See docs/ADMIN.md.
+- Phase 05 (done): media library (Pexels/Pixabay search, uploads, publishing) and
+  database-backed media for hero scenes, page photos, gallery and barber photos. See docs/MEDIA.md.
+- Phase 06 (done): Facebook Page and Instagram professional account connections, read-only
+  insights, token refresh (`npm run social:check`). See docs/SOCIAL.md.
+- Phase 07 (done): QA and production readiness: security headers (`next.config.ts`),
+  `sitemap.ts`/`robots.ts`, contrast fixes, deployment, backups and verification status in
+  [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 Don't start a later phase unless asked.

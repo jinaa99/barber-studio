@@ -64,6 +64,9 @@ Details: [BOOKING.md](BOOKING.md).
   page. It doesn't show this studio's work or the named (fictional) barbers.
 - Hero footage is Mixkit stock (Stock Video Free License), labelled as demo
   footage in the hero and credited on the gallery page. See docs/MEDIA.md.
+- Media added from Pexels or Pixabay keeps the creator, source page and licence the
+  provider reported; it is credited on the gallery page, and stock footage in the hero is
+  labelled with its provider. Nothing about a source is invented.
 
 ## Engineering
 
@@ -86,4 +89,10 @@ Details: [BOOKING.md](BOOKING.md).
   and time off, services and categories, customers, analytics with defined metrics,
   website content and booking rules, staff accounts with ADMIN/STAFF/BARBER permissions,
   activity log. See [ADMIN.md](ADMIN.md).
-- **Phase 05 (next):** media library: uploads for barber photos, gallery and hero media.
+- **Phase 05 (done):** media library: Pexels/Pixabay search and saving, uploads, drafts and
+  publishing, and database-backed media for the hero scenes, page photos, gallery and barber
+  photos, each falling back to the bundled media. See [MEDIA.md](MEDIA.md).
+- **Phase 06 (done):** Facebook Page and Instagram professional account connections in the
+  dashboard: official OAuth, encrypted server-side tokens, accurate connection states,
+  reconnect/disconnect, and read-only insights where Meta's permissions allow. Nothing is
+  posted and nothing from these accounts reaches the public site. See [SOCIAL.md](SOCIAL.md).

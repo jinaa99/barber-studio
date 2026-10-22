@@ -25,8 +25,9 @@ interface PhotoProps {
 
 /**
  * Art-directed image frame. Crops to a fixed ratio with `object-cover`, shows
- * a blur placeholder while loading, and falls back to a designed frame when an
- * asset is missing so layouts never collapse.
+ * a blur placeholder while a bundled image loads (library images sit on the
+ * paper-deep frame), and falls back to a designed frame when an asset is
+ * missing so layouts never collapse.
  */
 export function Photo({ media, ratio = "4/5", sizes, eager, className, imageClassName }: PhotoProps) {
   return (
@@ -37,7 +38,7 @@ export function Photo({ media, ratio = "4/5", sizes, eager, className, imageClas
           alt={media.alt}
           fill
           sizes={sizes}
-          placeholder="blur"
+          placeholder={typeof media.src === "object" ? "blur" : "empty"}
           loading={eager ? "eager" : "lazy"}
           fetchPriority={eager ? "high" : undefined}
           className={cn("object-cover", imageClassName)}

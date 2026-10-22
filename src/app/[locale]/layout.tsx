@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Manrope } from "next/font/google";
 import { locales } from "@/i18n/config";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { getStudioProfile } from "@/lib/data";
+import { siteOrigin } from "@/lib/metadata";
 import "../globals.css";
 
 // Both families ship Cyrillic Extended, which covers Mongolian Ө ө Ү ү.
@@ -27,7 +28,7 @@ export async function generateStaticParams() {
 export async function generateMetadata(): Promise<Metadata> {
   const [dict, studio] = await Promise.all([getDictionary(), getStudioProfile()]);
   return {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+    metadataBase: siteOrigin(),
     title: { default: `${studio.name} — ${dict.meta.home}`, template: `%s — ${studio.name}` },
     description: dict.meta.siteDescription,
     applicationName: studio.name,

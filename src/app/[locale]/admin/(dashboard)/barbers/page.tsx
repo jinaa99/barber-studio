@@ -1,12 +1,10 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { getDictionary, getLocale } from "@/i18n/get-dictionary";
 import { localizedPath, type Locale, type LocalizedText } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries/mn";
-import { mediaRecords } from "@/content/media";
 import { routes } from "@/lib/navigation";
 import { format } from "@/lib/format";
 import { cn } from "@/lib/cn";
@@ -18,6 +16,7 @@ import { listStaff } from "@/lib/server/staff";
 import { updateAccountAction } from "@/app/[locale]/admin/actions/settings";
 import { ActionForm, CheckboxField, SelectField, SubmitButton } from "@/components/admin/form";
 import { CreateAccountButton, ResetPasswordButton } from "@/components/admin/team-forms";
+import { mediaChoices, MediaThumb } from "@/components/admin/media-picker";
 import { TimeOffManager } from "@/components/admin/time-off";
 import { EmptyState, Forbidden, PageHeader, PageSkeleton, primarySmallButton, Section, Tag } from "@/components/admin/ui";
 
@@ -40,10 +39,11 @@ async function Barbers({ locale, dict }: { locale: Locale; dict: Dictionary }) {
   const ctx = await adminContext(locale);
   if (!ctx.can("catalog.manage")) return <Forbidden dict={dict} />;
   const t = dict.admin;
-  const [barbers, closures, staff] = await Promise.all([
+  const [barbers, closures, staff, images] = await Promise.all([
     listBarbersForAdmin(db, ctx.now),
     listStudioClosures(db, ctx.now),
     ctx.can("staff.manage") ? listStaff(db) : Promise.resolve(null),
+    mediaChoices(locale, "IMAGE"),
   ]);
   const name = (value: unknown) => (value as LocalizedText)[locale];
   const base = localizedPath(locale, routes.adminBarbers);
@@ -67,12 +67,12 @@ async function Barbers({ locale, dict }: { locale: Locale; dict: Dictionary }) {
         ) : (
           <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {barbers.map((b) => {
-              const image = mediaRecords.find((m) => m.id === b.imageId);
+              const image = images.find((m) => m.ref === b.imageId);
               return (
                 <li key={b.id}>
                   <Link href={`${base}/${b.id}`} className={cn("flex gap-4 border border-line p-3 transition-colors hover:border-ink", !b.active && "opacity-70")}>
                     <span className="relative block aspect-[4/5] w-20 shrink-0 overflow-hidden bg-paper-deep">
-                      {image?.src && <Image src={image.src} alt="" sizes="80px" fill className="object-cover" placeholder="blur" />}
+                      {image && <MediaThumb src={image.src} alt="" sizes="80px" />}
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center gap-2">

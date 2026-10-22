@@ -6,8 +6,8 @@ import {
   getFeaturedServices,
   getGallery,
   getHeroClips,
-  getMedia,
   getSiteDictionary,
+  getSlotMedia,
   getStudioProfile,
   getTestimonials,
 } from "@/lib/data";
@@ -39,7 +39,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function HomePage() {
   const locale = await getLocale();
-  const [dict, heroClips, services, barbers, work, testimonials, studio] = await Promise.all([
+  const [dict, heroClips, services, barbers, work, testimonials, studio, introMedia, visitMedia] = await Promise.all([
     getSiteDictionary(locale),
     getHeroClips(locale),
     getFeaturedServices(locale),
@@ -47,6 +47,8 @@ export default async function HomePage() {
     getGallery(locale, featuredWork),
     getTestimonials(locale),
     getStudioProfile(),
+    getSlotMedia("home.intro", locale),
+    getSlotMedia("home.visit", locale),
   ]);
   const t = dict.home;
 
@@ -56,7 +58,7 @@ export default async function HomePage() {
       {/* Skip-intro target; focusable so keyboard users land after the sequence. */}
       <span id={`after-hero-${locale}`} tabIndex={-1} className="block outline-none" />
       <Statement text={t.statement} />
-      <StudioIntro dict={dict} media={getMedia("studio-interior", locale)} />
+      <StudioIntro dict={dict} media={introMedia} />
 
       <section className="bg-paper-deep py-section">
         <Container>
@@ -107,7 +109,7 @@ export default async function HomePage() {
       </section>
 
       {testimonials.length > 0 && <Testimonials dict={dict} testimonials={testimonials} index="04" />}
-      <VisitSummary locale={locale} dict={dict} media={getMedia("studio-chair", locale)} index="05" studio={studio} />
+      <VisitSummary locale={locale} dict={dict} media={visitMedia} index="05" studio={studio} />
       <BookingCta locale={locale} dict={dict} phoneHref={studio.contact.phoneHref} />
     </>
   );

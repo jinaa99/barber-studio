@@ -207,7 +207,7 @@ export async function getBarberForEdit(db: Db, id: string, now = new Date()) {
   return { ...barber, upcoming };
 }
 
-/** `imageIds`: the media library's ids (passed in so this module never imports image assets). */
+/** `imageIds`: the photo references allowed (bundled ids and published library images, `asset:<id>`), passed in so this module never imports image assets. */
 export async function saveBarber(
   db: Db,
   input: BarberInput,

@@ -26,7 +26,7 @@ export async function resetDatabase(db: TestDb) {
   await db.$executeRawUnsafe(`
     TRUNCATE "audit_logs", "notifications", "reviews", "appointments", "customers", "time_off",
       "working_hours", "barber_services", "barbers", "services", "service_categories", "sessions", "users",
-      "business_settings", "site_content"
+      "business_settings", "site_content", "media_placements", "media_assets", "social_connections", "social_oauth_states"
     RESTART IDENTITY CASCADE`);
 }
 
