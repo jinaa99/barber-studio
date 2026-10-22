@@ -6,49 +6,92 @@ Records in `src/content/media.ts` carry the same information for the UI
 
 ## Photography: Unsplash
 
-The stills in `src/assets/media/studio-*.jpg` and `work-*.jpg` are used under the
-[Unsplash License](https://unsplash.com/license). Author and source URL per
+The stills in `src/assets/media/studio-*.jpg`, `work-*.jpg` and `barber-*.jpg` are used
+under the [Unsplash License](https://unsplash.com/license). Author and source URL per
 image are in `mediaRecords` (`src/content/media.ts`).
 
-## Home hero: 3D walk-through (no third-party assets)
+`barber-*.jpg` are the demo barbers' profile portraits (downloaded 2026-10-22, cropped
+to 4:5, re-encoded). They are stand-ins showing the photographers' models, not the
+fictional barbers; the barbers page carries the demo notice. Replace them with the
+team's own portraits (dashboard → Barbers → photo) before launch.
+
+## Home hero: 3D walk-through
 
 The home hero is a real-time three.js scene (`src/components/hero3d/`, camera
 path and timing in `src/lib/hero/journey.ts`). Scroll moves a perspective
 camera from the pavement outside the studio, through its hinged glass door,
 into the shop and up to a haircut in close-up, then hands over to the page.
 
-Everything in it is made in this repository, so there is no asset licence to
-track:
+Downloaded files live in `public/hero3d/` and are fetched only when the 3D
+scene starts (never for the poster, reduced-motion or no-WebGL modes).
+Downloaded 2026-10-22. Poly Haven states that all its assets are CC0 1.0
+(public domain dedication); each asset's API record (`api.polyhaven.com/info/<id>`)
+was read when it was chosen.
 
-| Part | Source | Licence |
-| --- | --- | --- |
-| Geometry: facade, shopfront, door, room, stations, chairs, figures, clipper | Built in code from three.js primitives (`storefront.tsx`, `interior.tsx`, `figures.tsx`) | Project code |
-| Textures: paving, terrazzo, plaster, oak, cladding, signage, hair density | Drawn on 2D canvases at runtime with a seeded generator (`textures.ts`) | Project code |
-| Reflections | `RoomEnvironment` from three.js's examples, prefiltered once; mirrors use a one-off cube-camera capture of the scene | three.js, MIT |
-| Signage text | The studio's own name and dictionary strings, set in Onest | Onest: SIL Open Font License 1.1 (via `next/font`) |
-| Posters `src/assets/media/hero-storefront[-portrait]-{mn,en}.jpg` | Frame one of the scene, rendered from the site in headless Chrome (1920×1080 and 1080×2340), one pair per language because the sign is localized | Project output |
-| Libraries | `three` 0.186.1, `@react-three/fiber` 9.8.2 | MIT |
+### What the scene is made of
 
-**People.** No realistic, animated barber or customer model with terms
-confirmed to allow redistribution in a public website bundle was sourced for
-this phase. Free CC0 character packs are stylized low-poly, and the usual
-sources of realistic rigged characters attach conditions to redistributing the
-model files themselves; their current terms were not re-verified, so check
-them before adopting one. Rather than ship an unverified or mismatched model,
-the barber and customer are deliberate
-sculptural figures (matte plaster, archviz style), with real 3D geometry,
-two-bone IK arms and a clipper that works along the fade. The haircut uses
-stacked hair shells whose density thins into a skin fade. Replacing them with
-licensed models later only touches `figures.tsx`.
+| Part | How it is made |
+| --- | --- |
+| Facade, battens, shopfront, door and hinges, sign, kerb, neighbours | Geometry built in code (`storefront.tsx`) |
+| Room, soffit, counters with drawers, mirrors and mounts, shelves, hydraulic chairs, tools, products, towels | Geometry built in code (`interior.tsx`, `figures.tsx`) |
+| Surfaces: paving, asphalt, oak floor, plaster, render, walnut, leather | Poly Haven CC0 PBR texture sets (colour, normal, AO/roughness/metal) |
+| Pendant lamps, potted plant, succulent, entrance-planter plants | Poly Haven CC0 models |
+| Customer's and barber's heads (face, ears, skull shape, skin) | 3D head scan, CC BY 3.0 (below), retoned for the barber |
+| Hair and beard | Geometry built in code: ~64k (customer) / ~26k (barber) strands grown on the scan's surface along a fade mask |
+| Bodies, clothing, cape, hands | Geometry built in code; the people are stylised below the head |
+| Reflections | Night-street HDRI outside (CC0); inside, a one-off cube capture of the room |
+| Distant city | The same HDRI's tonemapped panorama on a far sphere |
+| Lettering, labels, cloth weave | Drawn on canvases at runtime (`textures.ts`) |
+| Animation | The barber's clipper pass, wrist roll, resting hand and head tilt (time-based, in the head's frame); the door; sparse clippings |
+
+### Assets
+
+| File(s) in `public/hero3d/` | Source | Creator | Licence | Processing |
+| --- | --- | --- | --- | --- |
+| `models/head-scan.glb`, `textures/head-{color,normal}-{1024,512}.webp` | "Infinite, 3D Head Scan" by Lee Perry-Smith, via the three.js repository: [LeePerrySmith.glb](https://github.com/mrdoob/three.js/tree/dev/examples/models/gltf/LeePerrySmith) and its `Map-COL.jpg`, `Infinite-Level_02_Tangent_SmoothUV.jpg` | Lee Perry-Smith / Infinite Realities, based on a work at triplegangers.com | **CC BY 3.0 Unported** (from the included `LeePerrySmith_License.txt`). Attribution required: keep this credit | Geometry meshopt-compressed (gltf-transform 4.2.1); maps resized and re-encoded to WebP. In the scene: trimmed below the neck, scaled to a 23 cm head; the barber's copy retoned |
+| `models/ceiling-lamp.glb` | [Modern Ceiling Lamp 01](https://polyhaven.com/a/modern_ceiling_lamp_01) | Poly Haven | CC0 | 1k glTF → GLB, meshopt, WebP textures ≤ 512 px |
+| `models/potted-plant.glb` | [Potted Plant 02](https://polyhaven.com/a/potted_plant_02) | Poly Haven | CC0 | 1k glTF → GLB, simplified, meshopt, WebP ≤ 1024 px. High tier only |
+| `models/succulent.glb` | [Potted Plant 04](https://polyhaven.com/a/potted_plant_04) | Poly Haven | CC0 | 1k glTF → GLB, meshopt, WebP ≤ 512 px |
+| `models/anthurium.glb` | [Anthurium Botany 01](https://polyhaven.com/a/anthurium_botany_01) | Poly Haven | CC0 | 1k glTF → GLB, simplified, meshopt, WebP ≤ 1024 px; two of its plants are used |
+| `textures/pavement-*` | [Concrete Pavement 02](https://polyhaven.com/a/concrete_pavement_02) | Poly Haven | CC0 | 1k diffuse, normal (GL), ARM → WebP at 1024 / 512 px |
+| `textures/asphalt-*` | [Asphalt 02](https://polyhaven.com/a/asphalt_02) | Poly Haven | CC0 | as above, 512 px only |
+| `textures/oak-floor-*` | [Oak Wood Planks](https://polyhaven.com/a/oak_wood_planks) | Poly Haven | CC0 | as above |
+| `textures/plaster-*` | [Painted Plaster Wall](https://polyhaven.com/a/painted_plaster_wall) | Poly Haven | CC0 | as above; tinted per wall in code |
+| `textures/render-*` | [Plaster Grey 04](https://polyhaven.com/a/plaster_grey_04) | Poly Haven | CC0 | as above, 512 px only |
+| `textures/walnut-*` | [Smoked Walnut Veneer](https://polyhaven.com/a/smoked_walnut_veneer) | Poly Haven | CC0 | as above |
+| `textures/leather-*` | [Brown Leather](https://polyhaven.com/a/brown_leather) | Poly Haven | CC0 | as above; tinted dark in code |
+| `env/street-night-1k.hdr`, `env/street-night-backdrop.webp` | [Modern Buildings Night](https://polyhaven.com/a/modern_buildings_night) | Poly Haven | CC0 | 1k HDR as-is (high tier only); the tonemapped JPG resized to 2048 × 1024 WebP |
+
+**Evaluated and not used.** [Barber Shop Chair 01](https://polyhaven.com/a/BarberShopChair_01)
+(CC0, Fernando Quinn) is an ornate vintage chair with tufted leather, carved
+wood and brass fittings; it clashes with the studio's restrained interior and
+its "no gold" direction, so the chairs are built in code (hydraulic column and
+pedal, chrome dish base, domed leather cushions with piping and channel
+stitching, tubular back frame, adjustable headrest, ribbed footrest). Poly
+Haven has no human models. No realistic, rigged full-body human with terms
+confirmed to allow redistribution in a public website was found within this
+phase, so the bodies and hands remain stylised; only the heads are scanned.
 
 **Honesty.** The hero says it is an illustration (`home.hero.sceneNote`):
-it is a rendering, not a photograph of the studio.
+it is a rendering, not a photograph of the studio, and the people are not
+real staff or customers.
+
+**Budget (measured).** High tier: 2.1 MB of textures, 1.7 MB of models, 1.6 MB
+HDR and 0.14 MB backdrop (about 5.5 MB, after the poster is already showing).
+Low tier (phones, ≤ 4 GB memory or ≤ 4 cores): 0.86 MB of 512 px textures,
+0.34 MB of models (no potted plant or planter plants, procedural shrubs
+instead), no HDR, 18k / 9k hair strands and no shadows. Draw calls measured
+in development with the renderer's own counters: about 300–470 per frame
+inside on the high tier (including the chair key light's shadow pass), 170–300
+on the low tier.
 
 **Regenerating the posters.** After changing the scene's opening frame,
-render frame one again at both sizes with the copy, header and scrims hidden,
-for each language, and save over the four files (JPEG, quality ~82). The
-poster is shown while the scene loads and is the whole hero when motion is
-reduced, WebGL is unavailable or the device is constrained.
+render frame one again at 1920 × 1080 and 1080 × 2340 with the copy, header
+and scrims hidden, for each language, and save over
+`src/assets/media/hero-storefront[-portrait]-{mn,en}.jpg` (JPEG, quality ~82).
+In development, `/?heroBeat=exterior|approach|door|interior|barber|closeup`
+(or a number 0–1) pins the camera to a beat for inspection; production
+ignores the parameter.
 
 ## Former home hero footage: Mixkit
 

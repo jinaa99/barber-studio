@@ -66,6 +66,16 @@ or all candidate barbers, a start time is offered when:
 All wall-clock maths happens in the studio time zone (`src/lib/booking/time.ts`).
 `GET /api/booking/availability?service=&barber=&date=` serves these slots, uncached.
 
+## Optional choices
+
+The visitor may continue past the service and barber steps without choosing. No barber
+means "any barber". No service books `custom-cut` (`CUSTOM_SERVICE` in `lib/booking/types.ts`),
+a normal catalogue row named "Your own style". The customer describes the style in the notes and
+agrees it with the barber at the visit. A price of 0 shows as "Price agreed with barber"
+(`formatServicePrice`), and its appointments store a 0 ₮ price. The seed creates the
+service and links it to every active barber the first time. If it is deactivated, the service step
+needs a choice again.
+
 ## Creating a booking
 
 `POST /api/booking` → `createBooking()` in `src/lib/server/booking.ts`:

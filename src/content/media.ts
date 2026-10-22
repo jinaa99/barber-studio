@@ -12,6 +12,9 @@ import workTextureShears from "@/assets/media/work-texture-shears.jpg";
 import workScissorOverComb from "@/assets/media/work-scissor-over-comb.jpg";
 import workDetailComb from "@/assets/media/work-detail-comb.jpg";
 import workLineUp from "@/assets/media/work-line-up.jpg";
+import barberTemuulen from "@/assets/media/barber-temuulen.jpg";
+import barberEnkhjin from "@/assets/media/barber-enkhjin.jpg";
+import barberBilguun from "@/assets/media/barber-bilguun.jpg";
 import heroEntry from "@/assets/media/hero-entry.jpg";
 import heroCraft from "@/assets/media/hero-craft.jpg";
 import heroDetail from "@/assets/media/hero-detail.jpg";
@@ -185,6 +188,47 @@ export const mediaRecords = [
     credit: {
       author: "John Rodriguez",
       sourceUrl: "https://unsplash.com/photos/barber-using-trimmer-on-man-g4lupAofR9c",
+      license: "Unsplash License",
+    },
+  },
+  // Stand-in profile portraits for the fictional demo barbers. They show the
+  // photographers' models, not these people; replace with the team's own photos.
+  {
+    id: "barber-temuulen",
+    src: barberTemuulen,
+    alt: {
+      mn: "Бараан дэвсгэр дээр хажуу тийш харсан эрэгтэй барберын хөрөг",
+      en: "Portrait of a male barber looking to the side against a dark background",
+    },
+    credit: {
+      author: "Preillumination SeTh",
+      sourceUrl: "https://unsplash.com/photos/8kQU8Ts70Ko",
+      license: "Unsplash License",
+    },
+  },
+  {
+    id: "barber-enkhjin",
+    src: barberEnkhjin,
+    alt: {
+      mn: "Камер руу харж инээмсэглэсэн эмэгтэй барберын хөрөг",
+      en: "Portrait of a female barber smiling at the camera",
+    },
+    credit: {
+      author: "panitan punpuang",
+      sourceUrl: "https://unsplash.com/photos/OuxJHYeUYpk",
+      license: "Unsplash License",
+    },
+  },
+  {
+    id: "barber-bilguun",
+    src: barberBilguun,
+    alt: {
+      mn: "Хар цамцтай, сахалтай эрэгтэй барберын хөрөг",
+      en: "Portrait of a moustached male barber in a black T-shirt",
+    },
+    credit: {
+      author: "Nartan Büyükyıldız",
+      sourceUrl: "https://unsplash.com/photos/hr_feH2URs0",
       license: "Unsplash License",
     },
   },

@@ -24,6 +24,7 @@ import { testimonialRecords } from "../src/content/demo/testimonials";
 import { site } from "../src/content/site";
 import { addCalendarDays, isoWeekday, STUDIO_TIME_ZONE, zonedParts, zonedTimeToUtc } from "../src/lib/booking/time";
 import { timeToMinutes } from "../src/lib/booking/dates";
+import { CUSTOM_SERVICE } from "../src/lib/booking/types";
 
 config({ path: [".env.local", ".env"], quiet: true });
 
@@ -88,9 +89,22 @@ async function seedCatalog() {
     });
   }
 
+  // Demo barbers seeded before they had profile portraits used these work photos.
+  // Move them to the portrait, but only while staff haven't picked a photo of their own.
+  const previousImage: Record<string, string> = {
+    temuulen: "work-scissor-over-comb",
+    enkhjin: "work-detail-comb",
+    bilguun: "work-straight-razor",
+  };
+
   for (const [i, b] of barberRecords.entries()) {
-    const exists = await prisma.barber.findUnique({ where: { id: b.id }, select: { id: true } });
-    if (exists) continue;
+    const exists = await prisma.barber.findUnique({ where: { id: b.id }, select: { id: true, imageId: true } });
+    if (exists) {
+      if (exists.imageId === previousImage[b.id]) {
+        await prisma.barber.update({ where: { id: b.id }, data: { imageId: b.imageId } });
+      }
+      continue;
+    }
 
     await prisma.barber.create({
       data: {
@@ -120,6 +134,16 @@ async function seedCatalog() {
           }),
         },
       },
+    });
+  }
+
+  // The custom-style service arrived after the first barbers were seeded: until staff
+  // assign it themselves, every active barber offers it.
+  if ((await prisma.barberService.count({ where: { serviceId: CUSTOM_SERVICE } })) === 0) {
+    const barbers = await prisma.barber.findMany({ where: { active: true }, select: { id: true } });
+    await prisma.barberService.createMany({
+      data: barbers.map((b) => ({ barberId: b.id, serviceId: CUSTOM_SERVICE })),
+      skipDuplicates: true,
     });
   }
 }

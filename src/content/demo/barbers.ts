@@ -1,6 +1,6 @@
 import type { BarberRecord } from "../types";
 
-/** Fictional barbers for the demo. Images show licensed stock work, not these people. */
+/** Fictional barbers for the demo. Portraits are licensed stock models, not these people. */
 export const barberRecords: BarberRecord[] = [
   {
     id: "temuulen",
@@ -16,8 +16,8 @@ export const barberRecords: BarberRecord[] = [
       { mn: "Урт үс", en: "Longer hair" },
     ],
     yearsExperience: 12,
-    imageId: "work-scissor-over-comb",
-    serviceIds: ["studio-cut", "scissor-cut", "clipper-cut", "beard-sculpt", "cut-and-beard", "full-ritual", "junior-cut"],
+    imageId: "barber-temuulen",
+    serviceIds: ["studio-cut", "scissor-cut", "clipper-cut", "beard-sculpt", "cut-and-beard", "full-ritual", "junior-cut", "custom-cut"],
     workingDays: ["tue", "wed", "thu", "fri", "sat"],
   },
   {
@@ -34,8 +34,8 @@ export const barberRecords: BarberRecord[] = [
       { mn: "Шугам тэгшлэлт", en: "Line-ups" },
     ],
     yearsExperience: 8,
-    imageId: "work-detail-comb",
-    serviceIds: ["studio-cut", "skin-fade", "clipper-cut", "beard-sculpt", "cut-and-beard", "junior-cut"],
+    imageId: "barber-enkhjin",
+    serviceIds: ["studio-cut", "skin-fade", "clipper-cut", "beard-sculpt", "cut-and-beard", "junior-cut", "custom-cut"],
     workingDays: ["tue", "wed", "fri", "sat", "sun"],
   },
   {
@@ -52,8 +52,8 @@ export const barberRecords: BarberRecord[] = [
       { mn: "Скин фэйд", en: "Skin fades" },
     ],
     yearsExperience: 6,
-    imageId: "work-straight-razor",
-    serviceIds: ["studio-cut", "skin-fade", "beard-sculpt", "hot-towel-shave", "cut-and-beard", "full-ritual"],
+    imageId: "barber-bilguun",
+    serviceIds: ["studio-cut", "skin-fade", "beard-sculpt", "hot-towel-shave", "cut-and-beard", "full-ritual", "custom-cut"],
     workingDays: ["wed", "thu", "fri", "sat", "sun"],
   },
 ];

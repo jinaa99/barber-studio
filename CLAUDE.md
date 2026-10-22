@@ -136,11 +136,17 @@ tests/integration/         database tests
   `next/dynamic({ ssr: false })`. Scroll progress is a mutable object tweened by ScrollTrigger;
   the scene reads it in `useFrame` and never re-renders React per frame. The canvas renders on
   demand (continuous only once the animated interior is in view) and stops off screen.
-  Materials, textures and custom geometries are created once in the scene kit (`kit.tsx`) and
-  disposed on unmount. Camera, door and overlay timing live only in `lib/hero/journey.ts`
-  (tested: continuity, door clearance, room bounds). Mutate three.js objects through the
-  `useFrame` state argument or refs, not hook return values (React Compiler lint). After
-  changing the opening frame, re-render the posters (docs/MEDIA.md).
+  Downloaded assets (Poly Haven CC0 textures/models/HDRI, the CC BY 3.0 head scan) live in
+  `public/hero3d/` and load through `assets.ts` (`use()` + Suspense, one cached load per tier for
+  the page's lifetime; GLBs are meshopt-compressed, so bake node transforms before reading raw
+  geometry). Materials and drawn textures are created once in the scene kit (`kit.tsx`). Every
+  per-mount GPU resource (PMREM targets, cube captures) is created in an effect and disposed in
+  its cleanup, because a hidden `<Activity>` cleans up effects without re-rendering. Camera,
+  door and overlay timing live only in `lib/hero/journey.ts` (tested: continuity, door
+  clearance, room bounds). Mutate three.js objects through the `useFrame` state argument, refs
+  or `gsap.set`, not hook return values (React Compiler lint). In development,
+  `?heroBeat=exterior|approach|door|interior|barber|closeup` pins a beat. Every new asset needs a
+  row in docs/MEDIA.md; after changing the opening frame, re-render the four posters.
 - **Booking state** lives in `components/booking/use-booking-store.ts`
   (`useSyncExternalStore` over sessionStorage), so a language switch or reload keeps progress.
 

@@ -42,6 +42,21 @@ function detect(): Capabilities {
   };
 }
 
+/*
+ * Development only: `?heroBeat=exterior|approach|door|interior|barber|closeup`
+ * (or a number 0–1) pins the camera to a beat, without scrolling, for
+ * inspecting the scene. Production builds ignore the parameter.
+ */
+const debugBeats: Record<string, number> = { exterior: 0, approach: 0.19, door: 0.3, interior: 0.44, barber: 0.6, closeup: 0.84 };
+
+function debugBeat(): number | null {
+  if (process.env.NODE_ENV === "production") return null;
+  const value = new URLSearchParams(window.location.search).get("heroBeat");
+  if (value === null) return null;
+  const p = value in debugBeats ? debugBeats[value] : Number(value);
+  return Number.isFinite(p) ? Math.min(1, Math.max(0, p)) : null;
+}
+
 let cached: Capabilities | null = null;
 const subscribe = () => () => {};
 const getSnapshot = () => (cached ??= detect());
@@ -123,6 +138,13 @@ export function HeroStage({
       }
     };
 
+    const beat = debugBeat();
+    if (beat !== null) {
+      gsap.set(progress, { current: beat });
+      apply();
+      return;
+    }
+
     // Native scrolling; the tween only smooths progress (scrub) so the camera glides in both directions.
     const tween = gsap.to(progress, {
       current: 1,
@@ -160,6 +182,7 @@ export function HeroStage({
       ref={root}
       data-home-hero=""
       data-mode={mode}
+      data-ready={ready ? "true" : undefined}
       className={cn("relative bg-ink text-canvas", scene && "h-[620svh] md:h-[700svh]")}
     >
       <div className="sticky top-0 isolate h-svh min-h-[34rem] overflow-hidden">

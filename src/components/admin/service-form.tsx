@@ -64,7 +64,7 @@ export function ServiceForm({
       />
       <div className="grid gap-5 sm:grid-cols-3">
         <TextField label={t.durationLabel} name="durationMinutes" type="number" min={5} max={480} step={5} defaultValue={values?.durationMinutes ?? 60} required />
-        <TextField label={t.priceLabel} name="priceMnt" type="number" min={0} max={10_000_000} step={500} defaultValue={values?.priceMnt ?? 0} required />
+        <TextField label={t.priceLabel} hint={t.priceHint} name="priceMnt" type="number" min={0} max={10_000_000} step={500} defaultValue={values?.priceMnt ?? 0} required />
         <TextField label={c.sortOrder} name="sortOrder" type="number" min={0} max={999} defaultValue={values?.sortOrder ?? 0} hint={c.sortOrderHint} />
       </div>
 

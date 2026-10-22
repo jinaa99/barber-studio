@@ -60,12 +60,12 @@ export const cameraKeys: CameraKey[] = [
   { at: 0.46, position: [-0.45, 1.62, -2.4], target: [1.6, 1.25, -5.4], fov: 46 },
   { at: 0.58, position: [-0.2, 1.5, -3.45], target: [hx, 1.2, hz], fov: 40 },
   // 05 Close-up: the fade and the clipper, side on.
-  { at: beats.closeUp, position: [hx - 0.45, hy + 0.08, hz + 1.25], target: [hx - 0.08, hy - 0.02, hz], fov: 32 },
-  // The climax: the back of the fade, the ear and the clipper, slightly from behind.
-  { at: 0.84, position: [hx - 0.24, hy + 0.04, hz + 0.74], target: [hx - 0.04, hy - 0.03, hz], fov: 30 },
+  { at: beats.closeUp, position: [hx + 0.3, hy + 0.1, hz + 1.05], target: [hx - 0.05, hy - 0.02, hz], fov: 32 },
+  // The climax: the face in three-quarter view, the ear, the fade and the clipper behind it.
+  { at: 0.84, position: [hx + 0.2, hy + 0.05, hz + 0.66], target: [hx - 0.05, hy - 0.025, hz + 0.02], fov: 30 },
   // 06 Release: settle, ease back a touch, and hand over to the page.
-  { at: 0.93, position: [hx - 0.25, hy + 0.07, hz + 0.82], target: [hx - 0.04, hy - 0.02, hz], fov: 30 },
-  { at: 1, position: [hx - 0.26, hy + 0.08, hz + 0.85], target: [hx - 0.04, hy - 0.02, hz], fov: 30 },
+  { at: 0.93, position: [hx + 0.21, hy + 0.07, hz + 0.72], target: [hx - 0.05, hy - 0.02, hz + 0.02], fov: 30 },
+  { at: 1, position: [hx + 0.22, hy + 0.08, hz + 0.75], target: [hx - 0.05, hy - 0.02, hz + 0.02], fov: 30 },
 ];
 
 /**
@@ -73,8 +73,8 @@ export const cameraKeys: CameraKey[] = [
  * high, above the copy. From the door onwards both paths are the same.
  */
 export const portraitCameraKeys: CameraKey[] = [
-  { at: 0, position: [0.15, 1.62, 10.2], target: [0, 0.8, 0], fov: 33 },
-  { at: beats.approach, position: [0.15, 1.62, 9.2], target: [0, 0.9, 0], fov: 33 },
+  { at: 0, position: [0.15, 1.62, 8.4], target: [0, 1.0, 0], fov: 33 },
+  { at: beats.approach, position: [0.15, 1.62, 7.6], target: [0, 1.05, 0], fov: 33 },
   { at: 0.19, position: [0.12, 1.62, 5.2], target: [0, 1.45, 0], fov: 38 },
   ...cameraKeys.slice(3, 6),
   // Inside, the narrow frame needs the camera further right to keep the station in view.

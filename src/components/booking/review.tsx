@@ -7,7 +7,7 @@ import { localizedPath, type Locale } from "@/i18n/config";
 import type { BookingConfirmation, BookingDraft } from "@/lib/booking/types";
 import type { BookingStep } from "@/lib/booking/storage";
 import { formatLongDate } from "@/lib/booking/dates";
-import { format, formatDuration, formatPrice } from "@/lib/format";
+import { format, formatDuration, formatServicePrice } from "@/lib/format";
 import { Button, buttonStyles } from "@/components/ui/button";
 import type { BookingBarber, BookingDict, BookingService } from "./types";
 
@@ -97,7 +97,7 @@ export function ReviewStep({
           <span className="text-sm text-muted">
             {t.duration}: <span className="tabular">{formatDuration(selection.service.durationMinutes, dict.common.minutes)}</span>
           </span>
-          <span className="numeric text-display-sm">{formatPrice(selection.service.price, locale)}</span>
+          <span className="numeric text-display-sm">{formatServicePrice(selection.service.price, locale, dict.common.priceOnRequest)}</span>
         </div>
       )}
       <p className="px-1 text-sm text-muted">{t.payNote}</p>
@@ -218,7 +218,7 @@ export function BookingSummary({
           </dl>
           <div className="mt-6 flex items-baseline justify-between border-t border-line pt-5">
             <span className="text-sm text-muted">{t.summary.total}</span>
-            <span className="numeric text-2xl font-medium">{formatPrice(selection.service.price, locale)}</span>
+            <span className="numeric text-2xl font-medium">{formatServicePrice(selection.service.price, locale, dict.common.priceOnRequest)}</span>
           </div>
         </>
       ) : (

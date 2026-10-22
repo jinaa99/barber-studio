@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { AlertCircle, ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import type { Locale } from "@/i18n/config";
 import type { ServiceCategory } from "@/content/types";
-import { ANY_BARBER, type BookingProvider, type CustomerDetails, type TimeSlot } from "@/lib/booking/types";
+import { ANY_BARBER, CUSTOM_SERVICE, type BookingProvider, type CustomerDetails, type TimeSlot } from "@/lib/booking/types";
 import { parseISODate, weekdayOf } from "@/lib/booking/dates";
 import { invalidCustomerFields, LIMITS, type CustomerField } from "@/lib/booking/validation";
-import { formatDuration, formatPrice } from "@/lib/format";
+import { formatDuration, formatServicePrice } from "@/lib/format";
 import { cn } from "@/lib/cn";
 import { OptionCard } from "./option-card";
 import type { BookingBarber, BookingDict, BookingService } from "./types";
@@ -31,36 +31,46 @@ export function ServiceStep({
   value: string | null;
   onChange: (id: string) => void;
 }) {
-  const categories = [...new Set(services.map((s) => s.category))];
+  const t = dict.booking.service;
+  // The custom-style option sits apart from the menu, after every category.
+  const custom = services.find((s) => s.id === CUSTOM_SERVICE);
+  const menu = services.filter((s) => s.id !== CUSTOM_SERVICE);
+  const categories = [...new Set(menu.map((s) => s.category))];
+  const groups = [
+    ...categories.map((category) => ({ key: category, label: categoryLabels[category], items: menu.filter((s) => s.category === category) })),
+    ...(custom ? [{ key: CUSTOM_SERVICE, label: t.customTitle, items: [custom] }] : []),
+  ];
+
   return (
     <fieldset>
-      <legend className="sr-only">{dict.booking.service.title}</legend>
+      <legend className="sr-only">{t.title}</legend>
+      {custom && <p className="-mt-3 mb-8 max-w-xl text-[0.9375rem] leading-relaxed text-muted">{t.hint}</p>}
       <div className="space-y-10">
-        {categories.map((category) => (
-          <div key={category}>
-            <p className="eyebrow mb-3 text-muted">{categoryLabels[category]}</p>
+        {groups.map((group) => (
+          <div key={group.key}>
+            <p className="eyebrow mb-3 text-muted">{group.label}</p>
             <div className="grid gap-2.5">
-              {services
-                .filter((s) => s.category === category)
-                .map((service) => (
-                  <OptionCard
-                    key={service.id}
-                    name={`${idPrefix}-service`}
-                    value={service.id}
-                    checked={value === service.id}
-                    onSelect={onChange}
-                  >
-                    <span className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-                      <span className="text-lg font-medium tracking-[-0.02em]">{service.name}</span>
-                      <span className="numeric text-lg font-medium">{formatPrice(service.price, locale)}</span>
+              {group.items.map((service) => (
+                <OptionCard
+                  key={service.id}
+                  name={`${idPrefix}-service`}
+                  value={service.id}
+                  checked={value === service.id}
+                  onSelect={onChange}
+                >
+                  <span className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+                    <span className="text-lg font-medium tracking-[-0.02em]">{service.name}</span>
+                    <span className="numeric text-lg font-medium">
+                      {formatServicePrice(service.price, locale, dict.common.priceOnRequest)}
                     </span>
-                    <span className="mt-1 block text-sm leading-relaxed text-muted">{service.summary}</span>
-                    <span className="tabular mt-2.5 inline-flex items-center gap-1.5 text-[0.8125rem] text-muted">
-                      <Clock aria-hidden className="size-3.5 text-faint" strokeWidth={1.75} />
-                      {formatDuration(service.durationMinutes, dict.common.minutes)}
-                    </span>
-                  </OptionCard>
-                ))}
+                  </span>
+                  <span className="mt-1 block text-sm leading-relaxed text-muted">{service.summary}</span>
+                  <span className="tabular mt-2.5 inline-flex items-center gap-1.5 text-[0.8125rem] text-muted">
+                    <Clock aria-hidden className="size-3.5 text-faint" strokeWidth={1.75} />
+                    {formatDuration(service.durationMinutes, dict.common.minutes)}
+                  </span>
+                </OptionCard>
+              ))}
             </div>
           </div>
         ))}

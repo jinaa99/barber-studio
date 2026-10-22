@@ -19,6 +19,11 @@ export function formatPrice(amount: number, locale: Locale): string {
   return locale === "mn" ? `${grouped} ₮` : `₮${grouped}`;
 }
 
+/** A service price; 0 means it is agreed with the barber at the visit. */
+export function formatServicePrice(amount: number, locale: Locale, onRequest: string): string {
+  return amount === 0 ? onRequest : formatPrice(amount, locale);
+}
+
 export function formatDuration(minutes: number, unit: string): string {
   return `${minutes} ${unit}`;
 }

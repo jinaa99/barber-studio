@@ -3,7 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 import { localizedPath, type Locale } from "@/i18n/config";
 import type { Dictionary } from "@/i18n/dictionaries/mn";
 import type { Service } from "@/content/types";
-import { formatDuration, formatPrice } from "@/lib/format";
+import { formatDuration, formatServicePrice } from "@/lib/format";
 import { routes } from "@/lib/navigation";
 import { cn } from "@/lib/cn";
 
@@ -63,7 +63,7 @@ export function ServiceList({
               {formatDuration(service.durationMinutes, dict.common.minutes)}
             </span>
             <span className="numeric col-start-2 row-start-1 text-right text-lg font-medium sm:col-start-auto sm:row-start-auto sm:text-xl">
-              {formatPrice(service.price, locale)}
+              {formatServicePrice(service.price, locale, dict.common.priceOnRequest)}
             </span>
             <span
               aria-hidden

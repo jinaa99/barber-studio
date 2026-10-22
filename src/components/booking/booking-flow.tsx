@@ -9,8 +9,8 @@ import { createHttpBookingProvider } from "@/lib/booking/http-provider";
 import { bookableDates, isDateBookable } from "@/lib/booking/rules";
 import { isoWeekday } from "@/lib/booking/time";
 import type { BookingStep } from "@/lib/booking/storage";
-import { ANY_BARBER, type BookingConfig, type BookingDraft, type BookingRequest, type CustomerDetails } from "@/lib/booking/types";
-import { formatPrice } from "@/lib/format";
+import { ANY_BARBER, CUSTOM_SERVICE, type BookingConfig, type BookingDraft, type BookingRequest, type CustomerDetails } from "@/lib/booking/types";
+import { formatServicePrice } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { DemoNotice } from "@/components/ui/demo-notice";
 import { resetBooking, updateBooking, useBookingStore } from "./use-booking-store";
@@ -224,6 +224,9 @@ export function BookingFlow({ locale, dict, services, barbers, categoryLabels, c
       void submit();
       return;
     }
+    // Choosing is optional: no service means "decide with the barber", no barber means any.
+    if (step === "service" && !draft.serviceId) selectService(CUSTOM_SERVICE);
+    if (step === "barber" && !draft.barberId) patchDraft({ barberId: ANY_BARBER, time: null });
     goTo(bookingSteps[bookingSteps.indexOf(step) + 1]);
   }
 
@@ -246,8 +249,8 @@ export function BookingFlow({ locale, dict, services, barbers, categoryLabels, c
 
   const stepIndex = bookingSteps.indexOf(step);
   const canContinue =
-    (step === "service" && !!draft.serviceId) ||
-    (step === "barber" && !!draft.barberId) ||
+    (step === "service" && (!!draft.serviceId || services.some((s) => s.id === CUSTOM_SERVICE))) ||
+    step === "barber" ||
     (step === "time" && !!draft.date && !!draft.time) ||
     step === "details" ||
     step === "review";
@@ -329,7 +332,7 @@ export function BookingFlow({ locale, dict, services, barbers, categoryLabels, c
           )}
           {selection.service && (
             <span className="numeric ml-auto text-base font-medium lg:hidden">
-              {formatPrice(selection.service.price, locale)}
+              {formatServicePrice(selection.service.price, locale, dict.common.priceOnRequest)}
             </span>
           )}
           <Button

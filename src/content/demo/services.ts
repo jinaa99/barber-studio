@@ -122,4 +122,18 @@ export const serviceRecords: ServiceRecord[] = [
     price: 35000,
     featured: false,
   },
+  {
+    // CUSTOM_SERVICE (lib/booking/types.ts): booked when the customer skips the choice.
+    id: "custom-cut",
+    category: "haircut",
+    name: { mn: "Хүссэн засалт", en: "Your own style" },
+    summary: {
+      mn: "Жагсаалтад байхгүй загвар уу? Хүссэнээ тэмдэглэлд бичих эсвэл зургаа авчирч, барбертайгаа ярилцаж шийднэ. Үнийг засалтын өмнө тохиролцоно.",
+      en: "Something not on the menu? Describe it in the notes or bring a photo, and decide it with your barber. The price is agreed before the cut.",
+    },
+    includes: [consultation, finish],
+    durationMinutes: 60,
+    price: 0,
+    featured: false,
+  },
 ];

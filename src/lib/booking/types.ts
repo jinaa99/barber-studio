@@ -3,6 +3,12 @@ import type { CustomerField } from "./validation";
 
 export const ANY_BARBER = "any" as const;
 
+/**
+ * Catalogue service for "not on the menu": the customer and barber agree the
+ * style (and price) at the visit. Booking without picking a service books it.
+ */
+export const CUSTOM_SERVICE = "custom-cut";
+
 export type BarberChoice = string | typeof ANY_BARBER;
 
 export interface CustomerDetails {

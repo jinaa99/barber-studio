@@ -37,6 +37,7 @@ export const en: Dictionary = {
     specialties: "Specialties",
     closed: "Closed",
     learnMore: "Learn more",
+    priceOnRequest: "Price agreed with barber",
   },
   home: {
     hero: {
@@ -182,11 +183,13 @@ export const en: Dictionary = {
     continue: "Continue",
     service: {
       title: "What would you like?",
+      hint: "Not sure yet? You can continue without choosing and decide with your barber at the visit.",
+      customTitle: "Not on the list?",
     },
     barber: {
       title: "Choose your barber",
       any: "Any available barber",
-      anyHint: "Shows the widest choice of times",
+      anyHint: "Shows the widest choice of times. Continuing without a choice picks this.",
       notOffered: "Doesn't offer this service",
     },
     time: {
@@ -694,6 +697,7 @@ export const en: Dictionary = {
       includesHint: "One item per line. Both languages need the same number of lines.",
       durationLabel: "Duration (minutes)",
       priceLabel: "Price (₮)",
+      priceHint: "0 shows as “Price agreed with barber” on the site.",
       activeHint: "Bookable and shown on the website.",
       eligibleBarbers: "Barbers who offer it",
       categories: "Categories",
